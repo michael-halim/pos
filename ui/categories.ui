@@ -23,26 +23,7 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>50</number>
-      </property>
-      <property name="topMargin">
-       <number>50</number>
-      </property>
-      <property name="rightMargin">
-       <number>50</number>
-      </property>
-      <property name="bottomMargin">
-       <number>50</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="add_category_button">
-        <property name="text">
-         <string>Add Category</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
+      <item row="0" column="0" rowspan="2" colspan="2">
        <widget class="QTableWidget" name="categories_table">
         <attribute name="horizontalHeaderDefaultSectionSize">
          <number>150</number>
@@ -52,11 +33,87 @@
           <string>Category</string>
          </property>
         </column>
-        <column>
-         <property name="text">
-          <string>Options</string>
-         </property>
-        </column>
+       </widget>
+      </item>
+      <item row="0" column="2" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Category Name / Nama Kategori: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="category_name_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="2" colspan="2">
+       <widget class="QListWidget" name="products_table_in_categories"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="add_category_button_2">
+        <property name="text">
+         <string>Delete / Hapus</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="add_category_button">
+        <property name="text">
+         <string>Edit / Ubah</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="add_category_button_3">
+        <property name="text">
+         <string>Add / Tambah</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>802</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="4">
+       <widget class="QPushButton" name="add_category_button_4">
+        <property name="text">
+         <string>Close / Tutup</string>
+        </property>
        </widget>
       </item>
      </layout>

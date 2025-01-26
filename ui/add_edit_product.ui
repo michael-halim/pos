@@ -29,118 +29,23 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>20</number>
-      </property>
-      <property name="topMargin">
-       <number>20</number>
-      </property>
-      <property name="rightMargin">
-       <number>20</number>
-      </property>
-      <property name="bottomMargin">
-       <number>50</number>
-      </property>
-      <item row="7" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="leftMargin">
-         <number>10</number>
-        </property>
-        <property name="topMargin">
-         <number>10</number>
-        </property>
-        <property name="rightMargin">
-         <number>20</number>
-        </property>
-        <property name="bottomMargin">
-         <number>20</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="cancel_add_edit_product_button">
-          <property name="styleSheet">
-           <string notr="true">QPushButton{
-	background-color: red;
-	color: white;
-	font-size: 20px;
-	font-weight:bold;
-
-}</string>
-          </property>
-          <property name="text">
-           <string>Cancel</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="submit_add_edit_product_button">
-          <property name="styleSheet">
-           <string notr="true">QPushButton{
-	background-color: green;
-	color: white;
-	font-size: 20px;
-	font-weight:bold;
-
-}</string>
-          </property>
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="5" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_6">
-        <property name="topMargin">
-         <number>15</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_8">
-          <item>
-           <widget class="QLabel" name="remarks_label">
-            <property name="text">
-             <string>Remarks</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="remarks_error_message">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Error Message</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QTextEdit" name="remarks_input"/>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>17</width>
-            <height>118</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
       <item row="0" column="0">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="sku_label">
+            <property name="styleSheet">
+             <string notr="true">QLabel {
+    font-family: Arial, sans-serif;  /* Font style */
+    font-size: 14px;                 /* Font size */
+    font-weight: normal;              /* Normal font weight */
+    color: #333;                      /* Dark gray text color */
+    margin-bottom: 6px;                /* Space between label and input */
+}</string>
+            </property>
             <property name="text">
-             <string>SKU</string>
+             <string>SKU / Kode Barang</string>
             </property>
            </widget>
           </item>
@@ -157,7 +62,83 @@
          </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="sku_input"/>
+         <widget class="QLineEdit" name="sku_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="product_name_label">
+            <property name="text">
+             <string>Product Name / Nama Produk</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="product_name_error_message">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Error Message</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="product_name_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -171,7 +152,7 @@
           <item>
            <widget class="QLabel" name="cost_price_label">
             <property name="text">
-             <string>Cost Price</string>
+             <string>Cost Price / Harga Beli</string>
             </property>
            </widget>
           </item>
@@ -189,6 +170,28 @@
         </item>
         <item>
          <widget class="QSpinBox" name="cost_price_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QSpinBox{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QSpinBox:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
           <property name="suffix">
            <string/>
           </property>
@@ -215,7 +218,7 @@
           <item>
            <widget class="QLabel" name="price_label">
             <property name="text">
-             <string>Price</string>
+             <string>Price / Harga Jual</string>
             </property>
            </widget>
           </item>
@@ -233,6 +236,28 @@
         </item>
         <item>
          <widget class="QSpinBox" name="price_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QSpinBox{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QSpinBox:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
           <property name="prefix">
            <string>Rp. </string>
           </property>
@@ -240,37 +265,6 @@
            <number>999999999</number>
           </property>
          </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="topMargin">
-         <number>15</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="product_name_label">
-            <property name="text">
-             <string>Product Name</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="product_name_error_message">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Error Message</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="product_name_input"/>
         </item>
        </layout>
       </item>
@@ -284,7 +278,7 @@
           <item>
            <widget class="QLabel" name="stock_label">
             <property name="text">
-             <string>Stock</string>
+             <string>Stock / Stok</string>
             </property>
            </widget>
           </item>
@@ -302,8 +296,217 @@
         </item>
         <item>
          <widget class="QSpinBox" name="stock_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QSpinBox{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QSpinBox:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
           <property name="maximum">
            <number>999999999</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <widget class="QLabel" name="unit_label">
+            <property name="text">
+             <string>Unit / Satuan</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="unit_error_message">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Error Message</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="unit_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <item>
+           <widget class="QLabel" name="remarks_label">
+            <property name="text">
+             <string>Remarks / Keterangan</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="remarks_error_message">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Error Message</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="remarks_input">
+          <property name="styleSheet">
+           <string notr="true">QTextEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QTextEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>17</width>
+            <height>118</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="topMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>20</number>
+        </property>
+        <property name="bottomMargin">
+         <number>20</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="cancel_add_edit_product_button">
+          <property name="styleSheet">
+           <string notr="true">QPushButton{
+	font-family: Arial, sans-serif; /* Font style */
+    font-size: 16px;                /* Text size */
+    font-weight: bold;               /* Bold text */
+    color: #ffffff;                  /* White text color */
+    border: none;                     /* Remove default border */
+    border-radius: 6px;               /* Rounded corners */
+    padding: 10px 20px;               /* Padding inside button */
+    cursor: pointer;                  /* Pointer on hover */
+    transition: all 0.3s ease-in-out;  /* Smooth transition */
+    text-align: center;                /* Center text */
+    outline: none;                     /* Remove default outline */
+    margin-right: 10px;                /* Space between buttons */
+	background-color: #c82333;         /* Red background */
+}
+
+QPushButton:hover {
+    background-color: #a71d2a;         /* Darker red on hover */
+}</string>
+          </property>
+          <property name="text">
+           <string>Cancel</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="submit_add_edit_product_button">
+          <property name="styleSheet">
+           <string notr="true">QPushButton{
+	font-family: Arial, sans-serif; /* Font style */
+    font-size: 16px;                /* Text size */
+    font-weight: bold;               /* Bold text */
+    color: #ffffff;                  /* White text color */
+    border: none;                     /* Remove default border */
+    border-radius: 6px;               /* Rounded corners */
+    padding: 10px 20px;               /* Padding inside button */
+    cursor: pointer;                  /* Pointer on hover */
+    transition: all 0.3s ease-in-out;  /* Smooth transition */
+    text-align: center;                /* Center text */
+    outline: none;                     /* Remove default outline */
+    margin-right: 10px;                /* Space between buttons */
+	background-color: #157347;         /* Green background */
+}
+
+QPushButton:hover {
+    background-color: #145a32;         /* Darker green on hover */
+}</string>
+          </property>
+          <property name="text">
+           <string>Save</string>
           </property>
          </widget>
         </item>
@@ -327,6 +530,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>product_name_input</tabstop>
+  <tabstop>cost_price_input</tabstop>
+  <tabstop>price_input</tabstop>
+  <tabstop>stock_input</tabstop>
+  <tabstop>remarks_input</tabstop>
+  <tabstop>submit_add_edit_product_button</tabstop>
+  <tabstop>cancel_add_edit_product_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

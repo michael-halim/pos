@@ -35,15 +35,15 @@ class AddProductWindow(QtWidgets.QWidget):
 
         try:
             # Use parameterized query to prevent SQL injection
-            sql = """
-                INSERT INTO products (sku, product_name, cost_price, price, stock, remarks) 
-                VALUES (?, ?, ?, ?, ?, ?)
-            """
+            sql = '''INSERT INTO products (sku, product_name, cost_price, price, stock, remarks) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+            '''
 
             self.cursor.execute(sql, (sku, product_name, cost_price, price, stock, remarks))
             
             # Commit changes if everything is successful
             self.db.commit()
+
             # Emit signal after successful addition
             self.product_added.emit()
 
@@ -52,9 +52,19 @@ class AddProductWindow(QtWidgets.QWidget):
             self.db.rollback()
             print(f"Transaction failed: {e}")
 
+        # Clear the input fields
+        self.clear_product_input()
+        
         # Close the dialog
         self.close()
 
+    def clear_product_input(self):
+        self.ui.sku_input.clear()
+        self.ui.product_name_input.clear()
+        self.ui.cost_price_input.clear()
+        self.ui.price_input.clear()
+        self.ui.stock_input.clear()
+        self.ui.remarks_input.clear()
 
 
 class ProductsWindow(QtWidgets.QWidget):
