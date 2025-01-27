@@ -10,7 +10,7 @@ class CategoriesWindow(QtWidgets.QWidget):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         
-        # Init Dialog(s)
+        # Init Tables
         self.categories_table = self.ui.categories_table
         self.products_table_in_categories = self.ui.products_table_in_categories
 

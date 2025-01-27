@@ -178,6 +178,25 @@
                <string>Categories</string>
               </property>
              </widget>
+             <widget class="QPushButton" name="suppliers_button">
+              <property name="geometry">
+               <rect>
+                <x>530</x>
+                <y>50</y>
+                <width>191</width>
+                <height>61</height>
+               </rect>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+              </property>
+              <property name="text">
+               <string>Suppliers</string>
+              </property>
+             </widget>
             </widget>
            </item>
           </layout>

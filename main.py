@@ -3,6 +3,7 @@ from PyQt6 import QtWidgets, uic, QtGui, QtCore
 
 from products import ProductsWindow
 from categories import CategoriesWindow
+from suppliers import SuppliersWindow
 
 from connect_db import DatabaseConnection
 
@@ -16,6 +17,7 @@ class POS(QtWidgets.QMainWindow):
 
         self.products_dialog = ProductsWindow()
         self.categories_dialog = CategoriesWindow()
+        self.suppliers_dialog = SuppliersWindow()
 
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -30,6 +32,7 @@ class POS(QtWidgets.QMainWindow):
         # Connect Button to Dialog in Master Data Menu
         self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
+        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
 
     def closeEvent(self, event):
         # Close database connection

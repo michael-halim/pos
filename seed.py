@@ -5,6 +5,25 @@ class SeedData:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
+    def create_suppliers_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS suppliers (
+                    supplier_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    supplier_name VARCHAR(50) NOT NULL,
+                    supplier_address VARCHAR(100) DEFAULT '',
+                    supplier_city VARCHAR(100) DEFAULT '',
+                    supplier_phone VARCHAR(100) DEFAULT '',
+                    supplier_remarks TEXT DEFAULT '' );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO suppliers (supplier_name, supplier_address, supplier_city, supplier_phone, supplier_remarks) 
+                        VALUES 
+                        ('Supplier One', 'Address One', 'City One', '081234567890', 'Remarks One'),
+                        ('Supplier Two', 'Address Two', 'City Two', '081234567891', 'Remarks Two'),
+                        ('Supplier Three', 'Address Three', 'City Three', '081234567892', 'Remarks Three');'''
+        
+        self.cursor.execute(sql_insert)
+
     def create_products_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS products (
             sku VARCHAR(20) NOT NULL,
@@ -81,6 +100,7 @@ class SeedData:
         self.cursor.execute(sql_insert)
 
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS suppliers')
         self.cursor.execute('DROP TABLE IF EXISTS product_categories_detail')
         self.cursor.execute('DROP TABLE IF EXISTS products')
         self.cursor.execute('DROP TABLE IF EXISTS categories')
@@ -89,6 +109,7 @@ class SeedData:
         """Run all seed functions in order."""
         self.drop_all_tables()
 
+        self.create_suppliers_table()
         self.create_products_table()
         self.create_units_table()
         self.create_categories_table()
