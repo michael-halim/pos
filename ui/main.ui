@@ -159,7 +159,7 @@
                <string>Products</string>
               </property>
              </widget>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="categories_button">
               <property name="geometry">
                <rect>
                 <x>280</x>
