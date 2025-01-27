@@ -23,7 +23,7 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
+      <item row="0" column="0" colspan="2">
        <widget class="QPushButton" name="add_product_button">
         <property name="text">
          <string>Add Product</string>
@@ -31,6 +31,38 @@
        </widget>
       </item>
       <item row="1" column="0">
+       <widget class="QLabel" name="products_filter">
+        <property name="text">
+         <string>Filter: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="products_filter_input">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
        <widget class="QTableWidget" name="products_table">
         <attribute name="horizontalHeaderDefaultSectionSize">
          <number>150</number>
@@ -38,6 +70,11 @@
         <column>
          <property name="text">
           <string>SKU</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Product Name</string>
          </property>
         </column>
         <column>
@@ -53,6 +90,11 @@
         <column>
          <property name="text">
           <string>Stock</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Unit</string>
          </property>
         </column>
         <column>

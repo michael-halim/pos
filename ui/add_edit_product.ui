@@ -22,6 +22,9 @@
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="1">
     <widget class="QFrame" name="frame">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -380,6 +383,63 @@ QLineEdit:focus {
        </layout>
       </item>
       <item row="6" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout_8">
+        <property name="topMargin">
+         <number>15</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="unit_value_label">
+            <property name="text">
+             <string>Unit Value / Satuan Terkecil</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="unit_value_error_message">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Error Message</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="unit_value_input">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QSpinBox{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+}
+
+QSpinBox:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    background-color: #ffffff;       /* White background when focused */
+}</string>
+          </property>
+          <property name="maximum">
+           <number>999999999</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <property name="topMargin">
          <number>15</number>
@@ -440,7 +500,7 @@ QTextEdit:focus {
         </item>
        </layout>
       </item>
-      <item row="7" column="0">
+      <item row="8" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="leftMargin">
          <number>10</number>
@@ -512,7 +572,7 @@ QPushButton:hover {
         </item>
        </layout>
       </item>
-      <item row="8" column="0">
+      <item row="9" column="0">
        <spacer name="verticalSpacer_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>

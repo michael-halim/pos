@@ -1,6 +1,9 @@
 import sys
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
+
 from products import ProductsWindow
+from categories import CategoriesWindow
+
 from connect_db import DatabaseConnection
 
 
@@ -12,7 +15,7 @@ class POS(QtWidgets.QMainWindow):
         self.ui = uic.loadUi("./ui/main.ui", self)
 
         self.products_dialog = ProductsWindow()
-    
+        self.categories_dialog = CategoriesWindow()
 
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -26,6 +29,7 @@ class POS(QtWidgets.QMainWindow):
         
         # Connect Button to Dialog in Master Data Menu
         self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
+        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
 
     def closeEvent(self, event):
         # Close database connection
