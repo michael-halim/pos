@@ -36,7 +36,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Filter Siupplier: </string>
+             <string>Filter Supplier: </string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -95,7 +95,7 @@
           </column>
           <column>
            <property name="text">
-            <string>New Column</string>
+            <string>Phone Number</string>
            </property>
           </column>
           <column>

@@ -16,14 +16,14 @@ class SuppliersWindow(QtWidgets.QWidget):
 
         # Connect Add Supplier Button
         self.ui.add_supplier_button.clicked.connect(self.add_supplier)
-        # self.ui.edit_supplier_button.clicked.connect(self.edit_supplier)
+        self.ui.edit_supplier_button.clicked.connect(self.edit_supplier)
         # self.ui.delete_supplier_button.clicked.connect(self.delete_supplier)
         # self.ui.close_supplier_button.clicked.connect(lambda: self.close())
         # self.ui.clear_supplier_button.clicked.connect(self.clear_supplier)
-        # self.ui.submit_supplier_button.clicked.connect(self.submit_supplier)
+        self.ui.submit_supplier_button.clicked.connect(self.submit_supplier)
 
         # Connect search input to filter function
-        # self.ui.supplier_filter_input.textChanged.connect(self.show_products_data)
+        self.ui.supplier_filter_input.textChanged.connect(self.show_suppliers_data)
         
         # Add selected supplier tracking
         self.current_supplier_id = None
@@ -58,6 +58,7 @@ class SuppliersWindow(QtWidgets.QWidget):
         self.ui.supplier_phone_number_input.clear()
         self.ui.supplier_city_input.clear()
         self.ui.supplier_remarks_input.clear()
+        self.current_supplier_id = None
 
     def add_supplier(self):
         self.clear_supplier()
@@ -65,7 +66,29 @@ class SuppliersWindow(QtWidgets.QWidget):
         self.toggle_add_edit_suppliers(True)
 
     def show_suppliers_data(self):
-        self.cursor.execute('SELECT supplier_id, supplier_name, supplier_address, supplier_phone, supplier_city, supplier_remarks FROM suppliers')
+        # Temporarily disable sorting
+        self.suppliers_table.setSortingEnabled(False)
+        
+        # Clear the table
+        self.suppliers_table.setRowCount(0)
+
+        # Get search text if any
+        search_text = self.ui.supplier_filter_input.text().strip()
+
+        # Modify SQL query to include search filter
+        sql = '''SELECT supplier_id, supplier_name, supplier_address, supplier_phone, supplier_city, supplier_remarks 
+                FROM suppliers 
+                WHERE supplier_name LIKE ? OR supplier_address LIKE ? OR supplier_phone LIKE ? OR supplier_city LIKE ? OR supplier_remarks LIKE ?'''
+        
+        # If no search text, show all suppliers 
+        if not search_text:
+            sql = 'SELECT supplier_id, supplier_name, supplier_address, supplier_phone, supplier_city, supplier_remarks FROM suppliers'
+            self.cursor.execute(sql)
+        else:
+            # Add wildcards for LIKE query
+            search_pattern = f"%{search_text}%"
+            self.cursor.execute(sql, (search_pattern, search_pattern, search_pattern, search_pattern, search_pattern))
+
         suppliers_result = self.cursor.fetchall()
 
         self.suppliers_table.setRowCount(len(suppliers_result))
@@ -83,3 +106,34 @@ class SuppliersWindow(QtWidgets.QWidget):
             # Get the first selected row
             row = selected_rows[0].row()
             self.current_supplier_id = int(self.suppliers_table.item(row, 0).text())
+
+    def submit_supplier(self):
+        supplier_name = self.ui.supplier_name_input.text().strip()
+        supplier_address = self.ui.supplier_address_input.text().strip()
+        supplier_phone_number = self.ui.supplier_phone_number_input.text().strip()
+        supplier_city = self.ui.supplier_city_input.text().strip()
+        supplier_remarks = self.ui.supplier_remarks_input.text().strip()
+
+        if not supplier_name:
+            QtWidgets.QMessageBox.warning(self, "Error", "Supplier name is required")
+            return
+        
+        try:
+            self.cursor.execute('BEGIN TRANSACTION')
+
+            # Insert supplier and get the ID
+            self.cursor.execute('INSERT INTO suppliers (supplier_name, supplier_address, supplier_phone, supplier_city, supplier_remarks) VALUES (?, ?, ?, ?, ?)', 
+                                (supplier_name, supplier_address, supplier_phone_number, supplier_city, supplier_remarks))
+            
+            self.db.commit()
+            
+            # Reset UI
+            self.clear_supplier()
+            self.show_suppliers_data()
+
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error: {e}")
+
+    def edit_supplier(self):
+        pass
