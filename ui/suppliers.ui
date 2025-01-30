@@ -520,9 +520,9 @@ QLineEdit:focus {
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="clear_supplier_button_2">
+         <widget class="QPushButton" name="close_supplier_button">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Close / Tutup</string>

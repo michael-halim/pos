@@ -17,9 +17,9 @@ class SuppliersWindow(QtWidgets.QWidget):
         # Connect Add Supplier Button
         self.ui.add_supplier_button.clicked.connect(self.add_supplier)
         self.ui.edit_supplier_button.clicked.connect(self.edit_supplier)
-        # self.ui.delete_supplier_button.clicked.connect(self.delete_supplier)
-        # self.ui.close_supplier_button.clicked.connect(lambda: self.close())
-        # self.ui.clear_supplier_button.clicked.connect(self.clear_supplier)
+        self.ui.delete_supplier_button.clicked.connect(self.delete_supplier)
+        self.ui.close_supplier_button.clicked.connect(lambda: self.close())
+        self.ui.clear_supplier_button.clicked.connect(self.clear_supplier)
         self.ui.submit_supplier_button.clicked.connect(self.submit_supplier)
 
         # Connect search input to filter function
@@ -136,4 +136,97 @@ class SuppliersWindow(QtWidgets.QWidget):
             print(f"Error: {e}")
 
     def edit_supplier(self):
-        pass
+        if not self.current_supplier_id:
+            return
+        
+        # Enable necessary UI elements
+        self.toggle_add_edit_suppliers(True)
+        
+        # Get supplier data
+        self.cursor.execute('SELECT supplier_name, supplier_address, supplier_phone, supplier_city, supplier_remarks FROM suppliers WHERE supplier_id = ?', (self.current_supplier_id,))
+        supplier = self.cursor.fetchone()
+        
+        if supplier:
+            # Set supplier name (disabled for editing)
+            self.ui.supplier_name_input.setText(supplier[0])
+            self.ui.supplier_name_input.setEnabled(False)
+            
+            # Set supplier details
+            self.ui.supplier_address_input.setText(supplier[1])
+            self.ui.supplier_phone_number_input.setText(supplier[2])
+            self.ui.supplier_city_input.setText(supplier[3])
+            self.ui.supplier_remarks_input.setText(supplier[4])
+
+            # Refresh suppliers table
+            self.show_suppliers_data()
+            
+            # Change submit button to update
+            self.ui.submit_supplier_button.setText("Update Supplier")
+            self.ui.submit_supplier_button.clicked.disconnect()
+            self.ui.submit_supplier_button.clicked.connect(self.update_supplier)
+
+    def update_supplier(self):
+        supplier_address = self.ui.supplier_address_input.text().strip()
+        supplier_phone_number = self.ui.supplier_phone_number_input.text().strip()
+        supplier_city = self.ui.supplier_city_input.text().strip()
+        supplier_remarks = self.ui.supplier_remarks_input.text().strip()
+
+        try:
+            self.cursor.execute('BEGIN TRANSACTION')
+            
+            # Update supplier
+            self.cursor.execute('UPDATE suppliers SET supplier_address = ?, supplier_phone = ?, supplier_city = ?, supplier_remarks = ? WHERE supplier_id = ?', 
+                                (supplier_address, supplier_phone_number, supplier_city, supplier_remarks, self.current_supplier_id))
+            
+            self.db.commit()
+            
+            # Reset UI
+            self.clear_supplier()
+            self.show_suppliers_data()
+            
+            # Reset button
+            self.ui.submit_supplier_button.setText("Submit Supplier")
+            self.ui.submit_supplier_button.clicked.disconnect()
+            self.ui.submit_supplier_button.clicked.connect(self.submit_supplier)
+            
+        except Exception as e:
+            self.db.rollback()
+            QtWidgets.QMessageBox.warning(self, "Error", f"Failed to update category: {str(e)}")
+
+    
+    def delete_supplier(self):
+        if not self.current_supplier_id:
+            QtWidgets.QMessageBox.warning(self, "Warning", "Please select a supplier to delete")
+            return
+        
+        # Get supplier name for confirmation message
+        self.cursor.execute('SELECT supplier_name FROM suppliers WHERE supplier_id = ?', (self.current_supplier_id,))
+
+        supplier = self.cursor.fetchone()
+        
+        # Confirm deletion with user
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            'Confirm Deletion',
+            f'Are you sure you want to delete supplier "{supplier[0]}"?\nThis action cannot be undone.',
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.No
+        )
+        
+        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
+            try:
+                # Delete the supplier
+                self.cursor.execute('DELETE FROM suppliers WHERE supplier_id = ?', (self.current_supplier_id,))
+                
+                self.db.commit()
+                
+                # Reset UI
+                self.clear_supplier()
+                self.show_suppliers_data()
+                
+                # Show success message
+                QtWidgets.QMessageBox.information(self, 'Success', 'Supplier deleted successfully!')
+                
+            except Exception as e:
+                self.db.rollback()
+                QtWidgets.QMessageBox.warning(self, 'Error', f"Failed to delete supplier: {str(e)}")
