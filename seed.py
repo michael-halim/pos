@@ -5,6 +5,88 @@ class SeedData:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
+    def create_detail_transactions_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS detail_transactions (
+            transaction_id VARCHAR(20) NOT NULL,
+            sku VARCHAR(20) NOT NULL,
+            unit VARCHAR(10) NOT NULL,
+            unit_value INT(10) NOT NULL,
+            qty INT(10) NOT NULL,
+            price INT(10) NOT NULL,
+            discount INT(10) NOT NULL DEFAULT 0,
+            sub_total INT(10) NOT NULL);'''
+        
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
+                        VALUES 
+                        ('J202502010001', 'SKU001', 'pcs', 1, 10, 1000, 0, 10000),
+                        ('J202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
+                        ('J202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000);'''
+        
+        self.cursor.execute(sql_insert)
+        
+        sql = '''CREATE TABLE IF NOT EXISTS pending_detail_transactions (
+            transaction_id VARCHAR(20) NOT NULL,
+            sku VARCHAR(20) NOT NULL,
+            unit VARCHAR(10) NOT NULL,
+            unit_value INT(10) NOT NULL,
+            qty INT(10) NOT NULL,
+            price INT(10) NOT NULL,
+            discount INT(10) NOT NULL DEFAULT 0,
+            sub_total INT(10) NOT NULL);'''
+        
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
+                        VALUES 
+                        ('J202502010001', 'SKU001', 'pcs', 1, 10, 1000, 0, 10000),
+                        ('J202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
+                        ('J202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000);'''
+        
+        self.cursor.execute(sql_insert)
+
+
+
+    def create_transactions_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS transactions (
+            transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
+            total_amount INT(10) NOT NULL,
+            discount_transaction_id INT(10),
+            discount_amount INT(10) NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            payment_remarks TEXT DEFAULT ''
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, created_at, payment_remarks) 
+                        VALUES 
+                        ('J202502010001', 100000, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('J202502010002', 200000, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('J202502010003', 300000, CURRENT_TIMESTAMP, 'Remarks Three');'''
+
+        self.cursor.execute(sql_insert)
+
+        sql = '''CREATE TABLE IF NOT EXISTS pending_transactions (
+            transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
+            total_amount INT(10) NOT NULL,
+            discount_transaction_id INT(10),
+            discount_amount INT(10) NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            payment_remarks TEXT DEFAULT ''
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO pending_transactions (transaction_id, total_amount, created_at, payment_remarks) 
+                        VALUES 
+                        ('J202502010001', 100000, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('J202502010002', 200000, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('J202502010003', 300000, CURRENT_TIMESTAMP, 'Remarks Three');'''
+        
+        self.cursor.execute(sql_insert)
+
     def create_suppliers_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS suppliers (
                     supplier_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -44,7 +126,9 @@ class SeedData:
                     VALUES 
                     ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'pcs', CURRENT_TIMESTAMP, NULL),
                     ('SKU002', 'Product Two', 2000, 2500, 30, 'Limited stock', 'pcs', CURRENT_TIMESTAMP, NULL),
-                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'pcs', CURRENT_TIMESTAMP, NULL); '''
+                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'pcs', CURRENT_TIMESTAMP, NULL),
+                    ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'kodi', CURRENT_TIMESTAMP, NULL),
+                    ('SKU001', 'Product One', NULL, 3000, 20, 'New arrival', 'dus', CURRENT_TIMESTAMP, NULL); '''
         
         self.cursor.execute(sql_insert)
     
@@ -61,7 +145,9 @@ class SeedData:
                         VALUES 
                         ('SKU001', 'pcs', 1),
                         ('SKU002', 'pcs', 1),
-                        ('SKU003', 'pcs', 1); '''
+                        ('SKU003', 'pcs', 1),
+                        ('SKU001', 'kodi', 20),
+                        ('SKU001', 'dus', 10); '''
         
         self.cursor.execute(sql_insert)
 
@@ -100,8 +186,13 @@ class SeedData:
         self.cursor.execute(sql_insert)
 
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS detail_transactions')
+        self.cursor.execute('DROP TABLE IF EXISTS pending_detail_transactions')
+        self.cursor.execute('DROP TABLE IF EXISTS transactions')
+        self.cursor.execute('DROP TABLE IF EXISTS pending_transactions')
         self.cursor.execute('DROP TABLE IF EXISTS suppliers')
         self.cursor.execute('DROP TABLE IF EXISTS product_categories_detail')
+        self.cursor.execute('DROP TABLE IF EXISTS units')
         self.cursor.execute('DROP TABLE IF EXISTS products')
         self.cursor.execute('DROP TABLE IF EXISTS categories')
 
@@ -111,6 +202,8 @@ class SeedData:
 
         self.create_suppliers_table()
         self.create_products_table()
+        self.create_detail_transactions_table()
+        self.create_transactions_table()
         self.create_units_table()
         self.create_categories_table()
         self.create_product_categories_detail_table()

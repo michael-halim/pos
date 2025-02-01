@@ -40,7 +40,11 @@ class POS(QtWidgets.QMainWindow):
         self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.show())
 
         # TODO: Add an input for user to input suppliers in their products
-        # TODO: Add Transaction Menu
+        # TODO: Implement pending transaction
+        # TODO: Implement submit, edit and delete transaction
+        # TODO: Add "stock after transaction"
+
+        
     def closeEvent(self, event):
 
         # Close database connection

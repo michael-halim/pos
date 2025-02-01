@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>Transactions</class>
+ <widget class="QWidget" name="Transactions">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Transactions</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -30,7 +30,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_6">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_14">
           <item>
@@ -248,7 +248,7 @@
 }</string>
               </property>
               <property name="text">
-               <string>Rp. 120.000.000</string>
+               <string>Rp. 0</string>
               </property>
              </widget>
             </item>
@@ -257,15 +257,15 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_15">
+         <layout class="QHBoxLayout" name="horizontalLayout_19">
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
+           <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
              <widget class="QTableWidget" name="transactions_table">
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>480</height>
+                <height>410</height>
                </size>
               </property>
               <attribute name="horizontalHeaderDefaultSectionSize">
@@ -279,7 +279,7 @@
               </attribute>
               <column>
                <property name="text">
-                <string>Kode Barang</string>
+                <string>SKU</string>
                </property>
                <property name="font">
                 <font>
@@ -295,7 +295,22 @@
               </column>
               <column>
                <property name="text">
-                <string>Nama Barang</string>
+                <string>Product Name</string>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Price</string>
                </property>
                <property name="font">
                 <font>
@@ -325,7 +340,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Satuan</string>
+                <string>Unit</string>
                </property>
                <property name="font">
                 <font>
@@ -340,7 +355,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Harga</string>
+                <string>Discount (Rp)</string>
                </property>
                <property name="font">
                 <font>
@@ -355,7 +370,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Diskon (Rp)</string>
+                <string>Discount (%)</string>
                </property>
                <property name="font">
                 <font>
@@ -370,7 +385,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Jumlah</string>
+                <string>Subtotal</string>
                </property>
                <property name="font">
                 <font>
@@ -386,10 +401,10 @@
              </widget>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QHBoxLayout" name="horizontalLayout_17">
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout">
-                <item>
+               <layout class="QFormLayout" name="formLayout">
+                <item row="2" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_11">
                   <property name="bottomMargin">
                    <number>0</number>
@@ -397,7 +412,7 @@
                   <item>
                    <widget class="QLabel" name="sku_transaction_label">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -413,6 +428,9 @@
                       <pointsize>12</pointsize>
                      </font>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true"/>
+                    </property>
                     <property name="text">
                      <string>SKU : </string>
                     </property>
@@ -424,7 +442,7 @@
                   <item>
                    <widget class="QLineEdit" name="sku_transaction_input">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -435,8 +453,32 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="styleSheet">
+                     <string notr="true">QLineEdit {
+    padding: 0;
+
+}</string>
+                    </property>
                     <property name="alignment">
                      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Check</string>
                     </property>
                    </widget>
                   </item>
@@ -451,7 +493,7 @@
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>35</height>
+                      <height>30</height>
                      </size>
                     </property>
                     <property name="font">
@@ -466,7 +508,7 @@
                   </item>
                  </layout>
                 </item>
-                <item>
+                <item row="3" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_3">
                   <item>
                    <widget class="QLabel" name="product_name_transaction_label">
@@ -491,6 +533,9 @@
                   </item>
                   <item>
                    <widget class="QLineEdit" name="product_name_transaction_input">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="minimumSize">
                      <size>
                       <width>230</width>
@@ -501,7 +546,110 @@
                   </item>
                  </layout>
                 </item>
-                <item>
+                <item row="4" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_10">
+                  <item>
+                   <widget class="QLabel" name="price_transaction_label">
+                    <property name="minimumSize">
+                     <size>
+                      <width>125</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Price : </string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="price_transaction_input">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="5" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_15">
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="stock_transaction_label">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>125</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true"/>
+                    </property>
+                    <property name="text">
+                     <string>Stock : </string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="stock_transaction_input">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">QLineEdit {
+    padding: 0;
+
+}</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item row="6" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_12">
                   <item>
                    <widget class="QLabel" name="qty_transaction_label">
@@ -544,16 +692,12 @@
                     </property>
                    </widget>
                   </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_10">
                   <item>
-                   <widget class="QLabel" name="price_transaction_label">
+                   <widget class="QLabel" name="unit_value_transaction_label">
                     <property name="minimumSize">
                      <size>
-                      <width>125</width>
-                      <height>0</height>
+                      <width>0</width>
+                      <height>30</height>
                      </size>
                     </property>
                     <property name="font">
@@ -562,15 +706,15 @@
                      </font>
                     </property>
                     <property name="text">
-                     <string>Price : </string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <string>Unit Value</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="price_transaction_input">
+                   <widget class="QLineEdit" name="unit_value_transaction_input">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -581,7 +725,7 @@
                   </item>
                  </layout>
                 </item>
-                <item>
+                <item row="7" column="1">
                  <layout class="QHBoxLayout" name="horizontalLayout_9">
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -590,7 +734,13 @@
                       <property name="minimumSize">
                        <size>
                         <width>125</width>
-                        <height>0</height>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
                        </size>
                       </property>
                       <property name="font">
@@ -614,6 +764,12 @@
                         <height>30</height>
                        </size>
                       </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
                      </widget>
                     </item>
                    </layout>
@@ -622,6 +778,24 @@
                    <layout class="QHBoxLayout" name="horizontalLayout_7">
                     <item>
                      <widget class="QLabel" name="discount_rp_transaction_label">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>30</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
                       <property name="font">
                        <font>
                         <pointsize>12</pointsize>
@@ -643,42 +817,88 @@
                         <height>30</height>
                        </size>
                       </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>30</height>
+                       </size>
+                      </property>
                      </widget>
                     </item>
                    </layout>
                   </item>
                  </layout>
                 </item>
-                <item>
-                 <widget class="QPushButton" name="add_transaction_button">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Add</string>
-                  </property>
-                 </widget>
+                <item row="8" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_18">
+                  <item>
+                   <widget class="QPushButton" name="clear_data_transaction_button">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Clear Data</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="add_transaction_button">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Add</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </item>
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_3">
+               <layout class="QVBoxLayout" name="verticalLayout">
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_8">
+                  <item>
+                   <widget class="QPushButton" name="clear_transaction_button">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Clear Transaction</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item>
                    <widget class="QPushButton" name="edit_transaction_button">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>35</height>
+                      <height>30</height>
                      </size>
                     </property>
                     <property name="font">
@@ -696,7 +916,7 @@
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>35</height>
+                      <height>30</height>
                      </size>
                     </property>
                     <property name="font">
@@ -714,7 +934,7 @@
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
-                      <height>35</height>
+                      <height>30</height>
                      </size>
                     </property>
                     <property name="font">
@@ -730,9 +950,50 @@
                  </layout>
                 </item>
                 <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_4">
+                  <item>
+                   <widget class="QLabel" name="tax_transaction_label">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Tax (%) : </string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="tax_transaction_input">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
                  <layout class="QVBoxLayout" name="verticalLayout_2">
                   <item>
                    <widget class="QLabel" name="remarks_transaction_label">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>30</height>
+                     </size>
+                    </property>
                     <property name="font">
                      <font>
                       <pointsize>12</pointsize>
@@ -755,7 +1016,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
              <widget class="QTableWidget" name="history_transactions_table">
               <property name="maximumSize">
