@@ -4,11 +4,13 @@ from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from products import ProductsWindow
 from categories import CategoriesWindow
 from suppliers import SuppliersWindow
+from transactions import TransactionsWindow
 
 from connect_db import DatabaseConnection
 
 
 class POS(QtWidgets.QMainWindow):
+
     def __init__(self):
         super().__init__()
 
@@ -18,6 +20,8 @@ class POS(QtWidgets.QMainWindow):
         self.products_dialog = ProductsWindow()
         self.categories_dialog = CategoriesWindow()
         self.suppliers_dialog = SuppliersWindow()
+        self.transactions_dialog = TransactionsWindow()
+
 
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -33,10 +37,12 @@ class POS(QtWidgets.QMainWindow):
         self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
         self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
-        
+        self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.show())
+
         # TODO: Add an input for user to input suppliers in their products
         # TODO: Add Transaction Menu
     def closeEvent(self, event):
+
         # Close database connection
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()

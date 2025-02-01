@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1326</width>
-    <height>830</height>
+    <width>1264</width>
+    <height>878</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -106,7 +106,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="master_data_page">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -233,6 +233,25 @@
             <string>Transaction</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="transactions_button">
+           <property name="geometry">
+            <rect>
+             <x>60</x>
+             <y>90</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Transactions</string>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -279,7 +298,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1326</width>
+     <width>1264</width>
      <height>21</height>
     </rect>
    </property>
