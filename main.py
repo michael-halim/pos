@@ -34,15 +34,17 @@ class POS(QtWidgets.QMainWindow):
         self.ui.backup_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.backup_page))
         
         # Connect Button to Dialog in Master Data Menu
-        self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
-        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
-        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
-        self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.show())
+        self.ui.products_button.clicked.connect(lambda: self.products_dialog.showMaximized())
+        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.showMaximized())
+        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.showMaximized())
+        self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
+
 
         # TODO: Add an input for user to input suppliers in their products
-        # TODO: Implement pending transaction
+        # TODO: Implement filter for detail pending transactions, add pending transaction to transaction
         # TODO: Implement submit, edit and delete transaction
         # TODO: Add "stock after transaction"
+        # TODO: Change the UI button, or layout to form layout to make it beautiful
 
         
     def closeEvent(self, event):
@@ -64,5 +66,5 @@ class POS(QtWidgets.QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     window = POS()
-    window.show()
+    window.showMaximized()
     sys.exit(app.exec())

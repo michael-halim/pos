@@ -2,6 +2,7 @@ from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from connect_db import DatabaseConnection
 
 from helper import format_number, add_prefix, remove_non_digit
+from pending_transactions import PendingTransactionsWindow
 
 class ProductsInTransactionWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -131,7 +132,8 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Init Dialog
         self.products_in_transaction_dialog = ProductsInTransactionWindow()
-        
+        self.pending_transactions_dialog = PendingTransactionsWindow()
+
         # Connect the product_selected signal to handle_product_selected method
         self.products_in_transaction_dialog.product_selected.connect(self.handle_product_selected)
 
@@ -152,12 +154,13 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.edit_transaction_button.clicked.connect(self.edit_transaction)
         self.ui.delete_transaction_button.clicked.connect(self.delete_transaction)
         self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
-        self.ui.pending_transaction_button.clicked.connect(self.add_pending_transaction)
-        self.ui.open_pending_transaction_button.clicked.connect(self.open_pending_transaction)
+        self.ui.pending_transaction_button.clicked.connect(self.create_pending_transaction)
+        self.ui.open_pending_transaction_button.clicked.connect(lambda: self.pending_transactions_dialog.showMaximized())
+
 
         # Add selected tracking
         self.current_selected_sku = None
-        self.cached_qty = {} # key = <sku>_<unit>, value = (unit_value, price)
+        self.cached_qty = {} # key = <sku>_<unit>, value = (unit_value, stock, price)
         self.cached_transaction_index = {} # key = <sku>_<unit>, value = transaction_table_index
 
 
@@ -271,7 +274,7 @@ class TransactionsWindow(QtWidgets.QWidget):
     def submit_transaction(self):
         pass
 
-    def add_pending_transaction(self):
+    def create_pending_transaction(self):
         pass
 
     def open_pending_transaction(self):
@@ -289,18 +292,18 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Clear existing items
         self.ui.qty_transaction_combobox.clear()
         
-        sql = '''SELECT u.unit, u.unit_value, p.price 
+        sql = '''SELECT u.unit, u.unit_value, p.price, p.stock 
                 FROM products p 
                 LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit
                 WHERE p.sku = ?'''
-        
+
         self.cursor.execute(sql, (product_data['sku'],))
         results = self.cursor.fetchall()
 
         for result in results:
             # key = <sku>_<unit>, value = (unit_value, price)
             cache_key = f'{product_data["sku"]}_{result[0]}'
-            self.cached_qty[cache_key] = (result[1], result[2])
+            self.cached_qty[cache_key] = (result[1], result[2], result[3])
             self.ui.qty_transaction_combobox.addItem(result[0])
 
         # Reset loading flag
@@ -321,9 +324,8 @@ class TransactionsWindow(QtWidgets.QWidget):
             
         sku = self.ui.sku_transaction_input.text().strip()
         cache_key = f'{sku}_{text}'
-        print('cache_key ', cache_key)
-        print('cached_qty ', self.cached_qty)
         if cache_key in self.cached_qty:
             self.ui.unit_value_transaction_input.setText(str(self.cached_qty[cache_key][0]))
             self.ui.price_transaction_input.setText(str(self.cached_qty[cache_key][1]))
+            self.ui.stock_transaction_input.setText(str(self.cached_qty[cache_key][2]))
 
