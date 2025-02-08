@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from products import ProductsWindow
 from categories import CategoriesWindow
 from suppliers import SuppliersWindow
-from transactions import TransactionsWindow
+from transactions.transactions import TransactionsWindow
 
 from connect_db import DatabaseConnection
 

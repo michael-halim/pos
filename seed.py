@@ -40,11 +40,11 @@ class SeedData:
 
         sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
                         VALUES 
-                        ('J202502010001', 'SKU001', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('J202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('J202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('J202502010002', 'SKU001', 'kodi', 20, 1, 1000, 0, 20000),
-                        ('J202502010002', 'SKU001', 'dus', 10, 1, 1000, 0, 10000);'''
+                        ('P202502010001', 'SKU001', 'pcs', 2, 10, 1000, 0, 20000),
+                        ('P202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
+                        ('P202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000),
+                        ('P202502010002', 'SKU001', 'kodi', 20, 1, 1000, 0, 20000),
+                        ('P202502010002', 'SKU001', 'dus', 10, 1, 1000, 0, 10000);'''
 
         
         self.cursor.execute(sql_insert)
@@ -83,10 +83,12 @@ class SeedData:
 
         sql_insert = '''INSERT INTO pending_transactions (transaction_id, total_amount, created_at, payment_remarks) 
                         VALUES 
-                        ('J202502010001', 100000, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('J202502010002', 200000, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('J202502010003', 300000, CURRENT_TIMESTAMP, 'Remarks Three');'''
+                        ('P202502010001', 40000, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('P202502010002', 30000, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('P202502010003', 30000, CURRENT_TIMESTAMP, 'Remarks Three');'''
         
+
+
         self.cursor.execute(sql_insert)
 
     def create_suppliers_table(self):

@@ -4,6 +4,10 @@ from connect_db import DatabaseConnection
 from helper import format_number, add_prefix, remove_non_digit
 
 class PendingTransactionsWindow(QtWidgets.QWidget):
+
+    # Add signal to communicate with main window
+    pending_transaction_selected = QtCore.pyqtSignal(dict)
+
     def __init__(self):
         super().__init__()
 
@@ -18,8 +22,9 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
 
         self.pending_transactions_table.setSortingEnabled(True)
         self.pending_detail_transactions_table.setSortingEnabled(True)
+        # self.ui.add_products_in_transactions_button.clicked.connect(self.send_product_data)
 
-        # Connect Add Supplier Button
+        # Connect Add Pending Transaction Button
         self.ui.add_pending_transactions_button.clicked.connect(self.add_pending_transaction)
         self.ui.close_pending_transactions_button.clicked.connect(lambda: self.close())
 
@@ -49,6 +54,24 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
         self.show_pending_transactions_data()
         self.show_detail_pending_transactions_data()
     
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        # Reset the current selection
+        self.current_pending_transaction_id = None
+        # Refresh the data
+        self.show_pending_transactions_data()
+        self.show_detail_pending_transactions_data()
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        # Reset the current selection
+        self.current_pending_transaction_id = None
+        # Refresh the data
+        self.show_pending_transactions_data()
+        self.show_detail_pending_transactions_data()
+
     def show_pending_transactions_data(self):
         # Temporarily disable sorting
         self.pending_transactions_table.setSortingEnabled(False)
@@ -71,7 +94,6 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
 
         else:
             # Add wildcards for LIKE query
-
             search_pattern = f"%{search_text}%"
             self.cursor.execute(sql, (search_pattern, search_pattern, search_pattern, search_pattern))
 
@@ -100,7 +122,19 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
 
     
     def add_pending_transaction(self):
-        pass
+        selected_rows = self.pending_transactions_table.selectedItems()
+        if selected_rows:
+            row = selected_rows[0].row()
+
+            # Get the transaction id
+            pending_transaction_data = {
+                'transaction_id': self.pending_transactions_table.item(row, 0).text(),
+            }
+            
+            # Emit signal with product data
+            self.pending_transaction_selected.emit(pending_transaction_data)
+            self.close()
+
 
     def on_pending_transaction_selected(self):
         selected_rows = self.pending_transactions_table.selectedItems()
@@ -143,7 +177,6 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
     def load_detail_pending_transactions_data(self, details_result):
         font = QtGui.QFont()
         font.setPointSize(14)
-
 
         for row, detail in enumerate(details_result):
             for col, value in enumerate(detail):

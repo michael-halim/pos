@@ -355,6 +355,21 @@
               </column>
               <column>
                <property name="text">
+                <string>Unit Value</string>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>16</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
                 <string>Discount (Rp)</string>
                </property>
                <property name="font">
@@ -465,7 +480,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton">
+                   <widget class="QPushButton" name="check_sku_transaction_button">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -483,7 +498,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="find_sku_transaction_input">
+                   <widget class="QPushButton" name="find_sku_transaction_button">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
                       <horstretch>0</horstretch>
