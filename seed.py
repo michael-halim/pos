@@ -54,19 +54,23 @@ class SeedData:
         sql = '''CREATE TABLE IF NOT EXISTS transactions (
             transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
             total_amount INT(10) NOT NULL,
+            payment_method VARCHAR(10) NOT NULL,
+            payment_rp INT(10) NOT NULL,
+            payment_change INT(10) NOT NULL,
             discount_transaction_id INT(10),
             discount_amount INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             payment_remarks TEXT DEFAULT ''
+
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, created_at, payment_remarks) 
+        sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, payment_rp, payment_change, created_at, payment_remarks) 
                         VALUES 
-                        ('J202502010001', 100000, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('J202502010002', 200000, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('J202502010003', 300000, CURRENT_TIMESTAMP, 'Remarks Three');'''
+                        ('AB202502010001', 100000, 'Cash', 100000, 0, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('AB202502010002', 200000, 'Transfer', 200000, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('AB202502010003', 300000, 'Transfer', 300000, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
 
         self.cursor.execute(sql_insert)
 

@@ -40,7 +40,31 @@ class ProductsInTransactionWindow(QtWidgets.QWidget):
         self.products_in_transactions_table.itemSelectionChanged.connect(self.on_product_selected)
         
         self.show_products_in_transactions_data()
-        
+
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        # Reset the current selection
+        self.current_product_in_transaction = (None, None)
+        # Refresh the data
+        self.show_products_in_transactions_data()
+
+    def show(self):
+        """Override show to ensure data is refreshed"""
+        super().show()
+        # Reset the current selection
+        self.current_product_in_transaction = (None, None)
+        # Refresh the data
+        self.show_products_in_transactions_data()
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        # Reset the current selection
+        self.current_product_in_transaction = (None, None)
+        # Refresh the data
+        self.show_products_in_transactions_data()
+
     def show_products_in_transactions_data(self):
         # Temporarily disable sorting
         self.products_in_transactions_table.setSortingEnabled(False)
@@ -95,10 +119,20 @@ class ProductsInTransactionWindow(QtWidgets.QWidget):
 
         for row_num, product in enumerate(data_result):
             for col_num, data in enumerate(product):
-                if col_num in [3, 5]:
-                    item = QtWidgets.QTableWidgetItem(format_number(str(data)))
-                elif col_num == 2:
+                # Col 2 = Price, Col 3 = Stock, Col 5 = Unit Value
+                if col_num == 2:
                     item = QtWidgets.QTableWidgetItem(add_prefix(format_number(str(data))))
+
+                elif col_num == 3:
+                    # Stock can be negative
+                    item = QtWidgets.QTableWidgetItem(format_number(str(data)))
+                    if int(data) < 0:
+                        item = QtWidgets.QTableWidgetItem(f'-{format_number(str(abs(int(data))))}')
+                        item.setForeground(QtGui.QColor('red'))
+
+                elif col_num == 5:
+                    item = QtWidgets.QTableWidgetItem(format_number(str(data)))
+              
                 else:
                     item = QtWidgets.QTableWidgetItem(str(data))
 

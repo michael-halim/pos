@@ -47,25 +47,39 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.pending_transaction_button.clicked.connect(self.create_pending_transaction)
         self.ui.open_pending_transaction_button.clicked.connect(lambda: self.pending_transactions_dialog.showMaximized())
 
+        # Add 2 items to payment method combobox
+        self.ui.payment_method_transaction_combobox.addItem('Cash')
+        self.ui.payment_method_transaction_combobox.addItem('Transfer')
 
         # Add selected tracking
         self.current_selected_sku = None
         self.cached_qty = {} # key = <sku>_<unit>, value = (unit_value, stock, price)
         self.cached_transaction_index = {} # key = <sku>_<unit>, value = transaction_table_index
 
-
-        # Connect table selection
-        self.transactions_table.itemSelectionChanged.connect(self.on_transaction_selected)
-    
         # Add a flag to track if we're loading items
         self.is_loading_combo = False
+
+    
+        # Event Listeners
+        #====================
+        # Connect table selection
+        self.transactions_table.itemSelectionChanged.connect(self.on_transaction_selected)
         
         # Connect qty combobox to update qty input
         self.ui.qty_transaction_combobox.currentTextChanged.connect(self.on_qty_transaction_combobox_changed)
 
+        # Connect qty input to update stock after input
+        self.ui.qty_transaction_input.textChanged.connect(self.on_qty_transaction_input_changed)
+
+        # Connect payment input to update payment change
+        self.ui.payment_transaction_input.textChanged.connect(self.on_payment_transaction_input_changed)
+
+
         # Set selection behavior to select entire rows
+
         self.transactions_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
         self.transactions_table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
+
 
         # Set table properties
         self.transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
@@ -81,14 +95,32 @@ class TransactionsWindow(QtWidgets.QWidget):
     def show_history_transactions_data(self):
         pass
 
-
-
     def show_wholesale_transactions_data(self):
         pass
     
+
+    def on_payment_transaction_input_changed(self):
+        payment_rp = remove_non_digit(self.ui.payment_transaction_input.text())
+        total_amount = remove_non_digit(self.ui.total_transaction_input.text())
+        if payment_rp == '':
+            self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(total_amount))))
+            self.ui.payment_change_transaction_input.setStyleSheet('color: red;')
+            return
+        
+        payment_change = int(total_amount) - int(payment_rp)
+        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(payment_change))))
+
+
+        self.ui.payment_change_transaction_input.setStyleSheet('color: red;')
+
+        if payment_change <= 0:
+            self.ui.payment_change_transaction_input.setStyleSheet('color: black;')
+
     def on_transaction_selected(self):
         if self.transactions_table.selectedItems():
             self.current_selected_sku = self.transactions_table.selectedItems()[0].row()
+
+
 
     def clear_transaction(self):
         # Remove All Items from Transactions Table
@@ -97,6 +129,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.cached_transaction_index = {}
         self.cached_qty = {}
         self.current_selected_sku = None
+        self.clear_data_transaction()
 
 
     def clear_data_transaction(self):
@@ -104,13 +137,15 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.product_name_transaction_input.clear()
         self.ui.price_transaction_input.clear()
         self.ui.stock_transaction_input.clear()
+        self.ui.stock_after_transaction_input.clear()
         self.ui.unit_value_transaction_input.clear()
         self.ui.qty_transaction_input.clear()
         self.ui.qty_transaction_combobox.clear()
         self.ui.discount_rp_transaction_input.clear()
         self.ui.discount_pct_transaction_input.clear()
+        self.ui.payment_transaction_input.clear()
     
-    
+
     def add_transaction(self):
         # Stop temporary sorting
         self.transactions_table.setSortingEnabled(False)
@@ -119,15 +154,12 @@ class TransactionsWindow(QtWidgets.QWidget):
             sku: str = self.ui.sku_transaction_input.text().strip()
             name: str = self.ui.product_name_transaction_input.text().strip()
             price: str = remove_non_digit(self.ui.price_transaction_input.text().strip())
-
             qty: str = remove_non_digit(self.ui.qty_transaction_input.text().strip())
             unit: str = self.ui.qty_transaction_combobox.currentText().strip()
             unit_value: str = remove_non_digit(self.ui.unit_value_transaction_input.text().strip())
             discount_rp: str = remove_non_digit(self.ui.discount_rp_transaction_input.text()) if self.ui.discount_rp_transaction_input.text() else '0'
             discount_pct: str = remove_non_digit(self.ui.discount_pct_transaction_input.text()) if self.ui.discount_pct_transaction_input.text() else '0'
             amount: str = str(int(price) * int(qty))
-            
-
 
             # Check transaction index if sku and unit is same
             transaction_index_key = f'{sku}_{unit}'
@@ -144,7 +176,6 @@ class TransactionsWindow(QtWidgets.QWidget):
             else:
                 current_row = self.transactions_table.rowCount()
                 self.transactions_table.insertRow(current_row)
-                
 
                 # Add item to transactions table
                 items = [
@@ -156,7 +187,6 @@ class TransactionsWindow(QtWidgets.QWidget):
 
                 font = QtGui.QFont()
                 font.setPointSize(16)
-
                 for col, item in enumerate(items):
                     item.setFont(font)
                     self.transactions_table.setItem(current_row, col, item)
@@ -164,27 +194,31 @@ class TransactionsWindow(QtWidgets.QWidget):
                 # Add transaction index
                 self.cached_transaction_index[transaction_index_key] = current_row
 
+                
             # Update total amount
             total_amount = int(remove_non_digit(self.ui.total_transaction_input.text())) + int(amount)
             self.ui.total_transaction_input.setText(add_prefix(format_number(str(total_amount))))
 
+            # Update payment change
+            self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(total_amount))))
+            self.ui.payment_change_transaction_input.setStyleSheet('color: red;')
             # Clear data transaction
             self.clear_data_transaction()
-           
+
             # After adding new row, reapply filter if there's any
             self.filter_transactions()
-            
+
+
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Error", f"Failed to add transaction: {str(e)}")
 
         finally:
             # Re-enable sorting
             self.transactions_table.setSortingEnabled(True)
-            
+
 
     def edit_transaction(self):
         # Get selected row
-
         selected_rows = self.transactions_table.selectedItems()
         if selected_rows:
             self.current_selected_sku = selected_rows[0].row()
@@ -265,13 +299,59 @@ class TransactionsWindow(QtWidgets.QWidget):
                 QtWidgets.QMessageBox.critical(self, "Error", f"Failed to update transaction: {str(e)}")
 
     def delete_transaction(self):
-        pass
+        selected_rows = self.transactions_table.selectedItems()
+        if not selected_rows:
+            QtWidgets.QMessageBox.warning(self, "Warning", "Please select a transaction to delete")
+            return
 
+        # Confirm deletion
+        confirm = QtWidgets.QMessageBox.question(
+            self, 
+            "Confirm Deletion",
+            "Are you sure you want to delete this transaction?",
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No
+        )
+
+        if confirm == QtWidgets.QMessageBox.StandardButton.Yes:
+            row = selected_rows[0].row()
+            
+            # Get the transaction details before deletion
+            sku = self.transactions_table.item(row, 0).text()
+            unit = self.transactions_table.item(row, 4).text()
+            subtotal = remove_non_digit(self.transactions_table.item(row, 8).text())
+
+            # Remove from cached index
+            transaction_index_key = f'{sku}_{unit}'
+            if transaction_index_key in self.cached_transaction_index:
+                del self.cached_transaction_index[transaction_index_key]
+
+            # Remove the row from table
+            self.transactions_table.removeRow(row)
+
+            # Update total amount
+            total_amount = int(remove_non_digit(self.ui.total_transaction_input.text())) - int(subtotal)
+            self.ui.total_transaction_input.setText(add_prefix(format_number(str(total_amount))))
+
+            # Update payment change if payment exists
+            payment_rp = remove_non_digit(self.ui.payment_transaction_input.text())
+            if payment_rp:
+                payment_change = int(total_amount) - int(payment_rp)
+                self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(payment_change))))
+                if payment_change <= 0:
+                    self.ui.payment_change_transaction_input.setStyleSheet('color: black;')
+                else:
+                    self.ui.payment_change_transaction_input.setStyleSheet('color: red;')
 
     def submit_transaction(self):
+        payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text())
+
+        if payment_rp == '':
+            QtWidgets.QMessageBox.critical(self, "Error", "Payment cannot be empty")
+            return
+
         # Get detail transactions from transactions table
         detail_transactions = []
-        total_amount = 0
+        total_amount: int = 0
         transaction_id = self.create_transaction_id()
         for row in range(self.transactions_table.rowCount()):
             sku = self.transactions_table.item(row, 0).text()
@@ -286,22 +366,34 @@ class TransactionsWindow(QtWidgets.QWidget):
             total_amount += int(subtotal)
             detail_transactions.append((transaction_id, sku, unit, unit_value, qty, price, discount_rp, subtotal))
 
+        
+        payment_change: int = total_amount - int(payment_rp)
+        payment_method: str = self.ui.payment_method_transaction_combobox.currentText()
+        payment_remarks: str = self.ui.remarks_transaction_input.toPlainText().strip()
 
-        payment_remarks = self.ui.remarks_transaction_input.toPlainText().strip()
 
+        if payment_rp == '':
+            QtWidgets.QMessageBox.critical(self, "Error", "Payment cannot be empty")
+            return
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
+
 
             # Get current timestamp
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Insert main transaction first
-            sql = '''INSERT INTO transactions (transaction_id, total_amount, discount_transaction_id, discount_amount, created_at, payment_remarks) 
-                    VALUES (?, ?, ?, ?, ?, ?)'''
+            sql = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, 
+                                            payment_rp, payment_change, created_at, payment_remarks) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
             
-            self.cursor.execute(sql, (transaction_id, total_amount, 1, discount_rp, current_time, payment_remarks))
+
+            self.cursor.execute(sql, (transaction_id, total_amount, payment_method, 
+                                      payment_rp, payment_change, current_time, payment_remarks))
             
+
             # Insert all detail transactions
             sql = '''INSERT INTO detail_transactions 
                     (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
@@ -325,7 +417,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Clear the transactions table and total
             self.clear_transaction()
             
-            QtWidgets.QMessageBox.information(self, "Success", "Transaction submitted successfully!")
+            QtWidgets.QMessageBox.information(self, "Success", f"Transaction#{transaction_id} submitted successfully!")
 
         except Exception as e:
             # If any error occurs, rollback all changes
@@ -420,12 +512,22 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.sku_transaction_input.setText(product_data['sku'])
         self.ui.product_name_transaction_input.setText(product_data['product_name'])
         self.ui.price_transaction_input.setText(add_prefix(format_number(str(product_data['price']))))
-        self.ui.stock_transaction_input.setText(format_number(str(product_data['stock'])))
         self.ui.unit_value_transaction_input.setText(format_number(str(product_data['unit_value'])))
+
+        stock = int(product_data['stock'].replace('.', ''))
+        self.ui.stock_transaction_input.setText(format_number(str(stock)))
+        self.ui.stock_after_transaction_input.setText(format_number(str(stock)))
+
+        if stock < 0:   
+            self.ui.stock_transaction_input.setText(f'-{format_number(str(abs(stock)))}')
+            self.ui.stock_after_transaction_input.setText(f'-{format_number(str(abs(stock)))}')
+            self.ui.stock_transaction_input.setStyleSheet('color: red;')
+            self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
 
         # Set loading flag
         self.is_loading_combo = True
         
+
         # Clear existing items
         self.ui.qty_transaction_combobox.clear()
         
@@ -461,7 +563,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         if result:
             self.ui.product_name_transaction_input.setText(result[0])
             self.ui.price_transaction_input.setText(add_prefix(format_number(str(result[1]))))
-            self.ui.stock_transaction_input.setText(format_number(str(result[2])))
             
             # Set loading flag
             self.is_loading_combo = True
@@ -477,13 +578,11 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.cursor.execute(sql, (sku,))
             results = self.cursor.fetchall()
 
-
             for result in results:
-                # key = <sku>_<unit>, value = (unit_value, price)
+                # key = <sku>_<unit>, value = (unit_value, price, stock)
                 cache_key = f'{sku}_{result[0]}'
                 self.cached_qty[cache_key] = (result[1], result[2], result[3])
                 self.ui.qty_transaction_combobox.addItem(result[0])
-
 
             # Reset loading flag
             self.is_loading_combo = False
@@ -491,12 +590,48 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Set the unit in combobox
             self.ui.qty_transaction_combobox.setCurrentIndex(0)
             
-            self.ui.unit_value_transaction_input.setText(format_number(str(results[0][1])))
-
+            # Calculate stock after existing transactions
+            current_unit = self.ui.qty_transaction_combobox.currentText()
+            self.calculate_stock_after_transactions(sku, current_unit)
 
         else:
             QtWidgets.QMessageBox.critical(self, "Error", "Product not found")
 
+    def get_total_qty_in_transactions(self, sku: str, unit: str) -> int:
+        total_qty = 0
+        for row in range(self.transactions_table.rowCount()):
+            if (self.transactions_table.item(row, 0).text() == sku and 
+                self.transactions_table.item(row, 4).text() == unit):
+                total_qty += int(remove_non_digit(self.transactions_table.item(row, 3).text()))
+        return total_qty
+
+    def calculate_stock_after_transactions(self, sku: str, unit: str):
+        # Get initial stock
+        cache_key = f'{sku}_{unit}'
+        if cache_key in self.cached_qty:
+            initial_stock = self.cached_qty[cache_key][2]
+
+            self.ui.stock_transaction_input.setStyleSheet('color: black;')
+            self.ui.stock_transaction_input.setText(format_number(str(initial_stock)))
+
+            if initial_stock < 0:
+                self.ui.stock_transaction_input.setText(f'-{format_number(str(abs(initial_stock)))}')
+                self.ui.stock_transaction_input.setStyleSheet('color: red;')
+            
+
+            # Get total qty in transaction table for this sku and unit
+            total_qty_in_transactions = self.get_total_qty_in_transactions(sku, unit)
+            
+            # Calculate and display stock after transactions
+            stock_after = initial_stock - total_qty_in_transactions
+            
+            # Set color based on stock level
+            self.ui.stock_after_transaction_input.setText(format_number(str(stock_after)))
+            self.ui.stock_after_transaction_input.setStyleSheet('color: black;')
+
+            if stock_after < 0:
+                self.ui.stock_after_transaction_input.setText(f'-{format_number(str(abs(stock_after)))}')
+                self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
 
     def handle_pending_transaction_selected(self, pending_transaction_data):
         results = []
@@ -552,7 +687,29 @@ class TransactionsWindow(QtWidgets.QWidget):
         
         self.ui.total_transaction_input.setText(add_prefix(format_number(str(subtotal))))
 
-    
+
+    def on_qty_transaction_input_changed(self):
+        sku = self.ui.sku_transaction_input.text().strip()
+        unit = self.ui.qty_transaction_combobox.currentText()
+        qty = remove_non_digit(self.ui.qty_transaction_input.text())
+        stock = self.ui.stock_transaction_input.text().replace('.', '').strip()
+        
+        if qty == '' or stock == '':
+            self.ui.stock_after_transaction_input.setStyleSheet('color: black;')
+            self.calculate_stock_after_transactions(sku, unit)
+            return
+        
+        total_qty_in_transactions = self.get_total_qty_in_transactions(sku, unit)
+        qty_after_transaction = int(stock) - int(qty) - total_qty_in_transactions
+        self.ui.stock_after_transaction_input.setText(format_number(str(qty_after_transaction)))
+
+        self.ui.stock_after_transaction_input.setStyleSheet('color: black;')
+        if qty_after_transaction < 0:
+            # add negative sign to stock after transaction
+            self.ui.stock_after_transaction_input.setText(f'-{format_number(str(qty_after_transaction))}')
+            self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
+
+
     def on_qty_transaction_combobox_changed(self, text):
         # Skip if we're loading items
         if self.is_loading_combo:
@@ -563,8 +720,12 @@ class TransactionsWindow(QtWidgets.QWidget):
         if cache_key in self.cached_qty:
             self.ui.unit_value_transaction_input.setText(format_number(str(self.cached_qty[cache_key][0])))
             self.ui.price_transaction_input.setText(add_prefix(format_number(str(self.cached_qty[cache_key][1]))))
-            self.ui.stock_transaction_input.setText(format_number(str(self.cached_qty[cache_key][2])))
+            
+            # Calculate stock after existing transactions for new unit
+            self.calculate_stock_after_transactions(sku, text)
 
+            # Update qty on input changed
+            self.on_qty_transaction_input_changed()
 
     def filter_transactions(self):
         search_text = self.ui.filter_transaction_input.text().lower()

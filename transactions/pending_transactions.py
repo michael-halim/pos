@@ -51,6 +51,9 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
         self.pending_detail_transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
         self.pending_detail_transactions_table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
 
+        # Add filter input for detail transactions
+        self.ui.pending_detail_transactions_filter_input.textChanged.connect(self.filter_detail_transactions)
+
         self.show_pending_transactions_data()
         self.show_detail_pending_transactions_data()
     
@@ -190,3 +193,26 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
                     item.setText(add_prefix(format_number(value)))
                     
                 self.pending_detail_transactions_table.setItem(row, col, item)
+
+    def filter_detail_transactions(self):
+        search_text = self.ui.pending_detail_transactions_filter_input.text().lower()
+        
+        # Show all rows if search text is empty
+        if not search_text:
+            for row in range(self.pending_detail_transactions_table.rowCount()):
+                self.pending_detail_transactions_table.setRowHidden(row, False)
+            return
+        
+        # Iterate through all rows
+        for row in range(self.pending_detail_transactions_table.rowCount()):
+            match_found = False
+            
+            # Search through all columns in the row
+            for col in range(self.pending_detail_transactions_table.columnCount()):
+                item = self.pending_detail_transactions_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match_found = True
+                    break
+            
+            # Hide/show row based on whether match was found
+            self.pending_detail_transactions_table.setRowHidden(row, not match_found)
