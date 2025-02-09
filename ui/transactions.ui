@@ -34,51 +34,10 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_14">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
-             <widget class="QLabel" name="transaction_id_label">
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Transaction#</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="transaction_id_input">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <layout class="QHBoxLayout" name="horizontalLayout_5"/>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_13">
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
             <item>
              <widget class="QLabel" name="transaction_date_label">
               <property name="font">
@@ -468,6 +427,11 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
                     <property name="styleSheet">
                      <string notr="true">QLineEdit {
     padding: 0;
@@ -557,6 +521,11 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -595,6 +564,11 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -630,6 +604,11 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -639,6 +618,11 @@
                       <width>0</width>
                       <height>30</height>
                      </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
                     </property>
                    </widget>
                   </item>
@@ -670,6 +654,11 @@
                       <width>0</width>
                       <height>30</height>
                      </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
                     </property>
                    </widget>
                   </item>
@@ -719,6 +708,11 @@
                         <width>16777215</width>
                         <height>30</height>
                        </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>12</pointsize>
+                       </font>
                       </property>
                      </widget>
                     </item>
@@ -772,6 +766,11 @@
                         <width>16777215</width>
                         <height>30</height>
                        </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>12</pointsize>
+                       </font>
                       </property>
                      </widget>
                     </item>
@@ -873,6 +872,11 @@
                         <height>30</height>
                        </size>
                       </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>12</pointsize>
+                       </font>
+                      </property>
                       <property name="styleSheet">
                        <string notr="true">QLineEdit {
     padding: 0;
@@ -919,6 +923,11 @@
                         <width>230</width>
                         <height>30</height>
                        </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>12</pointsize>
+                       </font>
                       </property>
                      </widget>
                     </item>
@@ -1037,6 +1046,11 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -1076,6 +1090,11 @@
                           <height>30</height>
                          </size>
                         </property>
+                        <property name="font">
+                         <font>
+                          <pointsize>12</pointsize>
+                         </font>
+                        </property>
                        </widget>
                       </item>
                      </layout>
@@ -1114,6 +1133,11 @@
                           <height>30</height>
                          </size>
                         </property>
+                        <property name="font">
+                         <font>
+                          <pointsize>12</pointsize>
+                         </font>
+                        </property>
                        </widget>
                       </item>
                      </layout>
@@ -1151,6 +1175,11 @@
                         <height>30</height>
                        </size>
                       </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>12</pointsize>
+                       </font>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -1187,7 +1216,13 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QTextEdit" name="remarks_transaction_input"/>
+                   <widget class="QTextEdit" name="remarks_transaction_input">
+                    <property name="font">
+                     <font>
+                      <pointsize>12</pointsize>
+                     </font>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </item>
