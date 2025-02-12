@@ -198,24 +198,45 @@ class TransactionRepository:
             }
 
     def get_product_unit_details(self, sku: str) -> list[ProductUnitDetailModel]:
-        sql = '''SELECT u.unit, u.unit_value, p.price, p.stock 
-                    FROM products p 
-                    LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit
-                    WHERE p.sku = ?'''
+        sql = '''SELECT u.unit, u.unit_value, u.price 
+                    FROM units u
+                    WHERE u.sku = ?'''
 
         self.cursor.execute(sql, (sku,))
         results =  self.cursor.fetchall()
 
-        product_unit_details = [
-            ProductUnitDetailModel(unit=r[0], unit_value=r[1], price=r[2], stock=r[3]) 
-            for r in results
-        ]
+        if results:
+            product_unit_details = [
+                ProductUnitDetailModel(unit=r[0], unit_value=r[1], price=r[2]) 
+                for r in results
+            ]
+            return product_unit_details
 
-        return product_unit_details
+        return []
     
-    def get_product_by_sku(self, sku: str) -> ProductModel:
-        sql = 'SELECT product_name, price, stock FROM products WHERE sku = ?'
-        self.cursor.execute(sql, (sku,))
-        result = self.cursor.fetchone()
+    def get_product_by_sku(self, sku: str):
+        try:
+            sql = 'SELECT product_name, price, unit, stock FROM products WHERE sku = ?'
+            self.cursor.execute(sql, (sku,))
 
-        return ProductModel(product_name=result[0], price=result[1], stock=result[2])
+            if self.cursor.rowcount == 0:
+                return {
+                    'success': True,
+                    'message': f"Product with sku {sku} not found",
+                    'data': None
+                }
+
+            result = self.cursor.fetchone()
+            return {
+                'success': True,
+                'message': "Success",
+                'data': ProductModel(product_name=result[0], price=result[1], unit=result[2], stock=result[3])
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f"Error: {str(e)}",
+                'data': None
+            }
+

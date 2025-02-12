@@ -1,14 +1,18 @@
 from PyQt6 import QtWidgets, uic
+from PyQt6.QtWidgets import QDateEdit
 from datetime import datetime
 
 from helper import format_number, add_prefix, remove_non_digit
 from transactions.pending_transactions import PendingTransactionsWindow
 from transactions.products_in_transactions import ProductsInTransactionWindow
+
 from transactions.services.transaction_service import TransactionService
+
 from transactions.models.transactions_models import TransactionModel, DetailTransactionModel, PendingTransactionModel, PendingDetailTransactionModel
 
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
 
 class TransactionsWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -46,12 +50,16 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.clear_transaction_button.clicked.connect(self.clear_transaction)
         self.ui.add_transaction_button.clicked.connect(self.add_transaction)
         self.ui.find_sku_transaction_button.clicked.connect(lambda: self.products_in_transaction_dialog.show())
-        self.ui.check_sku_transaction_button.clicked.connect(self.check_sku)
         self.ui.edit_transaction_button.clicked.connect(self.edit_transaction)
         self.ui.delete_transaction_button.clicked.connect(self.delete_transaction)
         self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
         self.ui.pending_transaction_button.clicked.connect(self.create_pending_transaction)
         self.ui.open_pending_transaction_button.clicked.connect(lambda: self.pending_transactions_dialog.showMaximized())
+        
+        # Set date input
+        self.ui.date_transaction_input.setDate(datetime.now())
+        self.ui.date_transaction_input.setButtonSymbols(QDateEdit.ButtonSymbols.NoButtons)
+        self.ui.date_transaction_input.setDisplayFormat("dd/MM/yyyy")
 
         # Add 2 items to payment method combobox
         self.ui.payment_method_transaction_combobox.addItems(['Cash', 'Transfer'])
@@ -80,19 +88,20 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Connect payment input to update payment change
         self.ui.payment_transaction_input.textChanged.connect(self.on_payment_transaction_input_changed)
 
+        # Connect return pressed signal
+        self.ui.sku_transaction_input.returnPressed.connect(self.on_handle_sku_enter)
 
         # Set selection behavior to select entire rows
-        self.transactions_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
-        self.transactions_table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
-
+        self.transactions_table.setSelectionBehavior(SELECT_ROWS)
+        self.transactions_table.setSelectionMode(SINGLE_SELECTION)
 
         # Set table properties
-        self.transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.transactions_table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.wholesale_transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.wholesale_transactions_table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.history_transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.history_transactions_table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        self.transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.wholesale_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.wholesale_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.history_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.history_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
    
     def show_history_transactions_data(self):
@@ -424,84 +433,58 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.clear_transaction()
 
     def handle_product_selected(self, product_data):
-         # Fill the form fields with selected product data
-        self.ui.sku_transaction_input.setText(product_data['sku'])
-        self.ui.product_name_transaction_input.setText(product_data['product_name'])
-        self.ui.price_transaction_input.setText(add_prefix(format_number(str(product_data['price']))))
-        self.ui.unit_value_transaction_input.setText(format_number(str(product_data['unit_value'])))
-
-        stock = int(product_data['stock'].replace('.', ''))
-        self.ui.stock_transaction_input.setText(format_number(str(stock)))
-        self.ui.stock_after_transaction_input.setText(format_number(str(stock)))
-
-        if stock < 0:   
-            self.ui.stock_transaction_input.setText(f'-{format_number(str(abs(stock)))}')
-            self.ui.stock_after_transaction_input.setText(f'-{format_number(str(abs(stock)))}')
-            self.ui.stock_transaction_input.setStyleSheet('color: red;')
-            self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
+        # Clear existing items
+        self.ui.qty_transaction_combobox.clear()
 
         # Set loading flag
         self.is_loading_combo = True
+        sku = product_data['sku']
+        product_result = self.transaction_service.get_product_by_sku(sku)
+        if product_result['success']:
+            # Fill the form fields with selected product data
+            self.ui.sku_transaction_input.setText(sku)
+            self.ui.product_name_transaction_input.setText(product_result['data'].product_name)
+            self.ui.price_transaction_input.setText(add_prefix(format_number(str(product_result['data'].price))))
+            self.ui.qty_transaction_combobox.addItem(product_result['data'].unit)
+            self.ui.unit_value_transaction_input.setText('1')
+
+            cache_key = f'{sku}_{product_result["data"].unit}'
+            self.cached_qty[cache_key] = (1, product_result['data'].price)
+
+            self.set_product_unit_details(sku)
+
+            stock = product_result['data'].stock
+            self.ui.stock_transaction_input.setText(format_number(str(stock)))
+            self.ui.stock_after_transaction_input.setText(format_number(str(stock)))
+
+            if stock < 0:   
+                self.ui.stock_transaction_input.setText(f'-{format_number(str(stock))}')
+                self.ui.stock_after_transaction_input.setText(f'-{format_number(str(stock))}')
+                self.ui.stock_transaction_input.setStyleSheet('color: red;')
+                self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
         
-        # Clear existing items
-        self.ui.qty_transaction_combobox.clear()
-        
-        # Set product unit details (Combo Box)
-        self.set_product_unit_details(product_data['sku'])
-       
+        # Trigger qty input changed event
+        self.on_qty_transaction_input_changed()
+
         # Reset loading flag
         self.is_loading_combo = False
-        
-        # Set the unit in combobox
-        index = self.ui.qty_transaction_combobox.findText(product_data['unit'])
-        if index >= 0:
-            self.ui.qty_transaction_combobox.setCurrentIndex(index)
-            
-
-    def check_sku(self):
-        sku = self.ui.sku_transaction_input.text().strip()
-        product = self.transaction_service.get_product_by_sku(sku)
-
-        if product:
-            self.ui.product_name_transaction_input.setText(product.product_name)
-            self.ui.price_transaction_input.setText(add_prefix(format_number(str(product.price))))
-
-            # Set loading flag
-            self.is_loading_combo = True
-            
-            # Clear existing items
-            self.ui.qty_transaction_combobox.clear()
-
-            # Set product unit details (Combo Box)
-            self.set_product_unit_details(sku)
-            
-            # Reset loading flag
-            self.is_loading_combo = False
-            
-            # Set the unit in combobox
-            self.ui.qty_transaction_combobox.setCurrentIndex(0)
-            
-            # Calculate stock after existing transactions
-            current_unit = self.ui.qty_transaction_combobox.currentText()
-            
-            self.calculate_stock_after_transactions(sku, current_unit)
-
-        else:
-            POSMessageBox.error(self, title='Error', message="Product not found")
+     
 
     def get_total_qty_in_transactions(self, sku: str, unit: str) -> int:
         total_qty = 0
         for row in range(self.transactions_table.rowCount()):
-            if (self.transactions_table.item(row, 0).text() == sku and 
-                self.transactions_table.item(row, 4).text() == unit):
-                total_qty += int(remove_non_digit(self.transactions_table.item(row, 3).text()))
+            if self.transactions_table.item(row, 0).text() == sku:
+                qty_in_transaction = remove_non_digit(self.transactions_table.item(row, 3).text())
+                unit_value_in_transaction = remove_non_digit(self.transactions_table.item(row, 5).text())
+                total_qty += int(qty_in_transaction) * int(unit_value_in_transaction)
+
         return total_qty
 
     def calculate_stock_after_transactions(self, sku: str, unit: str):
-        # Get initial stock
         cache_key = f'{sku}_{unit}'
         if cache_key in self.cached_qty:
-            initial_stock = self.cached_qty[cache_key][2]
+            # Get initial stock
+            initial_stock = self.transaction_service.get_product_by_sku(sku)['data'].stock
 
             self.ui.stock_transaction_input.setStyleSheet('color: black;')
             self.ui.stock_transaction_input.setText(format_number(str(initial_stock)))
@@ -558,7 +541,8 @@ class TransactionsWindow(QtWidgets.QWidget):
     def on_qty_transaction_input_changed(self):
         sku = self.ui.sku_transaction_input.text().strip()
         unit = self.ui.qty_transaction_combobox.currentText()
-        qty = remove_non_digit(self.ui.qty_transaction_input.text())
+        unit_value = remove_non_digit(self.ui.unit_value_transaction_input.text())
+        qty = remove_non_digit(self.ui.qty_transaction_input.text()) if self.ui.qty_transaction_input.text() else '0'
         stock = self.ui.stock_transaction_input.text().replace('.', '').strip()
 
         if qty == '' or stock == '':
@@ -567,7 +551,8 @@ class TransactionsWindow(QtWidgets.QWidget):
             return
         
         total_qty_in_transactions = self.get_total_qty_in_transactions(sku, unit)
-        qty_after_transaction = int(stock) - int(qty) - total_qty_in_transactions
+
+        qty_after_transaction = int(stock) - (int(qty) * int(unit_value)) - total_qty_in_transactions
         self.ui.stock_after_transaction_input.setText(format_number(str(qty_after_transaction)))
 
         self.ui.stock_after_transaction_input.setStyleSheet('color: black;')
@@ -585,14 +570,15 @@ class TransactionsWindow(QtWidgets.QWidget):
         sku = self.ui.sku_transaction_input.text().strip()
         cache_key = f'{sku}_{text}'
         if cache_key in self.cached_qty:
+
             self.ui.unit_value_transaction_input.setText(format_number(str(self.cached_qty[cache_key][0])))
             self.ui.price_transaction_input.setText(add_prefix(format_number(str(self.cached_qty[cache_key][1]))))
             
             # Calculate stock after existing transactions for new unit
             self.calculate_stock_after_transactions(sku, text)
 
-            # Update qty on input changed
-            self.on_qty_transaction_input_changed()
+        # Update qty on input changed
+        self.on_qty_transaction_input_changed()
 
     def filter_transactions(self):
         search_text = self.ui.filter_transaction_input.text().lower()
@@ -621,24 +607,23 @@ class TransactionsWindow(QtWidgets.QWidget):
         '''
             Set the product unit into combobox
 
-            sku and unit is the unique key, and the value is (unit_value, price, stock)
+            sku and unit is the unique key, and the value is (unit_value, price)
             behind the scene the sku and unit is stored using dictionary called cached_qty
             Example: 
             
             ```cache_key = 'SKU001'
             cached_qty = {
-                'SKU001_pcs' : (1, 10000, 100),  #(pcs unit value is 1, price is 10.000, stock is 100)
-                'SKU001_kodi' : (20, 100000, 100), #(kodi unit value is 20, price is 100.000, stock is 100)
+                'SKU001_pcs' : (1, 10000),  #(pcs unit value is 1, price is 10.000)
+                'SKU001_kodi' : (20, 100000), #(kodi unit value is 20, price is 100.000)
             }
             ```
-
         '''
 
         product_unit_details = self.transaction_service.get_product_unit_details(sku)
         for pud in product_unit_details:
-            # key = <sku>_<unit>, value = (unit_value, price, stock)
+            # key = <sku>_<unit>, value = (unit_value, price)
             cache_key = f'{sku}_{pud.unit}'
-            self.cached_qty[cache_key] = (pud.unit_value, pud.price, pud.stock)
+            self.cached_qty[cache_key] = (pud.unit_value, pud.price)
             self.ui.qty_transaction_combobox.addItem(pud.unit)
 
     def get_detail_transactions(self) -> tuple[list[dict], int]:
@@ -675,3 +660,20 @@ class TransactionsWindow(QtWidgets.QWidget):
             })
 
         return (detail_transactions, total_amount)
+
+    def on_handle_sku_enter(self):
+        sku = self.ui.sku_transaction_input.text().strip().upper()
+        if not sku:
+            self.clear_transaction()
+            return
+
+        # Try to find exact SKU match
+        result = self.transaction_service.get_product_by_sku(sku)
+        
+        if result['success']:
+            # Product found - fill the form
+            self.handle_product_selected({'sku' : sku})
+        else:
+            # Product not found - show dialog with filter
+            self.products_in_transaction_dialog.set_filter(sku)
+            self.products_in_transaction_dialog.show()

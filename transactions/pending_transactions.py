@@ -1,10 +1,9 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from connect_db import DatabaseConnection
 
-from helper import format_number, add_prefix, remove_non_digit
-
+from helper import format_number, add_prefix
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
 class PendingTransactionsWindow(QtWidgets.QWidget):
-
     # Add signal to communicate with main window
     pending_transaction_selected = QtCore.pyqtSignal(dict)
 
@@ -22,7 +21,6 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
 
         self.pending_transactions_table.setSortingEnabled(True)
         self.pending_detail_transactions_table.setSortingEnabled(True)
-        # self.ui.add_products_in_transactions_button.clicked.connect(self.send_product_data)
 
         # Connect Add Pending Transaction Button
         self.ui.add_pending_transactions_button.clicked.connect(self.add_pending_transaction)
@@ -38,18 +36,18 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
         self.pending_transactions_table.itemSelectionChanged.connect(self.on_pending_transaction_selected)
 
         # Set selection behavior to select entire rows
-        self.pending_transactions_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
-        self.pending_transactions_table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
+        self.pending_transactions_table.setSelectionBehavior(SELECT_ROWS)
+        self.pending_transactions_table.setSelectionMode(SINGLE_SELECTION)
 
-        self.pending_detail_transactions_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
-        self.pending_detail_transactions_table.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
+        self.pending_detail_transactions_table.setSelectionBehavior(SELECT_ROWS)
+        self.pending_detail_transactions_table.setSelectionMode(SINGLE_SELECTION)
 
         # Set table properties
-        self.pending_transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.pending_transactions_table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        self.pending_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.pending_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
-        self.pending_detail_transactions_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
-        self.pending_detail_transactions_table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
+        self.pending_detail_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.pending_detail_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
         # Add filter input for detail transactions
         self.ui.pending_detail_transactions_filter_input.textChanged.connect(self.filter_detail_transactions)

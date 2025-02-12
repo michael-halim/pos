@@ -6,6 +6,7 @@ from typing import List, Optional
 class ProductModel:
     product_name: str
     price: int
+    unit: str
     stock: int
     
 
@@ -14,7 +15,6 @@ class ProductUnitDetailModel:
     unit: str
     unit_value: int
     price: int
-    stock: int
 
 @dataclass
 class DetailTransactionModel:

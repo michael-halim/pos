@@ -2,6 +2,8 @@ from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from connect_db import DatabaseConnection
 
 from helper import format_number, add_prefix, remove_non_digit
+from generals.fonts import POSFonts
+
 
 class ProductsInTransactionWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -76,18 +78,16 @@ class ProductsInTransactionWindow(QtWidgets.QWidget):
         search_text: str = self.ui.filter_products_in_transactions_input.text().strip()
         
         # Modify SQL query to include search filter
-        sql: str = '''SELECT p.sku, p.product_name, p.price, p.stock, p.unit, u.unit_value, p.created_at 
-                FROM products p 
-                LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit  
-                WHERE p.sku LIKE ? OR p.product_name LIKE ? OR p.unit LIKE ?
-                LIMIT 100'''
+        sql: str = '''SELECT p.sku, p.product_name, p.price, p.stock, p.unit, p.created_at 
+                        FROM products p 
+                        LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit  
+                        WHERE p.sku LIKE ? OR p.product_name LIKE ? OR p.unit LIKE ?'''
         
         # If no search text, show all products
         if not search_text:
-            sql: str = '''SELECT p.sku, p.product_name, p.price, p.stock, p.unit, u.unit_value, p.created_at 
-                    FROM products p 
-                    LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit 
-                    LIMIT 100'''
+            sql: str = '''SELECT p.sku, p.product_name, p.price, p.stock, p.unit, p.created_at 
+                            FROM products p 
+                            LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit '''
             
             self.cursor.execute(sql)
         else:
@@ -114,12 +114,9 @@ class ProductsInTransactionWindow(QtWidgets.QWidget):
             
 
     def load_products_in_transactions_table(self, data_result):
-        font = QtGui.QFont()
-        font.setPointSize(16)
-
         for row_num, product in enumerate(data_result):
             for col_num, data in enumerate(product):
-                # Col 2 = Price, Col 3 = Stock, Col 5 = Unit Value
+                # Col 2 = Price, Col 3 = Stock
                 if col_num == 2:
                     item = QtWidgets.QTableWidgetItem(add_prefix(format_number(str(data))))
 
@@ -130,13 +127,10 @@ class ProductsInTransactionWindow(QtWidgets.QWidget):
                         item = QtWidgets.QTableWidgetItem(f'-{format_number(str(abs(int(data))))}')
                         item.setForeground(QtGui.QColor('red'))
 
-                elif col_num == 5:
-                    item = QtWidgets.QTableWidgetItem(format_number(str(data)))
-              
                 else:
                     item = QtWidgets.QTableWidgetItem(str(data))
 
-                item.setFont(font)
+                item.setFont(POSFonts.get_font(16))
 
                 # Make item not editable
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemFlag.ItemIsEditable)
@@ -151,13 +145,25 @@ class ProductsInTransactionWindow(QtWidgets.QWidget):
             # Create dictionary with product details
             product_data = {
                 'sku': self.products_in_transactions_table.item(row, 0).text(),
-                'product_name': self.products_in_transactions_table.item(row, 1).text(),
-                'price': self.products_in_transactions_table.item(row, 2).text(),
-                'stock': self.products_in_transactions_table.item(row, 3).text(),
-                'unit': self.products_in_transactions_table.item(row, 4).text(),
-                'unit_value': self.products_in_transactions_table.item(row, 5).text()
             }
             
             # Emit signal with product data
             self.product_selected.emit(product_data)
             self.close()
+
+    def set_filter(self, search_text: str):
+        """Pre-fill the search filter"""
+        self.ui.filter_products_in_transactions_input.setText(search_text)
+        # Optionally trigger the filter
+        self.filter_products()
+
+    def filter_products(self):
+        search_text = self.ui.filter_products_in_transactions_input.text().lower()
+        for row in range(self.products_in_transactions_table.rowCount()):
+            match_found = False
+            for col in range(self.products_in_transactions_table.columnCount()):
+                item = self.products_in_transactions_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match_found = True
+                    break
+            self.products_in_transactions_table.setRowHidden(row, not match_found)

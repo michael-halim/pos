@@ -116,7 +116,7 @@ class SeedData:
 
     def create_products_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS products (
-            sku VARCHAR(20) NOT NULL,
+            sku VARCHAR(20) NOT NULL UNIQUE,
             product_name VARCHAR(120) NOT NULL,
             cost_price INT(10) NULL,
             price INT(10) NOT NULL,
@@ -124,8 +124,7 @@ class SeedData:
             stock INT(10) NOT NULL DEFAULT 0,
             unit VARCHAR(10) NOT NULL DEFAULT '',
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NULL DEFAULT NULL,
-            UNIQUE (sku, unit)
+            updated_at DATETIME NULL DEFAULT NULL
         );'''
 
         self.cursor.execute(sql)
@@ -134,9 +133,7 @@ class SeedData:
                     VALUES 
                     ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'pcs', CURRENT_TIMESTAMP, NULL),
                     ('SKU002', 'Product Two', 2000, 2500, 30, 'Limited stock', 'pcs', CURRENT_TIMESTAMP, NULL),
-                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'pcs', CURRENT_TIMESTAMP, NULL),
-                    ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'kodi', CURRENT_TIMESTAMP, NULL),
-                    ('SKU001', 'Product One', NULL, 3000, 20, 'New arrival', 'dus', CURRENT_TIMESTAMP, NULL); '''
+                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'pcs', CURRENT_TIMESTAMP, NULL); '''
         
         self.cursor.execute(sql_insert)
     
@@ -144,18 +141,16 @@ class SeedData:
         sql = '''CREATE TABLE IF NOT EXISTS units (
             sku VARCHAR(20) NOT NULL,
             unit VARCHAR(10) NOT NULL,
-            unit_value INT(10) NOT NULL
+            unit_value INT(10) NOT NULL,
+            price INT(10) NOT NULL
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO units (sku, unit, unit_value) 
+        sql_insert = '''INSERT INTO units (sku, unit, unit_value, price) 
                         VALUES 
-                        ('SKU001', 'pcs', 1),
-                        ('SKU002', 'pcs', 1),
-                        ('SKU003', 'pcs', 1),
-                        ('SKU001', 'kodi', 20),
-                        ('SKU001', 'dus', 10); '''
+                        ('SKU001', 'kodi', 20, 28000),
+                        ('SKU001', 'dus', 10, 20000); '''
         
         self.cursor.execute(sql_insert)
 
