@@ -24,7 +24,7 @@ class DetailTransactionModel:
     unit_value: int
     qty: int
     price: int
-    discount_rp: int
+    discount: int
     subtotal: int
 
 @dataclass
@@ -47,18 +47,7 @@ class PendingTransactionModel:
     payment_remarks: str
 
 @dataclass
-class PendingDetailTransactionModel:
-    transaction_id: str
-    sku: str
-    unit: str
-    unit_value: int
-    qty: int
-    price: int
-    discount: int
-    subtotal: int
-
-@dataclass
-class PendingDetailTransactionToTransactionModel:
+class TransactionTableItemModel:
     sku: str
     product_name: str
     price: int

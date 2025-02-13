@@ -3,7 +3,7 @@ from typing import Optional, List
 
 # Import Models
 from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from ..models.transactions_models import PendingTransactionModel, PendingDetailTransactionModel, PendingDetailTransactionToTransactionModel
+from ..models.transactions_models import PendingTransactionModel, TransactionTableItemModel
 
 from ..repositories.transaction_repository import TransactionRepository
 from ..models.result import ResponseMessage
@@ -21,8 +21,8 @@ class TransactionService:
         return self.repository.create_transaction_id(is_pending)
 
 
-    def create_pending_transaction(self, pending_transaction: PendingTransactionModel, pending_detail_transactions: List[PendingDetailTransactionModel]) -> ResponseMessage:
-        return self.repository.create_pending_transaction(pending_transaction, pending_detail_transactions)
+    def create_pending_transaction(self, pending_transaction: PendingTransactionModel, detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
+        return self.repository.create_pending_transaction(pending_transaction, detail_transactions)
 
 
     def get_pending_transactions_by_transaction_id(self, transaction_id: str):

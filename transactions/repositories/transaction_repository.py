@@ -3,7 +3,7 @@ from typing import List
 
 # Import Models
 from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from ..models.transactions_models import PendingTransactionModel, PendingDetailTransactionModel, PendingDetailTransactionToTransactionModel
+from ..models.transactions_models import PendingTransactionModel, TransactionTableItemModel
 
 
 from connect_db import DatabaseConnection
@@ -31,14 +31,8 @@ class TransactionRepository:
                     VALUES (?, ?, ?, ?, ?, ?, ?)'''
             
             transaction_id = transaction.transaction_id
-            total_amount = transaction.total_amount
-            payment_method = transaction.payment_method
-            payment_rp = transaction.payment_amount
-            payment_change = transaction.payment_change
-            payment_remarks = transaction.payment_remarks
-            
-            self.cursor.execute(sql, (transaction_id, total_amount, payment_method, 
-                                      payment_rp, payment_change, current_time, payment_remarks))
+            self.cursor.execute(sql, (transaction_id, transaction.total_amount, transaction.payment_method, 
+                                      transaction.payment_amount, transaction.payment_change, current_time, transaction.payment_remarks))
             
 
             # Insert all detail transactions
@@ -48,22 +42,18 @@ class TransactionRepository:
                 
 
             for detail in detail_transactions:  
-                transaction_id = detail.transaction_id
                 sku = detail.sku
-                unit = detail.unit
-                unit_value = detail.unit_value
                 qty = detail.qty
-                price = detail.price
-                discount_rp = detail.discount_rp
-                subtotal = detail.subtotal
-                
+                unit_value = detail.unit_value
+                unit = detail.unit
+                stock_affected: int = int(qty) * int(unit_value)
                 # Insert detail transaction
-                self.cursor.execute(sql, (transaction_id, sku, unit, unit_value, 
-                                          qty, price, discount_rp, subtotal))
+                self.cursor.execute(sql, (detail.transaction_id, sku, unit, unit_value, 
+                                          qty, detail.price,  detail.discount, detail.subtotal))
                 
                 # Update product stock
                 update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ? AND unit = ?'
-                self.cursor.execute(update_sql, (qty, sku, unit))
+                self.cursor.execute(update_sql, (stock_affected, sku, unit))
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -93,7 +83,7 @@ class TransactionRepository:
 
         return f'A{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
         
-    def create_pending_transaction(self, pending_transaction: PendingTransactionModel, pending_detail_transactions: List[PendingDetailTransactionModel]):
+    def create_pending_transaction(self, pending_transaction: PendingTransactionModel, detail_transactions: List[DetailTransactionModel]):
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -105,13 +95,9 @@ class TransactionRepository:
             sql = '''INSERT INTO pending_transactions (transaction_id, total_amount, discount_transaction_id, discount_amount, created_at, payment_remarks) 
                     VALUES (?, ?, ?, ?, ?, ?)'''
             
-            transaction_id = pending_transaction.transaction_id
-            total_amount = pending_transaction.total_amount
-            discount_transaction_id = pending_transaction.discount_transaction_id
-            discount_amount = pending_transaction.discount_amount
-            payment_remarks = pending_transaction.payment_remarks
-
-            self.cursor.execute(sql, (transaction_id, total_amount, discount_transaction_id, discount_amount, current_time, payment_remarks))
+            self.cursor.execute(sql, (pending_transaction.transaction_id,  pending_transaction.total_amount, 
+                                      pending_transaction.discount_transaction_id, pending_transaction.discount_amount, 
+                                      current_time, pending_transaction.payment_remarks))
             
             # Insert all detail transactions
             sql = '''INSERT INTO pending_detail_transactions 
@@ -120,24 +106,16 @@ class TransactionRepository:
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
                 
 
-            for detail in pending_detail_transactions:
-                transaction_id = detail.transaction_id
-                sku = detail.sku
-                unit = detail.unit
-                unit_value = detail.unit_value
-                qty = detail.qty
-                price = detail.price
-                discount_rp = detail.discount
-                subtotal = detail.subtotal
-                
+            for detail in detail_transactions:
                 # Insert detail transaction
-                self.cursor.execute(sql, (transaction_id, sku, unit, unit_value, 
-                                          qty, price, discount_rp, subtotal))
+                self.cursor.execute(sql, (detail.transaction_id,  detail.sku, detail.unit, 
+                                          detail.unit_value, detail.qty, detail.price, detail.discount, 
+                                          detail.subtotal))
                 
 
             # If everything successful, commit the transaction
             self.db.commit()
-            
+
             return ResponseMessage.ok("Transaction pending successfully!")
 
         except Exception as e:
@@ -175,7 +153,7 @@ class TransactionRepository:
             pending_detail_transactions = []
             for r in results:
                 pending_detail_transactions.append(
-                    PendingDetailTransactionToTransactionModel(
+                    TransactionTableItemModel(
                         sku=r[0], product_name=r[1],
                         price=r[2],qty=r[3],
                         unit=r[4],unit_value=r[5],

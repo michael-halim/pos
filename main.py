@@ -41,9 +41,6 @@ class POS(QtWidgets.QMainWindow):
 
 
         # TODO: Add an input for user to input suppliers in their products
-        # TODO: Implement filter for detail pending transactions, add pending transaction to transaction
-        # TODO: Implement submit, edit and delete transaction
-        # TODO: Add "stock after transaction"
         # TODO: Change the UI button, or layout to form layout to make it beautiful
 
         

@@ -40,7 +40,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
                         VALUES 
-                        ('P202502010001', 'SKU001', 'pcs', 2, 10, 1000, 0, 20000),
+                        ('P202502010001', 'SKU001', 'pcs', 1, 10, 1000, 0, 20000),
                         ('P202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
                         ('P202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000),
                         ('P202502010002', 'SKU001', 'kodi', 20, 1, 1000, 0, 20000),
