@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1264</width>
+    <width>1346</width>
     <height>878</height>
    </rect>
   </property>
@@ -252,6 +252,44 @@
             <string>Transactions</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="transactions_list_button">
+           <property name="geometry">
+            <rect>
+             <x>290</x>
+             <y>90</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Transactions List</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="purchasing_button">
+           <property name="geometry">
+            <rect>
+             <x>530</x>
+             <y>90</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Purchasing</string>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -298,8 +336,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1264</width>
-     <height>21</height>
+     <width>1346</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

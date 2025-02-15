@@ -265,7 +265,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                 self.clear_wholesale_transactions_data()
                 
             except Exception as e:
-                QtWidgets.QMessageBox.critical(self, "Error", f"Failed to update transaction: {str(e)}")
+                POSMessageBox.error(self, title='Error', message=f"Failed to update transaction: {str(e)}")
 
 
     def delete_transaction(self):
@@ -365,6 +365,10 @@ class TransactionsWindow(QtWidgets.QWidget):
         detail_transactions_data: list[DetailTransactionModel] = self.get_detail_transactions()
         for detail in detail_transactions_data:
             detail.transaction_id = transaction_id
+
+        if len(detail_transactions_data) == 0:
+            POSMessageBox.error(self, title='Error', message="No transactions to submit")
+            return
 
         # Calculate total amount
         total_amount: int = self.calculate_total_transactions()

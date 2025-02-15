@@ -5,10 +5,10 @@ from products import ProductsWindow
 from categories import CategoriesWindow
 from suppliers import SuppliersWindow
 from transactions.transactions import TransactionsWindow
+from transactions_list.transactions_list import TransactionsListWindow
+from purchasing.purchasing import PurchasingWindow
 
 from connect_db import DatabaseConnection
-
-
 class POS(QtWidgets.QMainWindow):
 
     def __init__(self):
@@ -21,7 +21,8 @@ class POS(QtWidgets.QMainWindow):
         self.categories_dialog = CategoriesWindow()
         self.suppliers_dialog = SuppliersWindow()
         self.transactions_dialog = TransactionsWindow()
-
+        self.transactions_list_dialog = TransactionsListWindow()
+        self.purchasing_dialog = PurchasingWindow()
 
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -38,7 +39,8 @@ class POS(QtWidgets.QMainWindow):
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.showMaximized())
         self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.showMaximized())
         self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
-
+        self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
+        self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
 
         # TODO: Add an input for user to input suppliers in their products
         # TODO: Change the UI button, or layout to form layout to make it beautiful

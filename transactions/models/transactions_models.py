@@ -16,6 +16,7 @@ class ProductUnitDetailModel:
     unit_value: int
     price: int
 
+
 @dataclass
 class DetailTransactionModel:
     transaction_id: str
@@ -27,6 +28,7 @@ class DetailTransactionModel:
     discount: int
     subtotal: int
 
+
 @dataclass
 class TransactionModel:
     transaction_id: str
@@ -37,6 +39,7 @@ class TransactionModel:
     payment_remarks: str
     created_at: datetime
 
+
 @dataclass 
 class PendingTransactionModel:
     transaction_id: str
@@ -45,6 +48,7 @@ class PendingTransactionModel:
     discount_amount: int
     created_at: datetime
     payment_remarks: str
+
 
 @dataclass
 class TransactionTableItemModel:

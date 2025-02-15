@@ -5,6 +5,48 @@ class SeedData:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
+    def create_purchasing_history_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS purchasing_history (
+            purchasing_id VARCHAR(20) NOT NULL,
+            supplier_id INT NOT NULL,
+            invoice_date DATETIME NOT NULL,
+            invoice_number VARCHAR(20) NOT NULL,
+            invoice_expired_date DATETIME NOT NULL,
+            total_amount INT(10) NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, invoice_expired_date, total_amount, created_at) 
+                        VALUES 
+                        ('P202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 30000, CURRENT_TIMESTAMP);'''
+
+        self.cursor.execute(sql_insert)
+
+    def create_detail_purchasing_history_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS detail_purchasing_history (
+            purchasing_id VARCHAR(20) NOT NULL,
+            sku VARCHAR(20) NOT NULL,
+            unit VARCHAR(10) NOT NULL,
+            qty INT(10) NOT NULL,
+            price INT(10) NOT NULL,
+            discount_rp INT(10) NOT NULL DEFAULT 0,
+            discount_pct INT(10) NOT NULL DEFAULT 0,
+            sub_total INT(10) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+        
+        sql_insert = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, qty, price, discount_rp, discount_pct, sub_total) 
+                        VALUES 
+                        ('P202502010001', 'SKU001', 'pcs', 10, 1000, 0, 0, 10000),
+                        ('P202502010001', 'SKU002', 'pcs', 10, 1000, 0, 0, 10000),
+                        ('P202502010001', 'SKU003', 'pcs', 10, 1000, 0, 0, 10000);'''
+
+        self.cursor.execute(sql_insert)
+
+
     def create_detail_transactions_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS detail_transactions (
             transaction_id VARCHAR(20) NOT NULL,
@@ -68,7 +110,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, payment_rp, payment_change, created_at, payment_remarks) 
                         VALUES 
-                        ('AB202502010001', 100000, 'Cash', 100000, 0, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('J202502010001', 30000, 'Cash', 30000, 0, CURRENT_TIMESTAMP, 'Remarks One'),
                         ('AB202502010002', 200000, 'Transfer', 200000, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
                         ('AB202502010003', 300000, 'Transfer', 300000, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
 
@@ -194,6 +236,8 @@ class SeedData:
         self.cursor.execute('DROP TABLE IF EXISTS transactions')
         self.cursor.execute('DROP TABLE IF EXISTS pending_transactions')
         self.cursor.execute('DROP TABLE IF EXISTS suppliers')
+        self.cursor.execute('DROP TABLE IF EXISTS detail_purchasing_history')
+        self.cursor.execute('DROP TABLE IF EXISTS purchasing_history')
         self.cursor.execute('DROP TABLE IF EXISTS product_categories_detail')
         self.cursor.execute('DROP TABLE IF EXISTS units')
         self.cursor.execute('DROP TABLE IF EXISTS products')
@@ -204,6 +248,8 @@ class SeedData:
         self.drop_all_tables()
 
         self.create_suppliers_table()
+        self.create_purchasing_history_table()
+        self.create_detail_purchasing_history_table()
         self.create_products_table()
         self.create_detail_transactions_table()
         self.create_transactions_table()
