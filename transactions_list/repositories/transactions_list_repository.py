@@ -22,11 +22,8 @@ class TransactionRepository:
                                 AND (transaction_id LIKE ? OR payment_rp LIKE ? OR payment_method LIKE ? OR payment_remarks LIKE ?)'''
                 
                 search_text = f'%{search_text}%'
-                print('repo ', start_date, end_date, search_text)
                 transactions_result = self.cursor.execute(sql, (start_date, end_date, search_text, search_text, search_text, search_text))
             else:
-                print('else ')
-                print('repo ', start_date, end_date)
 
                 sql = '''SELECT created_at, transaction_id, payment_rp, payment_method, payment_remarks 
                             FROM transactions 

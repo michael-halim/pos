@@ -458,8 +458,10 @@ class TransactionsWindow(QtWidgets.QWidget):
             cache_key = f'{sku}_{product_result["data"].unit}'
             self.cached_qty[cache_key] = (1, product_result['data'].price)
 
+            # Set product unit details
             self.set_product_unit_details(sku)
 
+            # Set stock 
             stock = product_result['data'].stock
             self.ui.stock_transaction_input.setText(format_number(str(stock)))
             self.ui.stock_after_transaction_input.setText(format_number(str(stock)))
@@ -504,7 +506,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             
 
             # Get total qty in transaction table for this sku and unit
-            total_qty_in_transactions = self.get_total_qty_in_transactions(sku, unit)
+            total_qty_in_transactions = self.get_total_qty_in_transactions(sku)
             
             # Calculate and display stock after transactions
             stock_after = initial_stock - total_qty_in_transactions
@@ -553,10 +555,9 @@ class TransactionsWindow(QtWidgets.QWidget):
     #==========
     def get_detail_transactions(self) -> list[DetailTransactionModel]:
         '''
-            Returns a tuple of (detail_transactions, total_amount)
+            Returns detail_transactions
             
             detail_transactions data is all the details from transactions table
-            total_amount is the total amount of the transactions
         '''
         detail_transactions: list[DetailTransactionModel] = []
         for row in range(self.transactions_table.rowCount()):
@@ -585,7 +586,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         return detail_transactions
 
 
-    def get_total_qty_in_transactions(self, sku: str, unit: str) -> int:
+    def get_total_qty_in_transactions(self, sku: str) -> int:
         total_qty = 0
         for row in range(self.transactions_table.rowCount()):
             if self.transactions_table.item(row, 0).text() == sku:
@@ -707,7 +708,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.calculate_stock_after_transactions(sku, unit)
             return
         
-        total_qty_in_transactions = self.get_total_qty_in_transactions(sku, unit)
+        total_qty_in_transactions = self.get_total_qty_in_transactions(sku)
 
         qty_after_transaction = int(stock) - (int(qty) * int(unit_value)) - total_qty_in_transactions
         self.ui.stock_after_transaction_input.setText(format_number(str(qty_after_transaction)))

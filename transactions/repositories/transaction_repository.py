@@ -52,8 +52,8 @@ class TransactionRepository:
                                           qty, detail.price,  detail.discount, detail.subtotal))
                 
                 # Update product stock
-                update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ? AND unit = ?'
-                self.cursor.execute(update_sql, (stock_affected, sku, unit))
+                update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
+                self.cursor.execute(update_sql, (stock_affected, sku))
 
             # If everything successful, commit the transaction
             self.db.commit()

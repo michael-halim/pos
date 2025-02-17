@@ -52,6 +52,9 @@
                     <pointsize>12</pointsize>
                    </font>
                   </property>
+                  <property name="calendarPopup">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -76,6 +79,9 @@
                    <font>
                     <pointsize>12</pointsize>
                    </font>
+                  </property>
+                  <property name="calendarPopup">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>

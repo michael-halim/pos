@@ -13,14 +13,15 @@ class SeedData:
             invoice_number VARCHAR(20) NOT NULL,
             invoice_expired_date DATETIME NOT NULL,
             total_amount INT(10) NOT NULL,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            purchasing_remarks TEXT DEFAULT ''
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, invoice_expired_date, total_amount, created_at) 
+        sql_insert = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, invoice_expired_date, total_amount, created_at, purchasing_remarks) 
                         VALUES 
-                        ('P202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 30000, CURRENT_TIMESTAMP);'''
+                        ('PO202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 30000, CURRENT_TIMESTAMP, 'Remarks Purchasing One');'''
 
         self.cursor.execute(sql_insert)
 
@@ -33,16 +34,16 @@ class SeedData:
             price INT(10) NOT NULL,
             discount_rp INT(10) NOT NULL DEFAULT 0,
             discount_pct INT(10) NOT NULL DEFAULT 0,
-            sub_total INT(10) NOT NULL
+            subtotal INT(10) NOT NULL
         );'''
 
         self.cursor.execute(sql)
         
-        sql_insert = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, qty, price, discount_rp, discount_pct, sub_total) 
+        sql_insert = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, qty, price, discount_rp, discount_pct, subtotal) 
                         VALUES 
-                        ('P202502010001', 'SKU001', 'pcs', 10, 1000, 0, 0, 10000),
-                        ('P202502010001', 'SKU002', 'pcs', 10, 1000, 0, 0, 10000),
-                        ('P202502010001', 'SKU003', 'pcs', 10, 1000, 0, 0, 10000);'''
+                        ('PO202502010001', 'SKU001', 'pcs', 10, 1000, 0, 0, 10000),
+                        ('PO202502010001', 'SKU002', 'pcs', 10, 1000, 0, 0, 10000),
+                        ('PO202502010001', 'SKU003', 'pcs', 10, 1000, 0, 0, 10000);'''
 
         self.cursor.execute(sql_insert)
 
@@ -173,26 +174,28 @@ class SeedData:
 
         sql_insert = '''INSERT INTO products (sku, product_name, cost_price, price, stock, remarks, unit, created_at, updated_at) 
                     VALUES 
-                    ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'pcs', CURRENT_TIMESTAMP, NULL),
-                    ('SKU002', 'Product Two', 2000, 2500, 30, 'Limited stock', 'pcs', CURRENT_TIMESTAMP, NULL),
-                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'pcs', CURRENT_TIMESTAMP, NULL); '''
+                    ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'PCS', CURRENT_TIMESTAMP, NULL),
+                    ('SKU002', 'Product Two', 2000, 2500, 30, 'Limited stock', 'PCS', CURRENT_TIMESTAMP, NULL),
+                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'PCS', CURRENT_TIMESTAMP, NULL); '''
         
         self.cursor.execute(sql_insert)
     
     def create_units_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS units (
             sku VARCHAR(20) NOT NULL,
+            barcode VARCHAR(20),
             unit VARCHAR(10) NOT NULL,
             unit_value INT(10) NOT NULL,
-            price INT(10) NOT NULL
+            price INT(10) NOT NULL,
+            UNIQUE (sku, unit)
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO units (sku, unit, unit_value, price) 
+        sql_insert = '''INSERT INTO units (sku, barcode, unit, unit_value, price) 
                         VALUES 
-                        ('SKU001', 'kodi', 20, 28000),
-                        ('SKU001', 'dus', 10, 20000); '''
+                        ('SKU001', 'barcode', 'KODI', 20, 28000),
+                        ('SKU001', 'barcode', 'DUS', 10, 20000); '''
         
         self.cursor.execute(sql_insert)
 

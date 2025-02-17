@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1364</width>
-    <height>855</height>
+    <width>1000</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Suppliers</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -30,7 +30,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="filter_categories_label">
+             <widget class="QLabel" name="filter_suppliers_dialog_label">
               <property name="maximumSize">
                <size>
                 <width>16777215</width>
@@ -51,7 +51,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="supplier_filter_input">
+             <widget class="QLineEdit" name="filter_suppliers_dialog_input">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -200,7 +200,24 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="add_supplier_button">
+           <widget class="QPushButton" name="close_suppliers_dialog_button">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Close / Tutup</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="add_supplier_dialog_button">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Add / Tambah</string>
             </property>
