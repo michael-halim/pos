@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional
 from datetime import datetime
+
+
 @dataclass
 class PurchasingTableItemModel:
     sku: str
@@ -37,6 +38,7 @@ class DetailPurchasingModel:
     discount_rp: int
     discount_pct: int
     subtotal: int
+
 
 @dataclass
 class ProductModel:

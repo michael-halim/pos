@@ -353,6 +353,9 @@
             </item>
             <item row="5" column="0">
              <widget class="QPushButton" name="clear_data_price_unit_button">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>110</width>
@@ -371,6 +374,9 @@
             </item>
             <item row="5" column="1">
              <widget class="QPushButton" name="submit_price_unit_button">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>

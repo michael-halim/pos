@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1297</width>
+    <width>1400</width>
     <height>610</height>
    </rect>
   </property>
@@ -146,52 +146,6 @@
                </layout>
               </item>
               <item row="3" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                 <widget class="QLabel" name="category_master_stock_label">
-                  <property name="minimumSize">
-                   <size>
-                    <width>150</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Categories : </string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="category_master_stock_input">
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="find_category_master_stock_button">
-                  <property name="font">
-                   <font>
-                    <pointsize>12</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Find</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item row="4" column="1">
                <spacer name="verticalSpacer_3">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
@@ -383,6 +337,52 @@
                 </property>
                </spacer>
               </item>
+              <item row="10" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_9">
+                <item>
+                 <widget class="QLabel" name="stock_master_stock_label">
+                  <property name="minimumSize">
+                   <size>
+                    <width>150</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Stock : </string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QSpinBox" name="stock_master_stock_input">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="buttonSymbols">
+                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  </property>
+                  <property name="maximum">
+                   <number>999999999</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
               <item row="11" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_10">
                 <item>
@@ -457,10 +457,10 @@
                 </item>
                </layout>
               </item>
-              <item row="10" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item row="13" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
                 <item>
-                 <widget class="QLabel" name="stock_master_stock_label">
+                 <widget class="QLabel" name="remarks_master_stock_label">
                   <property name="minimumSize">
                    <size>
                     <width>150</width>
@@ -473,7 +473,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Stock : </string>
+                   <string>Remarks : </string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -481,23 +481,75 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QSpinBox" name="stock_master_stock_input">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+                 <widget class="QTextEdit" name="remarks_master_stock_input"/>
+                </item>
+               </layout>
+              </item>
+              <item row="4" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QLabel" name="category_master_stock_label">
+                  <property name="minimumSize">
+                   <size>
+                    <width>150</width>
+                    <height>0</height>
+                   </size>
                   </property>
                   <property name="font">
                    <font>
                     <pointsize>12</pointsize>
                    </font>
                   </property>
-                  <property name="buttonSymbols">
-                   <enum>QAbstractSpinBox::NoButtons</enum>
+                  <property name="text">
+                   <string>Category : </string>
                   </property>
-                  <property name="maximum">
-                   <number>999999999</number>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="category_master_stock_input">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="find_category_master_stock_button">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Find</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="category_name_master_stock_label">
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Category Name : </string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="category_name_master_stock_input">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                   </font>
                   </property>
                  </widget>
                 </item>

@@ -21,7 +21,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, invoice_expired_date, total_amount, created_at, purchasing_remarks) 
                         VALUES 
-                        ('PO202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 30000, CURRENT_TIMESTAMP, 'Remarks Purchasing One');'''
+                        ('PO202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 70000, CURRENT_TIMESTAMP, 'Remarks Purchasing One');'''
 
         self.cursor.execute(sql_insert)
 
@@ -41,9 +41,9 @@ class SeedData:
         
         sql_insert = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, qty, price, discount_rp, discount_pct, subtotal) 
                         VALUES 
-                        ('PO202502010001', 'SKU001', 'pcs', 10, 1000, 0, 0, 10000),
-                        ('PO202502010001', 'SKU002', 'pcs', 10, 1000, 0, 0, 10000),
-                        ('PO202502010001', 'SKU003', 'pcs', 10, 1000, 0, 0, 10000);'''
+                        ('PO202502010001', 'SKU001', 'PCS', 50, 1000, 0, 0, 50000),
+                        ('PO202502010001', 'SKU002', 'PCS', 10, 1000, 0, 0, 10000),
+                        ('PO202502010001', 'SKU003', 'PCS', 10, 1000, 0, 0, 10000);'''
 
         self.cursor.execute(sql_insert)
 
@@ -63,9 +63,9 @@ class SeedData:
 
         sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
                         VALUES 
-                        ('J202502010001', 'SKU001', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('J202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('J202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000);'''
+                        ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 10000),
+                        ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 10000),
+                        ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 10000);'''
         
         self.cursor.execute(sql_insert)
         
@@ -83,11 +83,11 @@ class SeedData:
 
         sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
                         VALUES 
-                        ('P202502010001', 'SKU001', 'pcs', 1, 10, 1000, 0, 20000),
-                        ('P202502010001', 'SKU002', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('P202502010001', 'SKU003', 'pcs', 1, 10, 1000, 0, 10000),
-                        ('P202502010002', 'SKU001', 'kodi', 20, 1, 1000, 0, 20000),
-                        ('P202502010002', 'SKU001', 'dus', 10, 1, 1000, 0, 10000);'''
+                        ('P202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 20000),
+                        ('P202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 10000),
+                        ('P202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 10000),
+                        ('P202502010002', 'SKU001', 'KODI', 20, 1, 1000, 0, 20000),
+                        ('P202502010002', 'SKU001', 'DUS', 10, 1, 1000, 0, 10000);'''
 
         
         self.cursor.execute(sql_insert)
@@ -161,22 +161,27 @@ class SeedData:
         sql = '''CREATE TABLE IF NOT EXISTS products (
             sku VARCHAR(20) NOT NULL UNIQUE,
             product_name VARCHAR(120) NOT NULL,
+            barcode VARCHAR(20),
+            category_id INT(10),
+            supplier_id INT(10),
             cost_price INT(10) NULL,
             price INT(10) NOT NULL,
             remarks TEXT NOT NULL DEFAULT '',
             stock INT(10) NOT NULL DEFAULT 0,
             unit VARCHAR(10) NOT NULL DEFAULT '',
+            last_price INT(10) NOT NULL DEFAULT 0,
+            average_price INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NULL DEFAULT NULL
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO products (sku, product_name, cost_price, price, stock, remarks, unit, created_at, updated_at) 
+        sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
                     VALUES 
-                    ('SKU001', 'Product One', 1000, 1500, 50, 'Best seller', 'PCS', CURRENT_TIMESTAMP, NULL),
-                    ('SKU002', 'Product Two', 2000, 2500, 30, 'Limited stock', 'PCS', CURRENT_TIMESTAMP, NULL),
-                    ('SKU003', 'Product Three', NULL, 3000, 20, 'New arrival', 'PCS', CURRENT_TIMESTAMP, NULL); '''
+                    ('SKU001', 'Product One', 'barcode', 1, 1, 1000, 1500, 'Best seller', 50, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
+                    ('SKU002', 'Product Two', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 30, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
+                    ('SKU003', 'Product Three', 'barcode', 3, 3, 3000, 20, 'New arrival', 20, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
         
         self.cursor.execute(sql_insert)
     

@@ -1,6 +1,6 @@
-from typing import List, Optional
-from ..purchasing_repositories.purchasing_repositories import PurchasingRepository
-from ..purchasing_models.purchasing_models import PurchasingModel, DetailPurchasingModel, PurchasingHistoryTableItemModel
+from typing import List
+from ..repositories.purchasing_repositories import PurchasingRepository
+from ..models.purchasing_models import PurchasingModel, DetailPurchasingModel
 
 from response.response_message import ResponseMessage
 class PurchasingService:

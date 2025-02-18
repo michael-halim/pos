@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import List
 from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
 
-from ..purchasing_models.purchasing_models import ProductModel, ProductUnitsModel, PurchasingModel, DetailPurchasingModel, PurchasingHistoryTableItemModel
-from dialogs.suppliers_dialog.suppliers_dialog_models.suppliers_dialog_models import SupplierModel
+from ..models.purchasing_models import ProductModel, ProductUnitsModel, PurchasingModel, DetailPurchasingModel, PurchasingHistoryTableItemModel
+from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
 
 from response.response_message import ResponseMessage
 
@@ -11,6 +11,7 @@ class PurchasingRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
+
         
     def get_product_by_sku(self, sku: str):
         try:
@@ -32,6 +33,7 @@ class PurchasingRepository:
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
         
+
     def get_product_unit_details(self, sku: str) -> list[ProductUnitsModel]:
         try:
             sql = '''SELECT u.unit, u.unit_value FROM units u WHERE u.sku = ?'''
@@ -57,6 +59,7 @@ class PurchasingRepository:
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 
+
     def create_purchasing_id(self) -> str:
         # Get Today's Date
         today = datetime.now().strftime('%Y-%m-%d')
@@ -71,6 +74,7 @@ class PurchasingRepository:
 
         return f'PO{datetime.now().strftime("%Y%m%d")}{purchasing_count_today:04d}'
     
+
     def submit_purchasing(self, purchasing: PurchasingModel, detail_purchasing: List[DetailPurchasingModel]) -> ResponseMessage:
         try:
             # Start transaction
@@ -104,9 +108,14 @@ class PurchasingRepository:
                 self.cursor.execute(sql, (detail.purchasing_id, sku, unit, qty, detail.price,  
                                           detail.discount_rp, detail.discount_pct, detail.subtotal))
                 
-                # Update product stock
-                update_sql = 'UPDATE products SET stock = stock + ? WHERE sku = ?'
-                self.cursor.execute(update_sql, (stock_affected, sku))
+                # Update product stock, average price, and last price
+                # Average Price = ((Average Price * Old Stock) + (New Price * New Qty)) / (Old Stock + New Qty)
+                update_sql = '''UPDATE products 
+                                SET stock = stock + ?, 
+                                    last_price = ?, 
+                                    average_price = ((average_price * stock) + ( ? * ? )) / (stock + ?) 
+                                WHERE sku = ?'''
+                self.cursor.execute(update_sql, (stock_affected, detail.price, detail.price, stock_affected, stock_affected, sku))
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -160,7 +169,8 @@ class PurchasingRepository:
                     FROM detail_purchasing_history dph 
                     JOIN purchasing_history ph on ph.purchasing_id = dph.purchasing_id
                     LEFT JOIN suppliers s on s.supplier_id = ph.supplier_id
-                    WHERE dph.sku = ?'''
+                    WHERE dph.sku = ?
+                    ORDER BY ph.created_at DESC'''
             
             self.cursor.execute(sql, (sku,))
 
@@ -173,7 +183,7 @@ class PurchasingRepository:
                                                     qty=ph[2], 
                                                     unit=ph[3], 
                                                     price=ph[4], 
-                                                subtotal=ph[5]) 
+                                                    subtotal=ph[5]) 
                     for ph in purchasing_history_results
                 ]
 
@@ -189,4 +199,3 @@ class PurchasingRepository:
         
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
-

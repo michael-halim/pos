@@ -1,9 +1,7 @@
-from typing import List, Optional
-from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
 
 from response.response_message import ResponseMessage
-from dialogs.suppliers_dialog.suppliers_dialog_models.suppliers_dialog_models import SupplierModel
+from ..models.suppliers_dialog_models import SupplierModel
 
 class SuppliersDialogRepository:
     def __init__(self):

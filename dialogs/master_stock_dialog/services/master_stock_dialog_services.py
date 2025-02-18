@@ -13,3 +13,10 @@ class MasterStockDialogService:
     def get_supplier_by_id(self, supplier_id: str):
         return self.repository.get_supplier_by_id(supplier_id)
 
+
+    def get_purchasing_history_by_sku(self, sku: str):
+        return self.repository.get_purchasing_history_by_sku(sku)
+
+
+    def get_product_by_sku(self, sku: str):
+        return self.repository.get_product_by_sku(sku)

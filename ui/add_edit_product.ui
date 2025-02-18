@@ -83,7 +83,7 @@
 
 QLineEdit:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -132,12 +132,12 @@ QLineEdit:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QLineEdit:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -186,12 +186,12 @@ QLineEdit:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QSpinBox:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -252,12 +252,12 @@ QSpinBox:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QSpinBox:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -312,12 +312,12 @@ QSpinBox:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QSpinBox:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -369,12 +369,12 @@ QSpinBox:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QLineEdit:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -423,12 +423,12 @@ QLineEdit:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QSpinBox:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -474,12 +474,12 @@ QSpinBox:focus {
     outline: none;                  /* Remove default outline */
     color: #333;                    /* Text color */
     background-color: #fff;       /* Light gray background */
-    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    
 }
 
 QTextEdit:focus {
     border: 1px solid #93c5fd;       /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);  /* Soft blue glow */
+    
     background-color: #ffffff;       /* White background when focused */
 }</string>
           </property>
@@ -525,8 +525,8 @@ QTextEdit:focus {
     border: none;                     /* Remove default border */
     border-radius: 6px;               /* Rounded corners */
     padding: 10px 20px;               /* Padding inside button */
-    cursor: pointer;                  /* Pointer on hover */
-    transition: all 0.3s ease-in-out;  /* Smooth transition */
+    
+    
     text-align: center;                /* Center text */
     outline: none;                     /* Remove default outline */
     margin-right: 10px;                /* Space between buttons */
@@ -553,8 +553,8 @@ QPushButton:hover {
     border: none;                     /* Remove default border */
     border-radius: 6px;               /* Rounded corners */
     padding: 10px 20px;               /* Padding inside button */
-    cursor: pointer;                  /* Pointer on hover */
-    transition: all 0.3s ease-in-out;  /* Smooth transition */
+    
+    
     text-align: center;                /* Center text */
     outline: none;                     /* Remove default outline */
     margin-right: 10px;                /* Space between buttons */

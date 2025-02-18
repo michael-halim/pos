@@ -5,16 +5,16 @@ def create_module_structure(module_name: str):
     # Base directory structure
     directories = [
         f"{module_name}",
-        f"{module_name}/{module_name}_models",
-        f"{module_name}/{module_name}_repositories",
-        f"{module_name}/{module_name}_services",
+        f"{module_name}/models",
+        f"{module_name}/repositories",
+        f"{module_name}/services",
     ]
     
     # Files to create
     files = [
-        f"{module_name}/{module_name}_models/{module_name}_models.py",
-        f"{module_name}/{module_name}_repositories/{module_name}_repositories.py",
-        f"{module_name}/{module_name}_services/{module_name}_services.py",
+        f"{module_name}/models/{module_name}_models.py",
+        f"{module_name}/repositories/{module_name}_repositories.py",
+        f"{module_name}/services/{module_name}_services.py",
         f"{module_name}/{module_name}.py",
     ]
     
@@ -46,32 +46,22 @@ class {module_name.capitalize()}Model:
 '''
                 elif "repositories" in file_path:
                     content = f'''from typing import List, Optional
-from ..{module_name}_models.{module_name}_models import {module_name.capitalize()}Model
+from datetime import datetime, timedelta
+from connect_db import DatabaseConnection
 
 class {module_name.capitalize()}Repository:
     def __init__(self):
-        pass
+        self.db = DatabaseConnection().get_connection()
+        self.cursor = self.db.cursor()
         
-    def get_all(self) -> List[{module_name.capitalize()}Model]:
-        pass
-        
-    def get_by_id(self, id: int) -> Optional[{module_name.capitalize()}Model]:
-        pass
 '''
                 elif "services" in file_path:
                     content = f'''from typing import List, Optional
-from ..{module_name}_models.{module_name}_models import {module_name.capitalize()}Model
-from ..{module_name}_repositories.{module_name}_repositories import {module_name.capitalize()}Repository
+from ..repositories.{module_name}_repositories import {module_name.capitalize()}Repository
 
 class {module_name.capitalize()}Service:
     def __init__(self):
         self.repository = {module_name.capitalize()}Repository()
-        
-    def get_all(self) -> List[{module_name.capitalize()}Model]:
-        return self.repository.get_all()
-        
-    def get_by_id(self, id: int) -> Optional[{module_name.capitalize()}Model]:
-        return self.repository.get_by_id(id)
 '''
                 else:
                     content = f'''from .{module_name}_services.{module_name}_services import {module_name.capitalize()}Service

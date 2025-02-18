@@ -1,5 +1,4 @@
-from PyQt6 import QtWidgets, uic, QtGui, QtCore
-from connect_db import DatabaseConnection
+from PyQt6 import QtWidgets, uic, QtCore
 
 from helper import format_number, add_prefix, remove_non_digit
 
@@ -7,9 +6,8 @@ from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 
-from dialogs.suppliers_dialog.suppliers_dialog_models.suppliers_dialog_models import SupplierModel
-from dialogs.suppliers_dialog.suppliers_dialog_services.suppliers_dialog_services import SuppliersDialogService
-
+from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
+from dialogs.suppliers_dialog.services.suppliers_dialog_services import SuppliersDialogService
 
 class SuppliersDialogWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -78,9 +76,6 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
         # Temporarily disable sorting
         self.suppliers_table.setSortingEnabled(False)
         
-        # Clear the table
-        self.suppliers_table.setRowCount(0)
-
         # Get search text if any    
         search_text: str = self.ui.filter_suppliers_dialog_input.text().strip()
 
@@ -94,6 +89,9 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
         self.suppliers_table.setSortingEnabled(True)
 
     def set_suppliers_table_data(self, data: list[SupplierModel]):
+        # Clear the table
+        self.suppliers_table.setRowCount(0)
+
         for supplier in data:
             current_row = self.suppliers_table.rowCount()
             self.suppliers_table.insertRow(current_row)
