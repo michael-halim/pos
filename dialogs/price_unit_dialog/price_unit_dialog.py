@@ -193,6 +193,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=16))
                 self.price_unit_table.setItem(current_row, col, item)
 
+
     def set_price_unit_form_by_sku(self, sku: str):
         self.clear_price_unit_form()
 
@@ -222,11 +223,13 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
             # Set Price Unit Table
             self.set_price_unit_table(price_unit_table_items)
 
+
     def set_price_unit_form_data(self, data: PriceUnitTableItemModel):
         self.ui.unit_price_unit_input.setText(data.unit)
         self.ui.barcode_price_unit_input.setText(data.barcode)
         self.ui.unit_value_price_unit_input.setValue(int(data.unit_value))
         self.ui.price_price_unit_input.setValue(int(remove_non_digit(data.price)))
+
 
     def set_enabled_form(self, enabled: bool = True):
         self.ui.unit_price_unit_input.setEnabled(enabled)
@@ -254,6 +257,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
             unit_value=unit_value,
             price=price
         )
+
 
     def get_selected_price_unit(self) -> PriceUnitTableItemModel | None:
         selected_row = self.price_unit_table.selectedItems()

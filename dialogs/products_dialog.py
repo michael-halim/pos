@@ -51,6 +51,7 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_products_in_transactions_data()
 
+
     def show(self):
         """Override show to ensure data is refreshed"""
         super().show()
@@ -59,6 +60,7 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_products_in_transactions_data()
 
+
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
@@ -66,6 +68,7 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         self.current_product_in_transaction = (None, None)
         # Refresh the data
         self.show_products_in_transactions_data()
+
 
     def show_products_in_transactions_data(self):
         # Temporarily disable sorting

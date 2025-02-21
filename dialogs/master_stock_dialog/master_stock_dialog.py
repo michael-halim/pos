@@ -36,7 +36,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.find_supplier_master_stock_button.clicked.connect(lambda: self.suppliers_dialog.show())
 
         
-        self.ui.price_unit_master_stock_button.clicked.connect(lambda: self.price_unit_dialog.show())
+        self.ui.price_unit_master_stock_button.clicked.connect(self.show_price_unit_dialog)
         # self.ui.discount_master_stock_button.clicked.connect(self.discount_master_stock_button)
         # self.ui.delete_master_stock_button.clicked.connect(self.delete_master_stock_button)
         # self.ui.submit_master_stock_button.clicked.connect(self.submit_master_stock_button)
@@ -63,14 +63,14 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         pass
     
 
-    def show_purchasing_history(self):
-        sku = self.ui.sku_purchasing_input.text().strip()
+    def show_price_unit_dialog(self):
+        sku = self.ui.sku_master_stock_input.text().strip()
         if not sku:
             return
         
-        purchasing_history_result = self.master_stock_dialog_service.get_purchasing_history_by_sku(sku)
-        if purchasing_history_result.success and purchasing_history_result.data:
-            self.set_purchasing_history_table_data(purchasing_history_result.data)
+        self.price_unit_dialog.set_price_unit_form_by_sku(sku)
+        self.price_unit_dialog.show()
+
 
 
     def set_purchasing_history_table_data(self, data: list[PurchasingHistoryTableItemModel]):
@@ -87,6 +87,8 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(format_number(purchasing_history.qty)),
                 QtWidgets.QTableWidgetItem(purchasing_history.unit),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.price))),
+                QtWidgets.QTableWidgetItem(format_number(purchasing_history.discount_pct)),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.discount_rp))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.subtotal)))
             ]
             

@@ -104,6 +104,8 @@ class PurchasingRepository:
                 unit_value = detail.unit_value
                 unit = detail.unit
                 stock_affected: int = int(qty) * int(unit_value)
+                net_price: int =  int(detail.subtotal) / int(stock_affected)
+                
                 # Insert detail purchasing
                 self.cursor.execute(sql, (detail.purchasing_id, sku, unit, qty, detail.price,  
                                           detail.discount_rp, detail.discount_pct, detail.subtotal))
@@ -115,7 +117,7 @@ class PurchasingRepository:
                                     last_price = ?, 
                                     average_price = ((average_price * stock) + ( ? * ? )) / (stock + ?) 
                                 WHERE sku = ?'''
-                self.cursor.execute(update_sql, (stock_affected, detail.price, detail.price, stock_affected, stock_affected, sku))
+                self.cursor.execute(update_sql, (stock_affected, net_price, net_price, stock_affected, stock_affected, sku))
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -165,7 +167,8 @@ class PurchasingRepository:
 
     def get_purchasing_history_by_sku(self, sku: str) -> list[PurchasingHistoryTableItemModel]:
         try:
-            sql = '''SELECT ph.created_at, s.supplier_name, dph.qty, dph.unit, dph.price, dph.subtotal
+            sql = '''SELECT ph.created_at, s.supplier_name, dph.qty, dph.unit, dph.price,
+                            dph.discount_rp, dph.discount_pct, dph.subtotal
                     FROM detail_purchasing_history dph 
                     JOIN purchasing_history ph on ph.purchasing_id = dph.purchasing_id
                     LEFT JOIN suppliers s on s.supplier_id = ph.supplier_id
@@ -183,7 +186,9 @@ class PurchasingRepository:
                                                     qty=ph[2], 
                                                     unit=ph[3], 
                                                     price=ph[4], 
-                                                    subtotal=ph[5]) 
+                                                    discount_rp=ph[5], 
+                                                    discount_pct=ph[6], 
+                                                    subtotal=ph[7]) 
                     for ph in purchasing_history_results
                 ]
 

@@ -1,5 +1,4 @@
 from PyQt6 import QtWidgets, uic
-from PyQt6.QtWidgets import QDateEdit
 from datetime import datetime
 
 from helper import format_number, add_prefix, remove_non_digit
@@ -77,6 +76,14 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Connect return pressed signal
         self.ui.sku_purchasing_input.returnPressed.connect(self.on_handle_sku_enter)
 
+        # Connect discount radio button to update discount rp input
+        self.ui.discount_pct_purchasing_radio_button.toggled.connect(self.on_discount_pct_purchasing_radio_button_toggled)
+
+        # Listen to discount pct input, price input, and qty input to update discount rp input
+        self.ui.discount_pct_purchasing_input.textChanged.connect(self.on_calculate_discount_rp)
+        self.ui.price_purchasing_input.textChanged.connect(self.on_calculate_discount_rp)
+        self.ui.qty_purchasing_input.textChanged.connect(self.on_calculate_discount_rp)
+
         # Set date input
         self.ui.purchasing_date_input.setDate(datetime.now())
         self.ui.invoice_date_purchasing_input.setDate(datetime.now())
@@ -107,58 +114,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.purchasing_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
-    def show_master_stock_dialog(self):
-        sku = self.ui.sku_purchasing_input.text().strip()
-        if not sku:
-            return
-        
-        self.master_stock_dialog.set_master_stock_form_by_sku(sku)
-        self.master_stock_dialog.show()
-
-
-    def show_purchasing_history(self):
-        sku = self.ui.sku_purchasing_input.text().strip()
-        if not sku:
-            return
-        
-        purchasing_history_result = self.purchasing_service.get_purchasing_history_by_sku(sku)
-        if purchasing_history_result.success and purchasing_history_result.data:
-            self.set_purchasing_history_table_data(purchasing_history_result.data)
-
-
-    def show_price_unit_dialog(self):
-        sku = self.ui.sku_purchasing_input.text().strip()
-        if not sku:
-            return
-        
-        self.price_unit_dialog.set_price_unit_form_by_sku(sku)
-        self.price_unit_dialog.show()
-
-
-    def clear_purchasing(self):
-        # Remove All Items from Purchasing Table
-        self.purchasing_detail_table.setRowCount(0)
-        self.ui.total_purchasing_input.setText(add_prefix('0'))
-        self.cached_purchasing_index = {}
-        self.cached_qty = {}
-        self.current_selected_sku = None
-        self.clear_data_purchasing()
-
-
-    def clear_data_purchasing(self):
-        self.ui.sku_purchasing_input.clear()
-        self.ui.product_name_purchasing_input.clear()
-        self.ui.price_purchasing_input.clear()
-        self.ui.stock_purchasing_input.clear()
-        self.ui.stock_after_purchasing_input.clear()
-        self.ui.qty_purchasing_input.clear()
-        self.ui.qty_purchasing_combobox.clear()
-        self.ui.discount_rp_purchasing_input.clear()
-        self.ui.discount_pct_purchasing_input.clear()
-        self.ui.discount_total_purchasing_input.clear()
-        self.ui.remarks_purchasing_input.clear()
-
-
     def master_stock_purchasing(self):
         pass
 
@@ -166,7 +121,6 @@ class PurchasingWindow(QtWidgets.QWidget):
     def add_purchasing(self):
         # Stop temporary sorting
         self.purchasing_detail_table.setSortingEnabled(False)
-
         try:
             sku: str = self.ui.sku_purchasing_input.text().strip()
             name: str = self.ui.product_name_purchasing_input.text().strip()
@@ -174,9 +128,9 @@ class PurchasingWindow(QtWidgets.QWidget):
             qty: str = remove_non_digit(self.ui.qty_purchasing_input.text().strip())
             unit: str = self.ui.qty_purchasing_combobox.currentText().strip()
             unit_value: str = self.cached_qty[f'{sku}_{unit}']
-            discount_rp: int = int(remove_non_digit(self.ui.discount_rp_purchasing_input.text())) if self.ui.discount_rp_purchasing_input.text() else 0
-            discount_pct: str = remove_non_digit(self.ui.discount_pct_purchasing_input.text()) if self.ui.discount_pct_purchasing_input.text() else '0'
-            amount: str = str(int(price) * int(qty)) - int(discount_rp)
+            discount_rp: int = remove_non_digit(self.ui.discount_rp_purchasing_input.text()) if self.ui.discount_rp_purchasing_input.text().strip() else 0
+            discount_pct: int = remove_non_digit(self.ui.discount_pct_purchasing_input.text()) if self.ui.discount_pct_purchasing_input.text().strip() else 0
+            amount = (int(price) * int(qty)) - int(discount_rp)
 
             items = [
                 PurchasingTableItemModel(
@@ -214,9 +168,8 @@ class PurchasingWindow(QtWidgets.QWidget):
         if selected_rows:
             self.current_selected_sku = selected_rows[0].row()
 
-            self.ui.add_purchasing_button.setText('Update')
-            
             # Disconnect existing connections and connect to update function
+            self.ui.add_purchasing_button.setText('Update')
             self.ui.add_purchasing_button.clicked.disconnect()
             self.ui.add_purchasing_button.clicked.connect(self.update_purchasing)
 
@@ -225,9 +178,10 @@ class PurchasingWindow(QtWidgets.QWidget):
             product_name = self.purchasing_detail_table.item(self.current_selected_sku, 1).text()
             qty = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 2).text())
             unit = self.purchasing_detail_table.item(self.current_selected_sku, 3).text()
-            price = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 4).text())
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 5).text())
-            discount_pct = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 6).text())
+            unit_value = self.purchasing_detail_table.item(self.current_selected_sku, 4).text()
+            price = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 5).text())
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 6).text())
+            discount_pct = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 7).text())
 
             # Put the data into the form
             self.ui.sku_purchasing_input.setText(sku)
@@ -235,6 +189,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.ui.price_purchasing_input.setText(price)
             self.ui.qty_purchasing_input.setText(qty)
             self.ui.qty_purchasing_combobox.setCurrentText(unit)
+            self.ui.unit_value_purchasing_input.setText(unit_value)
             self.ui.discount_rp_purchasing_input.setText(discount_rp)
             self.ui.discount_pct_purchasing_input.setText(discount_pct)
 
@@ -260,9 +215,10 @@ class PurchasingWindow(QtWidgets.QWidget):
                 
                 # Update the row in the table
                 self.purchasing_detail_table.item(self.current_selected_sku, 2).setText(format_number(qty))
+                self.purchasing_detail_table.item(self.current_selected_sku, 5).setText(add_prefix(format_number(str(price))))
                 self.purchasing_detail_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(discount_rp))))
                 self.purchasing_detail_table.item(self.current_selected_sku, 7).setText(add_prefix(format_number(str(discount_pct))))
-
+                self.purchasing_detail_table.item(self.current_selected_sku, 8).setText(add_prefix(format_number(str(subtotal))))
                 
                 # Update total amount
                 total_amount = self.calculate_total_purchasing()
@@ -338,10 +294,13 @@ class PurchasingWindow(QtWidgets.QWidget):
         for detail in detail_purchasing_data:
             detail.purchasing_id = purchasing_id
 
-        # Calculate total amount
+        # Calculate total amount and total discount
         total_amount: int = self.calculate_total_purchasing()
         total_discount: int = self.calculate_total_discount()
-        
+
+        # Calculate total amount after discount
+        total_amount -= total_discount
+
         # Get Purchasing Data
         invoice_number: str = self.ui.invoice_number_purchasing_input.text().strip()
         purhcasing_remarks: str = self.ui.remarks_purchasing_input.toPlainText().strip()
@@ -357,7 +316,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             invoice_expired_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             purchasing_remarks = purhcasing_remarks,
-            total_amount = total_amount,
+            total_amount = total_amount ,
         )
 
         # Submit purchasing
@@ -375,76 +334,8 @@ class PurchasingWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title='Error', message=result.message)
     
 
-    def calculate_total_purchasing(self) -> int:
-        total_amount = 0
-        for row in range(self.purchasing_detail_table.rowCount()):
-            subtotal = remove_non_digit(self.purchasing_detail_table.item(row, 8).text())
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
-            total_amount += int(subtotal) - int(discount_rp)
-        return total_amount
-    
-
-    def calculate_total_discount(self) -> int:
-        total_discount = 0
-        for row in range(self.purchasing_detail_table.rowCount()):
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
-            total_discount += int(discount_rp)
-        return total_discount
-
-
-    def handle_product_selected(self, product_data):
-        # Clear existing items
-        self.ui.qty_purchasing_combobox.clear()
-
-        # Set loading flag
-        self.is_loading_combo = True
-        sku = product_data['sku']
-
-        product_result = self.purchasing_service.get_product_by_sku(sku)
-        if product_result.success and product_result.data:
-            # Fill the form fields with selected product data
-            self.ui.sku_purchasing_input.setText(sku)
-            self.ui.product_name_purchasing_input.setText(product_result.data.product_name)
-            self.ui.qty_purchasing_combobox.addItem(product_result.data.unit)
-            self.ui.unit_value_purchasing_input.setText('1')
-
-            # Cache the unit value
-            cache_key = f'{sku}_{product_result.data.unit}'
-            self.cached_qty[cache_key] = 1
-
-            # Set product unit details
-            self.set_product_unit_details(sku)
-
-            # Set stock
-            stock = product_result.data.stock
-            self.ui.stock_purchasing_input.setText(format_number(str(stock)))
-            self.ui.stock_after_purchasing_input.setText(format_number(str(stock)))
-
-            # Set color based on stock level
-            if stock < 0:   
-                self.ui.stock_purchasing_input.setText(f'-{format_number(str(stock))}')
-                self.ui.stock_after_purchasing_input.setText(f'-{format_number(str(stock))}')
-                self.ui.stock_purchasing_input.setStyleSheet('color: red;')
-                self.ui.stock_after_purchasing_input.setStyleSheet('color: red;')
-
-            # Show purchasing history
-            self.show_purchasing_history()
-
-            # Enable price unit button
-            self.ui.price_unit_purchasing_button.setEnabled(True)
-
-        # Reset loading flag
-        self.is_loading_combo = False
-
-
-    def handle_supplier_selected(self, supplier_data):
-        supplier_id = supplier_data['supplier_id']
-        supplier_result = self.purchasing_service.get_supplier_by_id(supplier_id)
-        if supplier_result.success and supplier_result.data:
-            self.ui.supplier_in_purchasing_input.setText(supplier_id)
-            self.ui.supplier_name_in_purchasing_input.setText(supplier_result.data.supplier_name)
-
-
+    # Setters
+    # ===============
     def set_purchasing_history_table_data(self, data: list[PurchasingHistoryTableItemModel]):
         # Clear purchasing history table
         self.purchasing_history_table.setRowCount(0)
@@ -453,12 +344,18 @@ class PurchasingWindow(QtWidgets.QWidget):
             current_row = self.purchasing_history_table.rowCount()
             self.purchasing_history_table.insertRow(current_row)
 
+            # Convert created_at string to datetime and format
+            created_at_dt = datetime.strptime(purchasing_history.created_at, '%Y-%m-%d %H:%M:%S')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+
             table_items =  [ 
-                QtWidgets.QTableWidgetItem(purchasing_history.created_at),
+                QtWidgets.QTableWidgetItem(formatted_date),
                 QtWidgets.QTableWidgetItem(purchasing_history.supplier_name),
                 QtWidgets.QTableWidgetItem(format_number(purchasing_history.qty)),
                 QtWidgets.QTableWidgetItem(purchasing_history.unit),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.price))),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.discount_rp))),
+                QtWidgets.QTableWidgetItem(format_number(purchasing_history.discount_pct)),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.subtotal)))
             ]
             
@@ -491,7 +388,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                     QtWidgets.QTableWidgetItem(format_number(item.unit_value)),
                     QtWidgets.QTableWidgetItem(add_prefix(format_number(item.price))),
                     QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount_rp))),
-                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount_pct))),
+                    QtWidgets.QTableWidgetItem(format_number(item.discount_pct)),
                     QtWidgets.QTableWidgetItem(add_prefix(format_number(item.subtotal)))
                 ]
                 
@@ -528,37 +425,8 @@ class PurchasingWindow(QtWidgets.QWidget):
                 self.ui.qty_purchasing_combobox.addItem(pud.unit)
 
 
-    def calculate_stock_after_purchasing(self, sku: str, unit: str):
-        cache_key = f'{sku}_{unit}'
-        if cache_key in self.cached_qty:
-            # Get initial stock
-            product_result = self.purchasing_service.get_product_by_sku(sku)
-            initial_stock = 0
-            if product_result.success and product_result.data:
-                initial_stock = product_result.data.stock
-
-            self.ui.stock_purchasing_input.setText(format_number(str(initial_stock)))
-            self.ui.stock_purchasing_input.setStyleSheet('color: black;')
-
-            if initial_stock < 0:
-                self.ui.stock_purchasing_input.setText(f'-{format_number(str(abs(initial_stock)))}')
-                self.ui.stock_purchasing_input.setStyleSheet('color: red;')
-
-            # Get total qty in purchasing table for this sku and unit
-            total_qty_in_purchasing = self.get_total_qty_in_purchasing(sku)
-            
-            # Calculate and display stock after purchasing
-            stock_after = initial_stock - total_qty_in_purchasing
-            
-            # Set color based on stock level
-            self.ui.stock_after_purchasing_input.setText(format_number(str(stock_after)))
-            self.ui.stock_after_purchasing_input.setStyleSheet('color: black;')
-
-            if stock_after < 0:
-                self.ui.stock_after_purchasing_input.setText(f'-{format_number(str(abs(stock_after)))}')
-                self.ui.stock_after_purchasing_input.setStyleSheet('color: red;')
-
-
+    # Getters
+    # ===============
     def get_purchasing_history(self) -> list[PurchasingHistoryTableItemModel]:
         sku = self.ui.sku_purchasing_input.text().strip()
         if not sku:
@@ -624,6 +492,190 @@ class PurchasingWindow(QtWidgets.QWidget):
         return None
 
 
+    # Signal Handlers
+    # ===============
+    def handle_product_selected(self, product_data):
+        # Clear existing items
+        self.ui.qty_purchasing_combobox.clear()
+
+        # Set loading flag
+        self.is_loading_combo = True
+        sku = product_data['sku']
+
+        product_result = self.purchasing_service.get_product_by_sku(sku)
+        if product_result.success and product_result.data:
+            # Fill the form fields with selected product data
+            self.ui.sku_purchasing_input.setText(sku)
+            self.ui.product_name_purchasing_input.setText(product_result.data.product_name)
+            self.ui.qty_purchasing_combobox.addItem(product_result.data.unit)
+            self.ui.unit_value_purchasing_input.setText('1')
+
+            # Cache the unit value
+            cache_key = f'{sku}_{product_result.data.unit}'
+            self.cached_qty[cache_key] = 1
+
+            # Set product unit details
+            self.set_product_unit_details(sku)
+
+            # Set stock
+            stock = product_result.data.stock
+            self.ui.stock_purchasing_input.setText(format_number(str(stock)))
+            self.ui.stock_after_purchasing_input.setText(format_number(str(stock)))
+
+            # Set color based on stock level
+            if stock < 0:   
+                self.ui.stock_purchasing_input.setText(f'-{format_number(str(stock))}')
+                self.ui.stock_after_purchasing_input.setText(f'-{format_number(str(stock))}')
+                self.ui.stock_purchasing_input.setStyleSheet('color: red;')
+                self.ui.stock_after_purchasing_input.setStyleSheet('color: red;')
+
+            # Show purchasing history
+            self.show_purchasing_history()
+
+            # Enable price unit button
+            self.ui.price_unit_purchasing_button.setEnabled(True)
+
+        # Reset loading flag
+        self.is_loading_combo = False
+
+
+    def handle_supplier_selected(self, supplier_data):
+        supplier_id = supplier_data['supplier_id']
+        supplier_result = self.purchasing_service.get_supplier_by_id(supplier_id)
+        if supplier_result.success and supplier_result.data:
+            self.ui.supplier_in_purchasing_input.setText(supplier_id)
+            self.ui.supplier_name_in_purchasing_input.setText(supplier_result.data.supplier_name)
+
+
+    # Calculate
+    # ===============
+    def calculate_stock_after_purchasing(self, sku: str, unit: str):
+        cache_key = f'{sku}_{unit}'
+        if cache_key in self.cached_qty:
+            # Get initial stock
+            product_result = self.purchasing_service.get_product_by_sku(sku)
+            initial_stock = 0
+            if product_result.success and product_result.data:
+                initial_stock = product_result.data.stock
+
+            self.ui.stock_purchasing_input.setText(format_number(str(initial_stock)))
+            self.ui.stock_purchasing_input.setStyleSheet('color: black;')
+
+            if initial_stock < 0:
+                self.ui.stock_purchasing_input.setText(f'-{format_number(str(abs(initial_stock)))}')
+                self.ui.stock_purchasing_input.setStyleSheet('color: red;')
+
+            # Get total qty in purchasing table for this sku and unit
+            total_qty_in_purchasing = self.get_total_qty_in_purchasing(sku)
+            
+            # Calculate and display stock after purchasing
+            stock_after = initial_stock - total_qty_in_purchasing
+            
+            # Set color based on stock level
+            self.ui.stock_after_purchasing_input.setText(format_number(str(stock_after)))
+            self.ui.stock_after_purchasing_input.setStyleSheet('color: black;')
+
+            if stock_after < 0:
+                self.ui.stock_after_purchasing_input.setText(f'-{format_number(str(abs(stock_after)))}')
+                self.ui.stock_after_purchasing_input.setStyleSheet('color: red;')
+
+
+    def calculate_total_purchasing(self) -> int:
+        total_amount = 0
+        for row in range(self.purchasing_detail_table.rowCount()):
+            qty = remove_non_digit(self.purchasing_detail_table.item(row, 2).text())
+            price = remove_non_digit(self.purchasing_detail_table.item(row, 5).text())
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
+            total_amount += (int(price) * int(qty)) - int(discount_rp)
+
+        return total_amount
+    
+
+    def calculate_total_discount(self) -> int:
+        total_discount = 0
+        for row in range(self.purchasing_detail_table.rowCount()):
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
+            total_discount += int(discount_rp)
+        return total_discount
+
+
+    # Show Dialogs
+    # ===============
+    def show_master_stock_dialog(self):
+        sku = self.ui.sku_purchasing_input.text().strip()
+        if not sku:
+            return
+        
+        self.master_stock_dialog.set_master_stock_form_by_sku(sku)
+        self.master_stock_dialog.show()
+
+
+    def show_purchasing_history(self):
+        sku = self.ui.sku_purchasing_input.text().strip()
+        if not sku:
+            return
+        
+        purchasing_history_result = self.purchasing_service.get_purchasing_history_by_sku(sku)
+        if purchasing_history_result.success and purchasing_history_result.data:
+            self.set_purchasing_history_table_data(purchasing_history_result.data)
+
+
+    def show_price_unit_dialog(self):
+        sku = self.ui.sku_purchasing_input.text().strip()
+        if not sku:
+            return
+        
+        self.price_unit_dialog.set_price_unit_form_by_sku(sku)
+        self.price_unit_dialog.show()
+
+
+    # Clears
+    # ===============
+    def clear_purchasing(self):
+        # Remove All Items from Purchasing Table
+        self.purchasing_detail_table.setRowCount(0)
+        self.ui.discount_total_purchasing_input.setText(add_prefix('0'))
+        self.ui.total_purchasing_input.setText(add_prefix('0'))
+        self.cached_purchasing_index = {}
+        self.cached_qty = {}
+        self.current_selected_sku = None
+        self.clear_data_purchasing()
+
+
+    def clear_data_purchasing(self):
+        self.ui.sku_purchasing_input.clear()
+        self.ui.product_name_purchasing_input.clear()
+        self.ui.price_purchasing_input.clear()
+        self.ui.stock_purchasing_input.clear()
+        self.ui.stock_after_purchasing_input.clear()
+        self.ui.qty_purchasing_input.clear()
+        self.ui.qty_purchasing_combobox.clear()
+        self.ui.discount_rp_purchasing_input.clear()
+        self.ui.discount_pct_purchasing_input.clear()
+        self.ui.remarks_purchasing_input.clear()
+        self.ui.unit_value_purchasing_input.clear()
+
+
+    # Event Listeners
+    # ===============
+    def on_handle_sku_enter(self):
+        sku = self.ui.sku_purchasing_input.text().strip().upper()
+        if not sku:
+            self.clear_data_purchasing()
+            return
+
+        # Try to find exact SKU match
+        result = self.purchasing_service.get_product_by_sku(sku)
+        if result.success and result.data:
+            # Product found - fill the form
+            self.handle_product_selected({'sku' : sku})
+            
+        else:
+            # Product not found - show dialog with filter
+            self.products_dialog.set_filter(sku)
+            self.products_dialog.show()
+
+
     def on_qty_purchasing_input_changed(self):
         sku = self.ui.sku_purchasing_input.text().strip()
         unit = self.ui.qty_purchasing_combobox.currentText()
@@ -666,24 +718,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.on_qty_purchasing_input_changed()
 
 
-    def on_handle_sku_enter(self):
-        sku = self.ui.sku_purchasing_input.text().strip().upper()
-        if not sku:
-            self.clear_data_purchasing()
-            return
-
-        # Try to find exact SKU match
-        result = self.purchasing_service.get_product_by_sku(sku)
-        if result.success and result.data:
-            # Product found - fill the form
-            self.handle_product_selected({'sku' : sku})
-            
-        else:
-            # Product not found - show dialog with filter
-            self.products_dialog.set_filter(sku)
-            self.products_dialog.show()
-
-
     def on_handle_supplier_enter(self):
         supplier_text = self.ui.supplier_in_purchasing_input.text().strip()
 
@@ -697,3 +731,32 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Supplier not found - show dialog with filter
             self.suppliers_dialog.set_filter(supplier_text)
             self.suppliers_dialog.show()
+
+
+    def on_discount_pct_purchasing_radio_button_toggled(self):
+        if self.ui.discount_pct_purchasing_radio_button.isChecked():
+            self.ui.discount_pct_purchasing_input.setEnabled(True)
+            self.ui.discount_pct_purchasing_input.setClearButtonEnabled(True)
+            self.ui.discount_rp_purchasing_input.setEnabled(False)
+            self.ui.discount_rp_purchasing_input.setText('0')
+            self.ui.discount_rp_purchasing_input.setClearButtonEnabled(False)
+        else:
+            self.ui.discount_rp_purchasing_input.setEnabled(True)
+            self.ui.discount_rp_purchasing_input.setClearButtonEnabled(True)
+            self.ui.discount_pct_purchasing_input.setEnabled(False)
+            self.ui.discount_pct_purchasing_input.setText('0')
+            self.ui.discount_pct_purchasing_input.setClearButtonEnabled(False)
+
+
+    def on_calculate_discount_rp(self):
+        if not self.ui.discount_pct_purchasing_radio_button.isChecked():
+            return
+        
+        # Get Price, Qty, Discount Pct
+        price = remove_non_digit(self.ui.price_purchasing_input.text()) if self.ui.price_purchasing_input.text() else 0
+        qty = remove_non_digit(self.ui.qty_purchasing_input.text()) if self.ui.qty_purchasing_input.text() else 0
+        discount_pct = remove_non_digit(self.ui.discount_pct_purchasing_input.text()) if self.ui.discount_pct_purchasing_input.text() else 0
+        
+        # Calculate Discount Rp
+        discount_rp: int = int((int(price) * int(qty) * int(discount_pct)) / 100)
+        self.ui.discount_rp_purchasing_input.setText(add_prefix(format_number(str(discount_rp))))

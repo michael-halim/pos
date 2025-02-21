@@ -1,5 +1,3 @@
-from typing import List, Optional
-from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
 
 from response.response_message import ResponseMessage
@@ -44,7 +42,8 @@ class MasterStockDialogRepository:
 
     def get_purchasing_history_by_sku(self, sku: str):
         try:
-            sql = '''SELECT ph.created_at, s.supplier_name, dph.qty, dph.unit, dph.price, dph.subtotal
+            sql = '''SELECT ph.created_at, s.supplier_name, dph.qty, dph.unit, dph.price, 
+                            dph.discount_rp, dph.discount_pct, dph.subtotal
                     FROM detail_purchasing_history dph 
                     JOIN purchasing_history ph on ph.purchasing_id = dph.purchasing_id
                     LEFT JOIN suppliers s on s.supplier_id = ph.supplier_id
@@ -62,7 +61,9 @@ class MasterStockDialogRepository:
                                                     qty=ph[2], 
                                                     unit=ph[3], 
                                                     price=ph[4], 
-                                                subtotal=ph[5]) 
+                                                    discount_rp=ph[5], 
+                                                    discount_pct=ph[6], 
+                                                    subtotal=ph[7]) 
                     for ph in purchasing_history_results
                 ]
 

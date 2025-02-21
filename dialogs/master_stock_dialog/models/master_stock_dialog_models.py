@@ -25,4 +25,6 @@ class PurchasingHistoryTableItemModel:
     qty: int
     unit: str
     price: int
+    discount_rp: int
+    discount_pct: int
     subtotal: int
