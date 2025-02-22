@@ -1,12 +1,12 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from connect_db import DatabaseConnection
-
+from generals.build import resource_path
 class SuppliersWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/suppliers.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/suppliers.ui'), self)
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         

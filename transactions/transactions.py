@@ -15,13 +15,14 @@ from transactions.models.wholesale_models import WholesaleTableModel
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from generals.build import resource_path
 
 class TransactionsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/transactions.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/transactions.ui'), self)
 
         # Init Services
         self.transaction_service = TransactionService()

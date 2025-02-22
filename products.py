@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from connect_db import DatabaseConnection
-
+from generals.build import resource_path
 
 class AddEditProductWindow(QtWidgets.QWidget):
     # Add signal definition at class level
@@ -11,7 +11,7 @@ class AddEditProductWindow(QtWidgets.QWidget):
         super().__init__()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/add_edit_product.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/add_edit_product.ui'), self)
         
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
@@ -235,7 +235,7 @@ class ProductsWindow(QtWidgets.QWidget):
         super().__init__()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/products.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/products.ui'), self)
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         

@@ -5,6 +5,125 @@ class SeedData:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
+
+    def create_roles_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS roles (
+            role_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            role_name VARCHAR(20) NOT NULL,
+            role_description TEXT DEFAULT ''
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO roles (role_name, role_description) 
+                        VALUES 
+                        ('Admin', 'Administrator'),
+                        ('Cashier', 'Cashier'),
+                        ('Manager', 'Manager');'''
+
+        self.cursor.execute(sql_insert)
+
+
+    def create_permissions_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS permissions (
+            permission_id VARCHAR(20) NOT NULL,
+            permission_name VARCHAR(20) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO permissions (permission_id, permission_name) 
+                        VALUES 
+                        ('add_products', 'Add Products'),
+                        ('edit_products', 'Edit Products'),
+                        ('delete_products', 'Delete Products'),
+                        ('view_products', 'View Products'),
+                        ('add_suppliers', 'Add Suppliers'),
+                        ('edit_suppliers', 'Edit Suppliers'),
+                        ('delete_suppliers', 'Delete Suppliers'),
+                        ('view_suppliers', 'View Suppliers');'''
+
+        self.cursor.execute(sql_insert)
+
+
+    def create_role_permissions_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS role_permissions (
+            role_id INT NOT NULL,
+            permission_id VARCHAR(20) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO role_permissions (role_id, permission_id) 
+                        VALUES 
+                        (1, 'add_products'),
+                        (1, 'edit_products'),
+                        (1, 'delete_products'),
+                        (1, 'view_products'),
+                        (1, 'add_suppliers'),
+                        (1, 'edit_suppliers'),
+                        (1, 'delete_suppliers'),
+                        (1, 'view_suppliers');'''
+
+        self.cursor.execute(sql_insert)
+
+
+    def create_logs_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS logs (
+            log_id INT NOT NULL,
+            log_name VARCHAR(20) NOT NULL,
+            log_description TEXT DEFAULT '',
+            log_type VARCHAR(1) NOT NULL,
+            old_data TEXT DEFAULT '',
+            new_data TEXT DEFAULT '',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_by VARCHAR(20) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+
+    def create_users_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS users (
+            user_id INT NOT NULL,
+            user_name VARCHAR(20) NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            user_salt VARCHAR(255) NOT NULL,
+            role_id INT NOT NULL,
+            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NULL DEFAULT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO users (user_id, user_name, password_hash, user_salt, role_id, is_active, created_at, updated_at) 
+                        VALUES 
+                        (1, 'Admin', 'password', 'salt', 1, TRUE, CURRENT_TIMESTAMP, NULL);'''
+
+        self.cursor.execute(sql_insert)     
+
+
+    def create_customers_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS customers (
+            customer_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            customer_name VARCHAR(50) NOT NULL,
+            customer_phone VARCHAR(20) NOT NULL,
+            customer_points INT(10) NOT NULL DEFAULT 0,
+            number_of_transactions INT(10) NOT NULL DEFAULT 0,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NULL DEFAULT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions) 
+                        VALUES 
+                        ('Customer One', '081234567890', 0, 0);'''
+        
+        self.cursor.execute(sql_insert)
+
+
     def create_purchasing_history_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS purchasing_history (
             purchasing_id VARCHAR(20) NOT NULL,
@@ -24,6 +143,7 @@ class SeedData:
                         ('PO202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 70000, CURRENT_TIMESTAMP, 'Remarks Purchasing One');'''
 
         self.cursor.execute(sql_insert)
+
 
     def create_detail_purchasing_history_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS detail_purchasing_history (
@@ -138,6 +258,7 @@ class SeedData:
 
         self.cursor.execute(sql_insert)
 
+
     def create_suppliers_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS suppliers (
                     supplier_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -156,6 +277,7 @@ class SeedData:
                         ('Supplier Three', 'Address Three', 'City Three', '081234567892', 'Remarks Three');'''
         
         self.cursor.execute(sql_insert)
+
 
     def create_products_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS products (
@@ -185,6 +307,7 @@ class SeedData:
         
         self.cursor.execute(sql_insert)
     
+
     def create_units_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS units (
             sku VARCHAR(20) NOT NULL,
@@ -203,6 +326,7 @@ class SeedData:
                         ('SKU001', 'barcode', 'DUS', 10, 20000); '''
         
         self.cursor.execute(sql_insert)
+
 
     def create_categories_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS categories (
@@ -238,7 +362,14 @@ class SeedData:
         
         self.cursor.execute(sql_insert)
 
+
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS roles')
+        self.cursor.execute('DROP TABLE IF EXISTS permissions')
+        self.cursor.execute('DROP TABLE IF EXISTS role_permissions')
+        self.cursor.execute('DROP TABLE IF EXISTS logs')
+        self.cursor.execute('DROP TABLE IF EXISTS users')
+        self.cursor.execute('DROP TABLE IF EXISTS customers')
         self.cursor.execute('DROP TABLE IF EXISTS detail_transactions')
         self.cursor.execute('DROP TABLE IF EXISTS pending_detail_transactions')
         self.cursor.execute('DROP TABLE IF EXISTS transactions')
@@ -250,6 +381,7 @@ class SeedData:
         self.cursor.execute('DROP TABLE IF EXISTS units')
         self.cursor.execute('DROP TABLE IF EXISTS products')
         self.cursor.execute('DROP TABLE IF EXISTS categories')
+
 
     def seed_all(self):
         """Run all seed functions in order."""
@@ -264,6 +396,12 @@ class SeedData:
         self.create_units_table()
         self.create_categories_table()
         self.create_product_categories_detail_table()
+        self.create_roles_table()
+        self.create_permissions_table()
+        self.create_role_permissions_table()
+        self.create_logs_table()
+        self.create_users_table()
+        self.create_customers_table()
 
         self.db.commit()
         self.db.close()

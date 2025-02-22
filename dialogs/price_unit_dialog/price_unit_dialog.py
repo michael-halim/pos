@@ -8,12 +8,12 @@ from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
 
 from dialogs.price_unit_dialog.services.price_unit_dialog_services import PriceUnitDialogService
 from dialogs.price_unit_dialog.models.price_unit_dialog_models import PriceUnitTableItemModel, PriceUnitsModel
-
+from generals.build import resource_path
 class PriceUnitDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.ui = uic.loadUi('./ui/price_unit.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/price_unit.ui'), self)
 
         # Init Services
         self.price_unit_dialog_service = PriceUnitDialogService()

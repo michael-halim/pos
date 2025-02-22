@@ -15,6 +15,7 @@ from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
 from dialogs.suppliers_dialog.suppliers_dialog import SuppliersDialogWindow
 from dialogs.master_stock_dialog.master_stock_dialog import MasterStockDialogWindow
 from dialogs.price_unit_dialog.price_unit_dialog import PriceUnitDialogWindow
+from generals.build import resource_path
 
 class PurchasingWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -23,7 +24,7 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.purchasing_service = PurchasingService()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/purchasing.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/purchasing.ui'), self)
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
@@ -39,7 +40,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Connect the add button to add_transaction method
         self.ui.close_purchasing_button.clicked.connect(lambda: self.close())
         self.ui.clear_data_purchasing_button.clicked.connect(self.clear_data_purchasing)
-        self.ui.master_stock_purchasing_button.clicked.connect(self.master_stock_purchasing)
         self.ui.add_purchasing_button.clicked.connect(self.add_purchasing)
         self.ui.edit_purchasing_button.clicked.connect(self.edit_purchasing)
         self.ui.delete_purchasing_button.clicked.connect(self.delete_purchasing)
@@ -114,10 +114,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.purchasing_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
-    def master_stock_purchasing(self):
-        pass
-
-
     def add_purchasing(self):
         # Stop temporary sorting
         self.purchasing_detail_table.setSortingEnabled(False)
@@ -180,8 +176,11 @@ class PurchasingWindow(QtWidgets.QWidget):
             unit = self.purchasing_detail_table.item(self.current_selected_sku, 3).text()
             unit_value = self.purchasing_detail_table.item(self.current_selected_sku, 4).text()
             price = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 5).text())
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 6).text())
-            discount_pct = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 7).text())
+            discount_pct = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 6).text())
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 7).text())
+
+            is_toogle_disc_pct = (int(discount_pct) > 0 and int(discount_rp) > 0)
+            self.set_discount_radio_button(discount_pct, discount_rp, is_toogle_disc_pct= is_toogle_disc_pct)
 
             # Put the data into the form
             self.ui.sku_purchasing_input.setText(sku)
@@ -190,13 +189,9 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.ui.qty_purchasing_input.setText(qty)
             self.ui.qty_purchasing_combobox.setCurrentText(unit)
             self.ui.unit_value_purchasing_input.setText(unit_value)
-            self.ui.discount_rp_purchasing_input.setText(discount_rp)
-            self.ui.discount_pct_purchasing_input.setText(discount_pct)
 
             # Make sure only qty is editable
             self.ui.price_purchasing_input.setEnabled(True)
-            self.ui.discount_rp_purchasing_input.setEnabled(True)
-            self.ui.discount_pct_purchasing_input.setEnabled(True)
             self.ui.sku_purchasing_input.setEnabled(False)
             self.ui.product_name_purchasing_input.setEnabled(False)
     
@@ -216,8 +211,8 @@ class PurchasingWindow(QtWidgets.QWidget):
                 # Update the row in the table
                 self.purchasing_detail_table.item(self.current_selected_sku, 2).setText(format_number(qty))
                 self.purchasing_detail_table.item(self.current_selected_sku, 5).setText(add_prefix(format_number(str(price))))
-                self.purchasing_detail_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(discount_rp))))
-                self.purchasing_detail_table.item(self.current_selected_sku, 7).setText(add_prefix(format_number(str(discount_pct))))
+                self.purchasing_detail_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(discount_pct))))
+                self.purchasing_detail_table.item(self.current_selected_sku, 7).setText(add_prefix(format_number(str(discount_rp))))
                 self.purchasing_detail_table.item(self.current_selected_sku, 8).setText(add_prefix(format_number(str(subtotal))))
                 
                 # Update total amount
@@ -354,13 +349,13 @@ class PurchasingWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(format_number(purchasing_history.qty)),
                 QtWidgets.QTableWidgetItem(purchasing_history.unit),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.price))),
-                QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.discount_rp))),
                 QtWidgets.QTableWidgetItem(format_number(purchasing_history.discount_pct)),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.discount_rp))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing_history.subtotal)))
             ]
             
             for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=14))
+                item.setFont(POSFonts.get_font(size=12))
                 self.purchasing_history_table.setItem(current_row, col, item)
 
 
@@ -387,13 +382,13 @@ class PurchasingWindow(QtWidgets.QWidget):
                     QtWidgets.QTableWidgetItem(item.unit),
                     QtWidgets.QTableWidgetItem(format_number(item.unit_value)),
                     QtWidgets.QTableWidgetItem(add_prefix(format_number(item.price))),
-                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount_rp))),
                     QtWidgets.QTableWidgetItem(format_number(item.discount_pct)),
+                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount_rp))),
                     QtWidgets.QTableWidgetItem(add_prefix(format_number(item.subtotal)))
                 ]
                 
                 for col, item in enumerate(table_items):
-                    item.setFont(POSFonts.get_font(size=16))
+                    item.setFont(POSFonts.get_font(size=12))
                     self.purchasing_detail_table.setItem(current_row, col, item)
 
                 # Add purchasing index
@@ -423,6 +418,19 @@ class PurchasingWindow(QtWidgets.QWidget):
                 cache_key = f'{sku}_{pud.unit}'
                 self.cached_qty[cache_key] = pud.unit_value
                 self.ui.qty_purchasing_combobox.addItem(pud.unit)
+
+
+    def set_discount_radio_button(self, discount_pct: str, discount_rp: str, is_toogle_disc_pct: bool = True):
+        self.ui.discount_rp_purchasing_radio_button.setChecked(not is_toogle_disc_pct)
+        self.ui.discount_rp_purchasing_input.setClearButtonEnabled(not is_toogle_disc_pct)
+        self.ui.discount_rp_purchasing_input.setEnabled(not is_toogle_disc_pct)
+
+        self.ui.discount_pct_purchasing_input.setClearButtonEnabled(is_toogle_disc_pct)
+        self.ui.discount_pct_purchasing_radio_button.setChecked(is_toogle_disc_pct)
+        self.ui.discount_pct_purchasing_input.setEnabled(is_toogle_disc_pct)
+
+        self.ui.discount_pct_purchasing_input.setText(format_number(discount_pct))
+        self.ui.discount_rp_purchasing_input.setText(add_prefix(format_number(discount_rp)))
 
 
     # Getters
@@ -463,8 +471,8 @@ class PurchasingWindow(QtWidgets.QWidget):
             unit = self.purchasing_detail_table.item(row, 3).text()
             unit_value = remove_non_digit(self.purchasing_detail_table.item(row, 4).text())
             price = remove_non_digit(self.purchasing_detail_table.item(row, 5).text())
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
-            discount_pct = remove_non_digit(self.purchasing_detail_table.item(row, 7).text())
+            discount_pct = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 7).text())
             subtotal = remove_non_digit(self.purchasing_detail_table.item(row, 8).text())
 
             detail_purchasing.append(
@@ -585,7 +593,7 @@ class PurchasingWindow(QtWidgets.QWidget):
         for row in range(self.purchasing_detail_table.rowCount()):
             qty = remove_non_digit(self.purchasing_detail_table.item(row, 2).text())
             price = remove_non_digit(self.purchasing_detail_table.item(row, 5).text())
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 7).text())
             total_amount += (int(price) * int(qty)) - int(discount_rp)
 
         return total_amount
@@ -594,7 +602,7 @@ class PurchasingWindow(QtWidgets.QWidget):
     def calculate_total_discount(self) -> int:
         total_discount = 0
         for row in range(self.purchasing_detail_table.rowCount()):
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 6).text())
+            discount_rp = remove_non_digit(self.purchasing_detail_table.item(row, 7).text())
             total_discount += int(discount_rp)
         return total_discount
 
@@ -604,9 +612,10 @@ class PurchasingWindow(QtWidgets.QWidget):
     def show_master_stock_dialog(self):
         sku = self.ui.sku_purchasing_input.text().strip()
         if not sku:
-            return
-        
-        self.master_stock_dialog.set_master_stock_form_by_sku(sku)
+            self.master_stock_dialog.clear_master_stock_form()
+        else:
+            self.master_stock_dialog.set_master_stock_form_by_sku(sku)
+
         self.master_stock_dialog.show()
 
 

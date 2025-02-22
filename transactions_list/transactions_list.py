@@ -6,16 +6,15 @@ from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
 from generals.fonts import POSFonts
 from helper import format_number, add_prefix
 
-# Import Models
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
-
+from generals.build import resource_path
 class TransactionsListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/transactions_list.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/transactions_list.ui'), self)
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
@@ -68,6 +67,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Show data for both tables
         self.show_transactions_data()
 
+
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
@@ -76,6 +76,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_transactions_data()
 
+
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
@@ -83,6 +84,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.current_selected_transaction_id = None
         # Refresh the data
         self.show_transactions_data()
+
 
     def show_transactions_data(self):
         # Temporarily disable sorting
@@ -112,7 +114,6 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Enable sorting
         self.transactions_table.setSortingEnabled(True)
 
-        
 
     def filter_detail_transactions(self):
         search_text = self.ui.filter_detail_transactions_input.text().lower()
@@ -137,6 +138,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
             # Hide/show row based on whether match was found
             self.detail_transactions_table.setRowHidden(row, not match_found)
     
+
     def on_transaction_selected(self):
         selected_rows = self.transactions_table.selectedItems()
         if selected_rows:
@@ -156,8 +158,12 @@ class TransactionsListWindow(QtWidgets.QWidget):
             current_row = self.transactions_table.rowCount()
             self.transactions_table.insertRow(current_row)
 
+            # Convert created_at string to datetime and format
+            created_at_dt = datetime.strptime(transaction.created_at, '%Y-%m-%d %H:%M:%S')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+
             table_items =  [ 
-                QtWidgets.QTableWidgetItem(transaction.created_at),
+                QtWidgets.QTableWidgetItem(formatted_date),
                 QtWidgets.QTableWidgetItem(transaction.transaction_id),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(transaction.payment_rp))),
                 QtWidgets.QTableWidgetItem(transaction.payment_method),
@@ -165,7 +171,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
             ]
             
             for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=14))
+                item.setFont(POSFonts.get_font(size=12))
                 self.transactions_table.setItem(current_row, col, item)
 
 
@@ -189,7 +195,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
             ]
 
             for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=14))
+                item.setFont(POSFonts.get_font(size=12))
                 self.detail_transactions_table.setItem(current_row, col, item)
 
 

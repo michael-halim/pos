@@ -1,11 +1,12 @@
 import sqlite3
 from PyQt6.QtCore import QMutex, QMutexLocker
+from generals.build import resource_path
 
 class DatabaseConnection:
     _instance = None
     _mutex = QMutex()
 
-    def __new__(cls, db_path="./db/pos.db"):
+    def __new__(cls, db_path=resource_path('db/pos.db')):
         with QMutexLocker(cls._mutex):
             if cls._instance is None:
                 cls._instance = super(DatabaseConnection, cls).__new__(cls)
@@ -14,8 +15,10 @@ class DatabaseConnection:
                 cls._instance.connection.row_factory = sqlite3.Row  # For dict-like row access
             return cls._instance
 
+
     def get_connection(self):
         return self.connection
+
 
     def close_connection(self):
         if self.connection:

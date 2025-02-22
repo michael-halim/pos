@@ -1,8 +1,9 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from connect_db import DatabaseConnection
-
+from generals.build import resource_path
 from helper import format_number, add_prefix
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
+
 class PendingTransactionsWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
     pending_transaction_selected = QtCore.pyqtSignal(dict)
@@ -11,7 +12,7 @@ class PendingTransactionsWindow(QtWidgets.QWidget):
         super().__init__()
 
         # Load the UI file
-        self.ui = uic.loadUi('./ui/pending_transactions.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/pending_transactions.ui'), self)
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 

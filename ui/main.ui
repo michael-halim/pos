@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>POS</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -290,6 +290,101 @@
             <string>Purchasing</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="purchasing_list_button">
+           <property name="geometry">
+            <rect>
+             <x>760</x>
+             <y>90</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Purchasing List</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="roles_button">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>280</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Roles</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="role_permissions_button">
+           <property name="geometry">
+            <rect>
+             <x>300</x>
+             <y>280</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Role Permissions</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="customers_button">
+           <property name="geometry">
+            <rect>
+             <x>540</x>
+             <y>280</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Customers</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="logs_button">
+           <property name="geometry">
+            <rect>
+             <x>770</x>
+             <y>280</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Logs</string>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -337,7 +432,7 @@
      <x>0</x>
      <y>0</y>
      <width>1346</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

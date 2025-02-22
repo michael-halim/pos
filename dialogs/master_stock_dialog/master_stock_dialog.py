@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
-
+from datetime import datetime
 from helper import format_number, add_prefix, remove_non_digit
 
 from generals.message_box import POSMessageBox
@@ -11,13 +11,13 @@ from dialogs.master_stock_dialog.models.master_stock_dialog_models import Master
 
 from dialogs.master_stock_dialog.services.master_stock_dialog_services import MasterStockDialogService
 from dialogs.price_unit_dialog.price_unit_dialog import PriceUnitDialogWindow
-
+from generals.build import resource_path
 class MasterStockDialogWindow(QtWidgets.QWidget):
     
     def __init__(self):
         super().__init__()
 
-        self.ui = uic.loadUi('./ui/master_stock.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/master_stock.ui'), self)
 
         # Init Dialog
         self.suppliers_dialog = SuppliersDialogWindow()
@@ -72,7 +72,6 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.price_unit_dialog.show()
 
 
-
     def set_purchasing_history_table_data(self, data: list[PurchasingHistoryTableItemModel]):
         # Clear Purchasing History Table
         self.purchasing_history_in_master_stock_table.setRowCount(0)
@@ -81,8 +80,12 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
             current_row = self.purchasing_history_in_master_stock_table.rowCount()
             self.purchasing_history_in_master_stock_table.insertRow(current_row)
 
+            # Convert created_at string to datetime and format
+            created_at_dt = datetime.strptime(purchasing_history.created_at, '%Y-%m-%d %H:%M:%S')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+
             table_items =  [ 
-                QtWidgets.QTableWidgetItem(purchasing_history.created_at),
+                QtWidgets.QTableWidgetItem(formatted_date),
                 QtWidgets.QTableWidgetItem(purchasing_history.supplier_name),
                 QtWidgets.QTableWidgetItem(format_number(purchasing_history.qty)),
                 QtWidgets.QTableWidgetItem(purchasing_history.unit),
@@ -93,7 +96,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
             ]
             
             for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=14))
+                item.setFont(POSFonts.get_font(size=12))
                 self.purchasing_history_in_master_stock_table.setItem(current_row, col, item)
 
 

@@ -3,7 +3,7 @@ from connect_db import DatabaseConnection
 
 from helper import format_number, add_prefix, remove_non_digit
 from generals.fonts import POSFonts
-
+from generals.build import resource_path
 
 class ProductsDialogWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -12,7 +12,7 @@ class ProductsDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.ui = uic.loadUi('./ui/products_in_transactions.ui', self)
+        self.ui = uic.loadUi(resource_path('ui/products_in_transactions.ui'), self)
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
