@@ -58,8 +58,8 @@ class POS(QtWidgets.QMainWindow):
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
-        self.ui.roles_button.clicked.connect(lambda: self.roles_dialog.showMaximized())
-        self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.showMaximized())
+        self.ui.roles_button.clicked.connect(lambda: self.roles_dialog.show())
+        self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
         self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.showMaximized())
         self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.showMaximized())
         

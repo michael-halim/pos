@@ -45,6 +45,7 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
         # Show data
         self.show_suppliers_data()
 
+
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
@@ -87,6 +88,7 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
 
         # Enable sorting
         self.suppliers_table.setSortingEnabled(True)
+
 
     def set_suppliers_table_data(self, data: list[SupplierModel]):
         # Clear the table

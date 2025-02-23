@@ -9,7 +9,7 @@ class SeedData:
     def create_roles_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS roles (
             role_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            role_name VARCHAR(20) NOT NULL,
+            role_name VARCHAR(20) NOT NULL UNIQUE,
             role_description TEXT DEFAULT ''
         );'''
 

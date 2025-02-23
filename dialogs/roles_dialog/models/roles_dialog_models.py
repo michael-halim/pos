@@ -3,6 +3,12 @@ from typing import Optional
 
 @dataclass
 class RolesModel:
-    id: int
-    name: str
-    description: Optional[str] = None
+    role_id: int
+    role_name: str
+    role_description: str
+
+
+@dataclass
+class PermissionsModel:
+    permission_id: str
+    permission_name: str
