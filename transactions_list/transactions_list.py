@@ -1,5 +1,4 @@
 from PyQt6 import QtWidgets, uic
-from connect_db import DatabaseConnection
 from datetime import datetime
 
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
@@ -15,8 +14,6 @@ class TransactionsListWindow(QtWidgets.QWidget):
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/transactions_list.ui'), self)
-        self.db = DatabaseConnection().get_connection()
-        self.cursor = self.db.cursor()
 
         # Init Services
         self.transaction_list_service = TransactionListService()
@@ -197,5 +194,3 @@ class TransactionsListWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.detail_transactions_table.setItem(current_row, col, item)
-
-

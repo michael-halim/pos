@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 @dataclass
-class CustomersModel:
+class CustomersDialogModel:
     customer_id: int
     customer_name: str
     customer_phone: str

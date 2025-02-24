@@ -42,7 +42,7 @@ class RolesDialogWindow(QtWidgets.QWidget):
         self.ui.filter_permissions_input.textChanged.connect(self.show_permissions_data)
 
         
-         # Set selection behavior to select entire rows
+        # Set selection behavior to select entire rows
         self.roles_table.setSelectionBehavior(SELECT_ROWS)
         self.roles_table.setSelectionMode(SINGLE_SELECTION)
         self.permissions_table.setSelectionBehavior(SELECT_ROWS)

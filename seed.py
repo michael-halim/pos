@@ -70,18 +70,25 @@ class SeedData:
 
     def create_logs_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS logs (
-            log_id INT NOT NULL,
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             log_name VARCHAR(20) NOT NULL,
             log_description TEXT DEFAULT '',
             log_type VARCHAR(1) NOT NULL,
             old_data TEXT DEFAULT '',
             new_data TEXT DEFAULT '',
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            created_by VARCHAR(20) NOT NULL
+            created_by INT NOT NULL
         );'''
 
         self.cursor.execute(sql)
 
+        sql_insert = '''INSERT INTO logs (log_name, log_description, log_type, old_data, new_data, created_at, created_by) 
+                        VALUES 
+                        ('Log One', 'Log One Description', 'C', '', 'Create Data', CURRENT_TIMESTAMP, 1),
+                        ('Log Two', 'Log Two Description', 'U', 'Old Data Two', 'New Data Two', CURRENT_TIMESTAMP, 1),
+                        ('Log Three', 'Log Three Description', 'D', 'Old Data Three', '', CURRENT_TIMESTAMP, 1);'''
+
+        self.cursor.execute(sql_insert)
 
     def create_users_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS users (
@@ -108,18 +115,21 @@ class SeedData:
         sql = '''CREATE TABLE IF NOT EXISTS customers (
             customer_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             customer_name VARCHAR(50) NOT NULL,
-            customer_phone VARCHAR(20) NOT NULL,
+            customer_phone VARCHAR(20) NOT NULL UNIQUE,
             customer_points INT(10) NOT NULL DEFAULT 0,
             number_of_transactions INT(10) NOT NULL DEFAULT 0,
+            transaction_value INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NULL DEFAULT NULL
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions) 
+        sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value) 
                         VALUES 
-                        ('Customer One', '081234567890', 0, 0);'''
+                        ('Customer One', '081234567890', 0, 0, 0),
+                        ('Customer Two', '081234567891', 0, 0, 0),
+                        ('Customer Three', '081234567892', 0, 0, 0);'''
         
         self.cursor.execute(sql_insert)
 

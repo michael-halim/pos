@@ -385,6 +385,25 @@
             <string>Logs</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="customers_dialog_button">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>380</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Customers Dialog</string>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>

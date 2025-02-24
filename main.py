@@ -12,6 +12,7 @@ from purchasing_list.purchasing_list import PurchasingListWindow
 from dialogs.roles_dialog.roles_dialog import RolesDialogWindow
 from role_permissions.role_permissions import RolePermissionsWindow
 from customers.customers import CustomersWindow
+from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
 from logs.logs import LogsWindow
 
 from generals.build import resource_path
@@ -36,6 +37,7 @@ class POS(QtWidgets.QMainWindow):
         self.role_permissions_dialog = RolePermissionsWindow()
         self.customers_dialog = CustomersWindow()
         self.logs_dialog = LogsWindow()
+        self.customers_dialog_window = CustomersDialogWindow()
 
         # Use resource_path for database
         self.db_path = resource_path('database/pos.db')
@@ -60,9 +62,10 @@ class POS(QtWidgets.QMainWindow):
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
         self.ui.roles_button.clicked.connect(lambda: self.roles_dialog.show())
         self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
-        self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.showMaximized())
-        self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.showMaximized())
-        
+        self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
+        self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
+        self.ui.customers_dialog_button.clicked.connect(lambda: self.customers_dialog_window.show())
+
         # TODO: Add an input for user to input suppliers in their products
         # TODO: Change the UI button, or layout to form layout to make it beautiful
 
