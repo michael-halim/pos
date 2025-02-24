@@ -9,6 +9,7 @@ from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
 from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
 from dialogs.suppliers_dialog.services.suppliers_dialog_services import SuppliersDialogService
 from generals.build import resource_path
+
 class SuppliersDialogWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
     supplier_selected = QtCore.pyqtSignal(dict)

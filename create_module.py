@@ -39,7 +39,7 @@ def create_module_structure(module_name: str):
 from typing import Optional
 
 @dataclass
-class {module_name.capitalize()}Model:
+class {module_name.replace('_', ' ').title().replace(' ', '')}Model:
     id: int
     name: str
     description: Optional[str] = None
@@ -49,7 +49,7 @@ class {module_name.capitalize()}Model:
 from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
 
-class {module_name.capitalize()}Repository:
+class {module_name.replace('_', ' ').title().replace(' ', '')}Repository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
@@ -57,19 +57,19 @@ class {module_name.capitalize()}Repository:
 '''
                 elif "services" in file_path:
                     content = f'''from typing import List, Optional
-from ..repositories.{module_name}_repositories import {module_name.capitalize()}Repository
+from ..repositories.{module_name}_repositories import {module_name.replace('_', ' ').title().replace(' ', '')}Repository
 
-class {module_name.capitalize()}Service:
+class {module_name.replace('_', ' ').title().replace(' ', '')}Service:
     def __init__(self):
-        self.repository = {module_name.capitalize()}Repository()
+        self.repository = {module_name.replace('_', ' ').title().replace(' ', '')}Repository()
 '''
                 else:
-                    content = f'''from .{module_name}_services.{module_name}_services import {module_name.capitalize()}Service
-from .{module_name}_models.{module_name}_models import {module_name.capitalize()}Model
+                    content = f'''from .{module_name}_services.{module_name}_services import {module_name.replace('_', ' ').title().replace(' ', '')}Service
+from .{module_name}_models.{module_name}_models import {module_name.replace('_', ' ').title().replace(' ', '')}Model
 
-class {module_name.capitalize()}:
+class {module_name.replace('_', ' ').title().replace(' ', '')}:
     def __init__(self):
-        self.service = {module_name.capitalize()}Service()
+        self.service = {module_name.replace('_', ' ').title().replace(' ', '')}Service()
 '''
                 
                 f.write(content)

@@ -26,6 +26,11 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QPushButton" name="master_data_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Master Data</string>
          </property>
@@ -33,6 +38,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="settings_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Settings</string>
          </property>
@@ -40,6 +50,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="transaction_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Transaction</string>
          </property>
@@ -47,6 +62,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="report_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Report</string>
          </property>
@@ -54,6 +74,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="log_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Log</string>
          </property>
@@ -61,6 +86,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="import_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Import</string>
          </property>
@@ -68,6 +98,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="export_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Export</string>
          </property>
@@ -75,6 +110,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="backup_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Backup</string>
          </property>
@@ -95,6 +135,11 @@
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_5">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Logout</string>
          </property>
@@ -106,7 +151,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="master_data_page">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -195,6 +240,25 @@
               </property>
               <property name="text">
                <string>Suppliers</string>
+              </property>
+             </widget>
+             <widget class="QPushButton" name="categories_dialog_button">
+              <property name="geometry">
+               <rect>
+                <x>290</x>
+                <y>170</y>
+                <width>251</width>
+                <height>71</height>
+               </rect>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+              </property>
+              <property name="text">
+               <string>Categories Dialog</string>
               </property>
              </widget>
             </widget>
@@ -451,7 +515,7 @@
      <x>0</x>
      <y>0</y>
      <width>1346</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

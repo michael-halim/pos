@@ -28,19 +28,19 @@
         <item>
          <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
-           <widget class="QLabel" name="filter_products_in_transactions_label">
+           <widget class="QLabel" name="filter_products_dialog_label">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Filter</string>
+             <string>Filter Products : </string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="filter_products_in_transactions_input">
+           <widget class="QLineEdit" name="filter_products_dialog_input">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
@@ -51,7 +51,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="products_in_transactions_table">
+         <widget class="QTableWidget" name="products_dialog_table">
           <column>
            <property name="text">
             <string>SKU</string>
@@ -160,14 +160,24 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="close_products_in_transactions_button">
+           <widget class="QPushButton" name="close_products_dialog_button">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Close</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="add_products_in_transactions_button">
+           <widget class="QPushButton" name="add_products_dialog_button">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Add</string>
             </property>

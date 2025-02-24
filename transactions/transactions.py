@@ -5,13 +5,13 @@ from datetime import datetime
 from helper import format_number, add_prefix, remove_non_digit
 
 from transactions.pending_transactions import PendingTransactionsWindow
-from transactions.products_in_transactions import ProductsInTransactionWindow
 
 from transactions.services.transaction_service import TransactionService
 
 from transactions.models.transactions_models import TransactionTableItemModel, PendingTransactionModel, TransactionModel, DetailTransactionModel
 from transactions.models.wholesale_models import WholesaleTableModel
 
+from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
@@ -28,7 +28,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.transaction_service = TransactionService()
 
         # Init Dialog
-        self.products_in_transaction_dialog = ProductsInTransactionWindow()
+        self.products_in_transaction_dialog = ProductsDialogWindow()
         self.pending_transactions_dialog = PendingTransactionsWindow()
 
 

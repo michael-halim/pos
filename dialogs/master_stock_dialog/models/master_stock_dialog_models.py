@@ -10,6 +10,7 @@ class MasterStockModel:
     category_id: str
     supplier_id: str
     unit: str
+    cost_price: int
     price: int
     stock: int
     remarks: str
@@ -28,3 +29,8 @@ class PurchasingHistoryTableItemModel:
     discount_rp: int
     discount_pct: int
     subtotal: int
+
+@dataclass
+class CategoriesModel:
+    category_id: str
+    category_name: str

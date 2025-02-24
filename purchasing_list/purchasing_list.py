@@ -3,7 +3,7 @@ from datetime import datetime
 
 from helper import format_number, add_prefix, remove_non_digit
 
-from dialogs.products_dialog import ProductsDialogWindow
+from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 
 from purchasing_list.services.purchasing_list_services import PurchasingListService
 from purchasing_list.models.purchasing_list_models import PurchasingListModel, DetailPurchasingModel

@@ -2,15 +2,16 @@ import os
 import sys
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 
-from products import ProductsWindow
-from categories import CategoriesWindow
-from suppliers import SuppliersWindow
+from products.products import ProductsWindow
+from categories.categories import CategoriesWindow
+from suppliers.suppliers import SuppliersWindow
 from transactions.transactions import TransactionsWindow
 from transactions_list.transactions_list import TransactionsListWindow
 from purchasing.purchasing import PurchasingWindow
 from purchasing_list.purchasing_list import PurchasingListWindow
 from dialogs.roles_dialog.roles_dialog import RolesDialogWindow
 from role_permissions.role_permissions import RolePermissionsWindow
+from dialogs.categories_dialog.categories_dialog import CategoriesDialogWindow
 from customers.customers import CustomersWindow
 from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
 from logs.logs import LogsWindow
@@ -28,6 +29,7 @@ class POS(QtWidgets.QMainWindow):
 
         self.products_dialog = ProductsWindow()
         self.categories_dialog = CategoriesWindow()
+        self.categories_dialog_show = CategoriesDialogWindow()
         self.suppliers_dialog = SuppliersWindow()
         self.transactions_dialog = TransactionsWindow()
         self.transactions_list_dialog = TransactionsListWindow()
@@ -53,9 +55,9 @@ class POS(QtWidgets.QMainWindow):
         self.ui.backup_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.backup_page))
         
         # Connect Button to Dialog in Master Data Menu
-        self.ui.products_button.clicked.connect(lambda: self.products_dialog.showMaximized())
+        self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.showMaximized())
-        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.showMaximized())
+        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
         self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
@@ -65,7 +67,9 @@ class POS(QtWidgets.QMainWindow):
         self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
         self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
         self.ui.customers_dialog_button.clicked.connect(lambda: self.customers_dialog_window.show())
+        self.ui.categories_dialog_button.clicked.connect(lambda: self.categories_dialog_show.show())
 
+        
         # TODO: Add an input for user to input suppliers in their products
         # TODO: Change the UI button, or layout to form layout to make it beautiful
 

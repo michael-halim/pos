@@ -8,6 +8,7 @@ from helper import format_number, add_prefix
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
 from generals.build import resource_path
+
 class TransactionsListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
