@@ -96,6 +96,9 @@
                 <pointsize>12</pointsize>
                </font>
               </property>
+              <property name="buttonSymbols">
+               <enum>QAbstractSpinBox::NoButtons</enum>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1163,7 +1166,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Remarks</string>
+                   <string>Remarks : </string>
                   </property>
                  </widget>
                 </item>

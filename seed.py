@@ -90,6 +90,7 @@ class SeedData:
 
         self.cursor.execute(sql_insert)
 
+
     def create_users_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS users (
             user_id INT NOT NULL,
@@ -186,16 +187,17 @@ class SeedData:
             unit_value INT(10) NOT NULL,
             qty INT(10) NOT NULL,
             price INT(10) NOT NULL,
-            discount INT(10) NOT NULL DEFAULT 0,
+            discount_rp INT(10) NOT NULL DEFAULT 0,
+            discount_pct INT(10) NOT NULL DEFAULT 0,
             sub_total INT(10) NOT NULL);'''
         
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
+        sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_pct, sub_total) 
                         VALUES 
-                        ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 10000),
-                        ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 10000),
-                        ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 10000);'''
+                        ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 10000),
+                        ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 10000),
+                        ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 10000);'''
         
         self.cursor.execute(sql_insert)
         
@@ -232,18 +234,21 @@ class SeedData:
             payment_change INT(10) NOT NULL,
             discount_transaction_id INT(10),
             discount_amount INT(10) NOT NULL DEFAULT 0,
+            tax_pct INT(10) NOT NULL DEFAULT 0,
+            tax_amount INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             payment_remarks TEXT DEFAULT ''
-
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, payment_rp, payment_change, created_at, payment_remarks) 
+        sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, payment_rp, payment_change, 
+                                                    discount_transaction_id, discount_amount, tax_pct, tax_amount, 
+                                                    created_at, payment_remarks) 
                         VALUES 
-                        ('J202502010001', 30000, 'Cash', 30000, 0, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('AB202502010002', 200000, 'Transfer', 200000, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('AB202502010003', 300000, 'Transfer', 300000, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
+                        ('J202502010001', 30000, 'Cash', 30000, 0, 1, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('AB202502010002', 200000, 'Transfer', 200000, 0, 1, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('AB202502010003', 300000, 'Transfer', 300000, 0, 1, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
 
         self.cursor.execute(sql_insert)
 

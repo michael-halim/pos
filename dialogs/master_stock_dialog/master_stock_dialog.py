@@ -120,7 +120,6 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
             self.purchasing_history_in_master_stock_table.setRowCount(0)
             self.clear_master_stock_form()
-            self.show_master_stock_data()
 
         else:
             POSMessageBox.error(self, title='Error', message=result.message)

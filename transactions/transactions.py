@@ -61,7 +61,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         
         # Set date input
         self.ui.date_transaction_input.setDate(datetime.now())
-        self.ui.date_transaction_input.setButtonSymbols(QDateEdit.ButtonSymbols.NoButtons)
         self.ui.date_transaction_input.setDisplayFormat("dd/MM/yyyy")
 
         # Add 2 items to payment method combobox
@@ -78,6 +77,19 @@ class TransactionsWindow(QtWidgets.QWidget):
     
         # Event Listeners
         #====================
+        # Connect discount radio button to update discount rp input
+        self.ui.discount_pct_transaction_radio_button.toggled.connect(self.on_discount_transaction_radio_button_toggled)
+        self.ui.discount_rp_per_item_transaction_radio_button.toggled.connect(self.on_discount_transaction_radio_button_toggled)
+        self.ui.discount_rp_total_transaction_radio_button.toggled.connect(self.on_discount_transaction_radio_button_toggled)
+
+        # Listen to discount pct input, price input, and qty input to update discount rp input
+        self.ui.discount_pct_transaction_input_2.textChanged.connect(self.on_calculate_discount_rp)
+        self.ui.discount_rp_per_item_transaction_input.textChanged.connect(self.on_calculate_discount_rp)
+        self.ui.discount_rp_total_transaction_input.textChanged.connect(self.on_calculate_discount_rp)
+
+        # Connect Tax Add, Remove
+        self.ui.add_tax_transaction_button.clicked.connect(self.add_tax_transaction)
+        self.ui.remove_tax_transaction_button.clicked.connect(self.remove_tax_transaction)
 
         # Connect table selection
         self.transactions_table.itemSelectionChanged.connect(self.on_transaction_selected)
@@ -90,6 +102,9 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Connect payment input to update payment change
         self.ui.payment_transaction_input.textChanged.connect(self.on_payment_transaction_input_changed)
+
+        # Connect tax input to update tax rp input
+        self.ui.tax_pct_transaction_input.textChanged.connect(self.on_tax_transaction_input_changed)
 
         # Connect return pressed signal
         self.ui.sku_transaction_input.returnPressed.connect(self.on_handle_sku_enter)
@@ -115,7 +130,54 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.history_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.history_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
-   
+
+    def add_tax_transaction(self):
+        self.ui.tax_pct_transaction_input.setEnabled(False)
+        self.ui.tax_pct_transaction_input.setClearButtonEnabled(False)
+        tax_rp = self.ui.tax_rp_transaction_input.text()
+
+        table_item =  TransactionTableItemModel(
+                sku = '=== TAX ===',
+                product_name = '=== TAX ===',
+                price = 0,
+                qty = 0,
+                unit = '=== TAX ===',
+                unit_value = 0,
+                discount_rp = 0,
+                discount_rp_per_item = 0,
+                discount_pct = 0,
+                subtotal = tax_rp,
+            )
+        self.set_transactions_table_data([table_item])
+        
+        # Update total amount
+        subtotal = self.calculate_total_transactions()
+        self.ui.total_transaction_input.setText(add_prefix(format_number(str(subtotal))))
+
+        # Update payment change
+        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
+
+
+    def remove_tax_transaction(self):
+        if self.ui.tax_pct_transaction_input.isEnabled():
+            return
+        
+
+        self.ui.tax_pct_transaction_input.setEnabled(True)
+        self.ui.tax_pct_transaction_input.setClearButtonEnabled(True)
+
+        # Remove from cached index
+        transaction_index_key = f'=== TAX ===_=== TAX ==='
+        if transaction_index_key in self.cached_transaction_index:
+            del self.cached_transaction_index[transaction_index_key]
+            
+        self.transactions_table.removeRow(self.transactions_table.rowCount() - 1)
+        
+        subtotal = self.calculate_total_transactions()
+        self.ui.total_transaction_input.setText(add_prefix(format_number(str(subtotal))))
+        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
+
+
     def show_history_transactions_data(self):
         pass
     
@@ -141,29 +203,17 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.transactions_table.setSortingEnabled(False)
 
         try:
-            sku: str = self.ui.sku_transaction_input.text().strip()
-            name: str = self.ui.product_name_transaction_input.text().strip()
-            price: str = remove_non_digit(self.ui.price_transaction_input.text().strip())
-            qty: str = remove_non_digit(self.ui.qty_transaction_input.text().strip())
-            unit: str = self.ui.qty_transaction_combobox.currentText().strip()
-            unit_value: str = remove_non_digit(self.ui.unit_value_transaction_input.text().strip())
-            discount_rp: str = remove_non_digit(self.ui.discount_rp_transaction_input.text()) if self.ui.discount_rp_transaction_input.text() else '0'
-            discount_pct: str = remove_non_digit(self.ui.discount_pct_transaction_input.text()) if self.ui.discount_pct_transaction_input.text() else '0'
-            amount: str = str(int(price) * int(qty))
-
-            items = [
-                TransactionTableItemModel(
-                    sku=sku, product_name=name, price=price,
-                    qty=qty, unit=unit, unit_value=unit_value,
-                    discount=discount_rp, subtotal=amount
-                )
-            ]
+            transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
             
-            self.set_transactions_table_data(items)
+            self.set_transactions_table_data([transaction_form_data])
                 
             # Update total amount
             total_amount = self.calculate_total_transactions()
             self.ui.total_transaction_input.setText(add_prefix(format_number(str(total_amount))))
+
+            # Update total discount
+            total_discount = self.calculate_total_discount()
+            self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
 
             # Update payment change
             self.set_payment_change_transaction_input(total_amount, is_color_red=True)
@@ -189,31 +239,15 @@ class TransactionsWindow(QtWidgets.QWidget):
         if selected_rows:
             self.current_selected_sku = selected_rows[0].row()
 
-            self.ui.add_transaction_button.setText('Update')
-            
             # Disconnect existing connections and connect to update function
+            self.ui.add_transaction_button.setText('Update')
             self.ui.add_transaction_button.clicked.disconnect()
             self.ui.add_transaction_button.clicked.connect(self.update_transaction)
 
-            # Get sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal
-            sku = self.transactions_table.item(self.current_selected_sku, 0).text()
-            product_name = self.transactions_table.item(self.current_selected_sku, 1).text()
-            unit = self.transactions_table.item(self.current_selected_sku, 4).text()
-            unit_value = self.transactions_table.item(self.current_selected_sku, 5).text()
-            qty = remove_non_digit(self.transactions_table.item(self.current_selected_sku, 3).text())
-            price = remove_non_digit(self.transactions_table.item(self.current_selected_sku, 2).text())
-            discount_rp = remove_non_digit(self.transactions_table.item(self.current_selected_sku, 6).text())
-            discount_pct = remove_non_digit(self.transactions_table.item(self.current_selected_sku, 7).text())
-
-            # Put the data into the form
-            self.ui.sku_transaction_input.setText(sku)
-            self.ui.product_name_transaction_input.setText(product_name)
-            self.ui.price_transaction_input.setText(price)
-            self.ui.qty_transaction_input.setText(qty)
-            self.ui.qty_transaction_combobox.setCurrentText(unit)
-            self.ui.unit_value_transaction_input.setText(unit_value)
-            self.ui.discount_rp_transaction_input.setText(discount_rp)
-            self.ui.discount_pct_transaction_input.setText(discount_pct)
+            # Get Selected Transaction Table Data
+            transaction_table_data: TransactionTableItemModel = self.get_selected_transaction_table_data()
+            
+            self.set_transaction_form_data(transaction_table_data)
 
             # Make sure only qty is editable
             self.ui.qty_transaction_input.setReadOnly(False)
@@ -229,19 +263,25 @@ class TransactionsWindow(QtWidgets.QWidget):
         if self.current_selected_sku is not None:
             try:
                 # Get the updated values
-                qty = self.ui.qty_transaction_input.text().strip()
-                price = remove_non_digit(self.ui.price_transaction_input.text())
+                transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
                 
-                # Calculate new subtotal
-                subtotal = int(price) * int(qty)
+                # Calculate new subtotal | subtotal = (price * qty) - discount_rp
+                subtotal = int(int(transaction_form_data.price) * int(transaction_form_data.qty)) - int(transaction_form_data.discount_rp)
                 
                 # Update the row in the table
-                self.transactions_table.item(self.current_selected_sku, 3).setText(format_number(qty))
-                self.transactions_table.item(self.current_selected_sku, 8).setText(add_prefix(format_number(str(subtotal))))
+                self.transactions_table.item(self.current_selected_sku, 3).setText(format_number(transaction_form_data.qty))
+                self.transactions_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(transaction_form_data.discount_pct))))
+                self.transactions_table.item(self.current_selected_sku, 7).setText(add_prefix(format_number(str(transaction_form_data.discount_rp_per_item))))
+                self.transactions_table.item(self.current_selected_sku, 8).setText(add_prefix(format_number(str(transaction_form_data.discount_rp))))
+                self.transactions_table.item(self.current_selected_sku, 9).setText(add_prefix(format_number(str(subtotal))))
                 
                 # Update total amount
                 total = self.calculate_total_transactions()
                 self.ui.total_transaction_input.setText(add_prefix(format_number(str(total))))
+
+                # Update total discount
+                total_discount = self.calculate_total_discount()
+                self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
 
                 # Update payment change
                 self.set_payment_change_transaction_input(total, is_color_red=True)
@@ -276,30 +316,38 @@ class TransactionsWindow(QtWidgets.QWidget):
             return
 
         # Confirm deletion
-        confirm = POSMessageBox.confirm(self, title="Confirm Deletion", message="Are you sure you want to delete this transaction ?")
+        confirm = POSMessageBox.confirm(self, title="Confirm Deletion", 
+                                        message="Are you sure you want to delete this transaction ?")
 
         if confirm:
             row = selected_rows[0].row()
 
             # Get the transaction details before deletion
-            sku = self.transactions_table.item(row, 0).text()
-            unit = self.transactions_table.item(row, 4).text()
-            subtotal = remove_non_digit(self.transactions_table.item(row, 8).text())
+            transaction_form_data: TransactionTableItemModel = self.get_selected_transaction_table_data()
+            sku = transaction_form_data.sku
+            unit = transaction_form_data.unit
+            subtotal = transaction_form_data.subtotal
+            discount_rp = transaction_form_data.discount_rp
 
             # Remove from cached index
             transaction_index_key = f'{sku}_{unit}'
             if transaction_index_key in self.cached_transaction_index:
                 del self.cached_transaction_index[transaction_index_key]
 
-            # Remove the row from table
-            self.transactions_table.removeRow(row)
 
             # Update total amount
             total_amount: int = self.calculate_total_transactions() - int(subtotal)
             self.ui.total_transaction_input.setText(add_prefix(format_number(str(total_amount))))
 
+            # Update total discount
+            total_discount = self.calculate_total_discount() - int(discount_rp)
+            self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
+
+            # Remove the row from table
+            self.transactions_table.removeRow(row)
+
             # Update payment change if payment exists
-            payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text())
+            payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text()) if self.ui.payment_transaction_input.text().strip() else '0'
             if payment_rp:
                 payment_change: int = int(total_amount) - int(payment_rp)
 
@@ -488,8 +536,15 @@ class TransactionsWindow(QtWidgets.QWidget):
     def calculate_total_transactions(self) -> int:
         total_amount = 0
         for row in range(self.transactions_table.rowCount()):
-            total_amount += int(remove_non_digit(self.transactions_table.item(row, 8).text()))
+            total_amount += int(remove_non_digit(self.transactions_table.item(row, 9).text()))
         return total_amount
+
+
+    def calculate_total_discount(self) -> int:
+        total_discount = 0
+        for row in range(self.transactions_table.rowCount()):
+            total_discount += int(remove_non_digit(self.transactions_table.item(row, 8).text()))
+        return total_discount
 
 
     def calculate_stock_after_transactions(self, sku: str, unit: str):
@@ -550,6 +605,10 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.discount_rp_transaction_input.clear()
         self.ui.discount_pct_transaction_input.clear()
         self.ui.payment_transaction_input.clear()
+        self.ui.discount_pct_transaction_input_2.clear()
+        self.ui.discount_rp_per_item_transaction_input.clear()
+        self.ui.discount_rp_total_transaction_input.clear()
+        self.clear_wholesale_transactions_data()
     
 
     # Getters
@@ -587,6 +646,52 @@ class TransactionsWindow(QtWidgets.QWidget):
         return detail_transactions
 
 
+    def get_transactions_form_data(self) -> TransactionTableItemModel:
+        price: int = remove_non_digit(self.ui.price_transaction_input.text()) if self.ui.price_transaction_input.text().strip() else 0
+        qty: int = remove_non_digit(self.ui.qty_transaction_input.text()) if self.ui.qty_transaction_input.text().strip() else 0
+        disc_pct: int = remove_non_digit(self.ui.discount_pct_transaction_input_2.text()) if self.ui.discount_pct_transaction_input_2.text().strip() else 0
+        disc_rp_per_item: int = remove_non_digit(self.ui.discount_rp_per_item_transaction_input.text()) if self.ui.discount_rp_per_item_transaction_input.text().strip() else 0
+        disc_rp: int = remove_non_digit(self.ui.discount_rp_total_transaction_input.text()) if self.ui.discount_rp_total_transaction_input.text().strip() else 0
+        
+        # Calculate subtotal
+        subtotal = int(int(price) * int(qty)) - int(disc_rp)
+
+        return TransactionTableItemModel(
+            sku = self.ui.sku_transaction_input.text().strip(),
+            product_name = self.ui.product_name_transaction_input.text().strip(),
+            unit = self.ui.qty_transaction_combobox.currentText().strip(),
+            unit_value = remove_non_digit(self.ui.unit_value_transaction_input.text()),
+            qty = qty,
+            price = price,
+            discount_rp = disc_rp,
+            discount_pct = disc_pct,
+            discount_rp_per_item = disc_rp_per_item,
+            subtotal = subtotal,
+        )
+    
+
+    def get_selected_transaction_table_data(self) -> TransactionTableItemModel:
+        selected_rows = self.transactions_table.selectedItems()
+        if not selected_rows:
+            return None
+
+        row = selected_rows[0].row()
+        sku = self.transactions_table.item(row, 0).text()
+        product_name = self.transactions_table.item(row, 1).text()
+        price = remove_non_digit(self.transactions_table.item(row, 2).text())
+        qty = remove_non_digit(self.transactions_table.item(row, 3).text())
+        unit = self.transactions_table.item(row, 4).text()
+        unit_value = remove_non_digit(self.transactions_table.item(row, 5).text())
+        discount_pct = remove_non_digit(self.transactions_table.item(row, 6).text())
+        discount_rp_per_item = remove_non_digit(self.transactions_table.item(row, 7).text())
+        discount_rp = remove_non_digit(self.transactions_table.item(row, 8).text())
+        subtotal = remove_non_digit(self.transactions_table.item(row, 9).text())
+
+        return TransactionTableItemModel(sku=sku, product_name=product_name, unit=unit, 
+                    unit_value=unit_value, qty=qty, price=price, discount_rp=discount_rp, 
+                    discount_pct=discount_pct, discount_rp_per_item=discount_rp_per_item, subtotal=subtotal)
+
+
     def get_total_qty_in_transactions(self, sku: str) -> int:
         total_qty = 0
         for row in range(self.transactions_table.rowCount()):
@@ -606,8 +711,8 @@ class TransactionsWindow(QtWidgets.QWidget):
             Set the index of the transaction in the cached_transaction_index
             
         '''
-        # SKU, Product_Name, Price, Qty, Unit, Unit_Value, Discount, Discount, Subtotal
-        #  0         1         2     3     4       5           6         7        8
+        # SKU, Product_Name, Price, Qty, Unit, Unit_Value, Discount Pct, Discount Per Item, Discount_Rp, Subtotal
+        #  0         1         2     3     4       5           6                  7             8           9
 
         for item in data:
             transaction_index_key = f'{item.sku}_{item.unit}'
@@ -631,8 +736,9 @@ class TransactionsWindow(QtWidgets.QWidget):
                     QtWidgets.QTableWidgetItem(format_number(item.qty)),
                     QtWidgets.QTableWidgetItem(item.unit),
                     QtWidgets.QTableWidgetItem(format_number(item.unit_value)),
-                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount))),
-                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount))),
+                    QtWidgets.QTableWidgetItem(format_number(item.discount_pct)),
+                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount_rp_per_item))),
+                    QtWidgets.QTableWidgetItem(add_prefix(format_number(item.discount_rp))),
                     QtWidgets.QTableWidgetItem(add_prefix(format_number(item.subtotal)))
                 ]
                 
@@ -693,6 +799,19 @@ class TransactionsWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.wholesale_transactions_table.setItem(current_row, col, item)
+
+
+    def set_transaction_form_data(self, data: TransactionTableItemModel):
+        self.ui.sku_transaction_input.setText(data.sku)
+        self.ui.product_name_transaction_input.setText(data.product_name)
+        self.ui.price_transaction_input.setText(add_prefix(format_number(str(data.price))))
+        self.ui.qty_transaction_input.setText(format_number(str(data.qty)))
+        self.ui.qty_transaction_combobox.setCurrentText(data.unit)
+        self.ui.unit_value_transaction_input.setText(format_number(str(data.unit_value)))
+        self.ui.discount_pct_transaction_input_2.setText(str(data.discount_pct))
+        self.ui.discount_rp_per_item_transaction_input.setText(str(data.discount_rp_per_item))
+        self.ui.discount_rp_total_transaction_input.setText(str(data.discount_rp))
+
 
 
     # Event Listeners
@@ -777,3 +896,75 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Product not found - show dialog with filter
             self.products_in_transaction_dialog.set_filter(sku)
             self.products_in_transaction_dialog.show()
+
+
+    def on_discount_transaction_radio_button_toggled(self):
+        if self.ui.discount_pct_transaction_radio_button.isChecked():
+            self.ui.discount_pct_transaction_input_2.clear()
+            self.ui.discount_pct_transaction_input_2.setEnabled(True)
+            self.ui.discount_pct_transaction_input_2.setClearButtonEnabled(True)
+
+            self.ui.discount_rp_per_item_transaction_input.setEnabled(False)
+            self.ui.discount_rp_per_item_transaction_input.setText('0')
+            self.ui.discount_rp_per_item_transaction_input.setClearButtonEnabled(False)
+            
+            self.ui.discount_rp_total_transaction_input.setEnabled(False)
+            self.ui.discount_rp_total_transaction_input.setText('0')
+            self.ui.discount_rp_total_transaction_input.setClearButtonEnabled(False)
+
+        elif self.ui.discount_rp_per_item_transaction_radio_button.isChecked():
+            self.ui.discount_rp_per_item_transaction_input.clear()
+            self.ui.discount_rp_per_item_transaction_input.setEnabled(True)
+            self.ui.discount_rp_per_item_transaction_input.setClearButtonEnabled(True)
+            
+            self.ui.discount_pct_transaction_input_2.setEnabled(False)
+            self.ui.discount_pct_transaction_input_2.setText('0')
+            self.ui.discount_pct_transaction_input_2.setClearButtonEnabled(False)
+
+            self.ui.discount_rp_total_transaction_input.setEnabled(False)
+            self.ui.discount_rp_total_transaction_input.setText(add_prefix('0'))
+            self.ui.discount_rp_total_transaction_input.setClearButtonEnabled(False)
+
+        elif self.ui.discount_rp_total_transaction_radio_button.isChecked():
+            self.ui.discount_rp_total_transaction_input.clear()
+            self.ui.discount_rp_total_transaction_input.setEnabled(True)
+            self.ui.discount_rp_total_transaction_input.setClearButtonEnabled(True)
+
+            self.ui.discount_rp_per_item_transaction_input.setEnabled(False)
+            self.ui.discount_rp_per_item_transaction_input.setText('0')
+            self.ui.discount_rp_per_item_transaction_input.setClearButtonEnabled(False)
+
+            self.ui.discount_pct_transaction_input_2.setEnabled(False)
+            self.ui.discount_pct_transaction_input_2.setText('0')
+            self.ui.discount_pct_transaction_input_2.setClearButtonEnabled(False)
+
+
+    def on_calculate_discount_rp(self):
+        if self.ui.discount_rp_total_transaction_radio_button.isChecked():
+            return
+        
+        # Get Form Data
+        transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
+        price = transaction_form_data.price
+        qty = transaction_form_data.qty
+
+        discounted_rp = 0
+        if self.ui.discount_rp_per_item_transaction_radio_button.isChecked():
+            discount_rp_per_item = transaction_form_data.discount_rp_per_item
+            discounted_rp = int(qty) * int(discount_rp_per_item)
+
+        elif self.ui.discount_pct_transaction_radio_button.isChecked():
+            discount_pct = transaction_form_data.discount_pct
+            discounted_rp = int((int(price) * int(qty) * int(discount_pct)) / 100)
+
+        # Calculate Discount Rp
+        self.ui.discount_rp_total_transaction_input.setText(add_prefix(format_number(str(discounted_rp))))
+
+
+    def on_tax_transaction_input_changed(self):
+        tax_pct = remove_non_digit(self.ui.tax_pct_transaction_input.text()) if self.ui.tax_pct_transaction_input.text() else 0
+        total_amount = self.calculate_total_transactions()
+
+        # Calculate tax rp  
+        tax_rp = int(int(total_amount) * int(tax_pct) / 100)
+        self.ui.tax_rp_transaction_input.setText(add_prefix(format_number(str(tax_rp))))

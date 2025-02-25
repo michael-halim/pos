@@ -25,7 +25,8 @@ class DetailTransactionModel:
     unit_value: int
     qty: int
     price: int
-    discount: int
+    discount_rp: int
+    discount_pct: int
     subtotal: int
 
 
@@ -37,8 +38,9 @@ class TransactionModel:
     payment_amount: int
     payment_change: int
     payment_remarks: str
+    tax_pct: int
+    tax_rp: int
     created_at: datetime
-
 
 @dataclass 
 class PendingTransactionModel:
@@ -58,5 +60,7 @@ class TransactionTableItemModel:
     qty: int
     unit: str
     unit_value: int
-    discount: int
+    discount_pct: int
+    discount_rp_per_item: int
+    discount_rp: int
     subtotal: int
