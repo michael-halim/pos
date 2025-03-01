@@ -4,18 +4,21 @@ from datetime import datetime
 
 from helper import format_number, add_prefix, remove_non_digit
 
-from transactions.pending_transactions import PendingTransactionsWindow
+from dialogs.pending_transactions_dialog.pending_transactions_dialog import PendingTransactionsDialogWindow
 
 from transactions.services.transaction_service import TransactionService
 
-from transactions.models.transactions_models import TransactionTableItemModel, PendingTransactionModel, TransactionModel, DetailTransactionModel
+from transactions.models.transactions_models import TransactionTableItemModel, TransactionModel, DetailTransactionModel, PurchasingHistoryTableItemModel
+from dialogs.pending_transactions_dialog.models.pending_transactions_dialog_models import PendingTransactionModel
 from transactions.models.wholesale_models import WholesaleTableModel
 
 from dialogs.products_dialog.products_dialog import ProductsDialogWindow
+from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, TAX_TABLE_KEY
 from generals.build import resource_path
+
 
 class TransactionsWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -28,13 +31,16 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.transaction_service = TransactionService()
 
         # Init Dialog
-        self.products_in_transaction_dialog = ProductsDialogWindow()
-        self.pending_transactions_dialog = PendingTransactionsWindow()
-
+        self.products_dialog = ProductsDialogWindow()
+        self.pending_transactions_dialog = PendingTransactionsDialogWindow()
+        self.customers_dialog = CustomersDialogWindow()
 
         # Connect the product_selected signal to handle_product_selected method
-        self.products_in_transaction_dialog.product_selected.connect(self.handle_product_selected)
+        self.products_dialog.product_selected.connect(self.handle_product_selected)
         self.pending_transactions_dialog.pending_transaction_selected.connect(self.handle_pending_transaction_selected)
+
+        # Connect the customer_selected signal to handle_customer_selected method
+        self.customers_dialog.customer_selected.connect(self.handle_customer_selected)
 
         # Connect Filter Transactions
         self.ui.filter_transaction_input.textChanged.connect(self.filter_transactions)
@@ -52,13 +58,14 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.clear_data_transaction_button.clicked.connect(self.clear_data_transaction)
         self.ui.clear_transaction_button.clicked.connect(self.clear_transaction)
         self.ui.add_transaction_button.clicked.connect(self.add_transaction)
-        self.ui.find_sku_transaction_button.clicked.connect(lambda: self.products_in_transaction_dialog.show())
+        self.ui.find_sku_transaction_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.edit_transaction_button.clicked.connect(self.edit_transaction)
         self.ui.delete_transaction_button.clicked.connect(self.delete_transaction)
         self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
         self.ui.pending_transaction_button.clicked.connect(self.create_pending_transaction)
         self.ui.open_pending_transaction_button.clicked.connect(lambda: self.pending_transactions_dialog.showMaximized())
-        
+        self.ui.find_customer_transaction_button.clicked.connect(lambda: self.customers_dialog.show())
+
         # Set date input
         self.ui.date_transaction_input.setDate(datetime.now())
         self.ui.date_transaction_input.setDisplayFormat("dd/MM/yyyy")
@@ -109,6 +116,10 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Connect return pressed signal
         self.ui.sku_transaction_input.returnPressed.connect(self.on_handle_sku_enter)
 
+        # Connect customer id input to update customer name input
+        self.ui.customer_id_transaction_input.returnPressed.connect(self.on_handle_customer_enter)
+
+
         # Set selection behavior to select entire rows
         self.transactions_table.setSelectionBehavior(SELECT_ROWS)
         self.transactions_table.setSelectionMode(SINGLE_SELECTION)
@@ -137,11 +148,11 @@ class TransactionsWindow(QtWidgets.QWidget):
         tax_rp = self.ui.tax_rp_transaction_input.text()
 
         table_item =  TransactionTableItemModel(
-                sku = '=== TAX ===',
-                product_name = '=== TAX ===',
+                sku = TAX_TABLE_KEY,
+                product_name = TAX_TABLE_KEY,
                 price = 0,
                 qty = 0,
-                unit = '=== TAX ===',
+                unit = TAX_TABLE_KEY,
                 unit_value = 0,
                 discount_rp = 0,
                 discount_rp_per_item = 0,
@@ -167,7 +178,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.tax_pct_transaction_input.setClearButtonEnabled(True)
 
         # Remove from cached index
-        transaction_index_key = f'=== TAX ===_=== TAX ==='
+        transaction_index_key = f'{TAX_TABLE_KEY}_{TAX_TABLE_KEY}'
         if transaction_index_key in self.cached_transaction_index:
             del self.cached_transaction_index[transaction_index_key]
             
@@ -178,8 +189,16 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
 
 
-    def show_history_transactions_data(self):
-        pass
+    def show_history_transactions_data(self, sku: str):
+        self.clear_history_transactions_data()
+
+        if sku == '':
+            sku = self.ui.sku_transaction_input.text().strip()
+        
+        result = self.transaction_service.get_purchasing_history_by_sku(sku)
+
+        if result.success and result.data:
+            self.set_purchasing_history_table_data(result.data)
     
     
     def show_wholesale_transactions_data(self, sku: str):
@@ -238,6 +257,9 @@ class TransactionsWindow(QtWidgets.QWidget):
         selected_rows = self.transactions_table.selectedItems()
         if selected_rows:
             self.current_selected_sku = selected_rows[0].row()
+            if self.transactions_table.item(self.current_selected_sku, 0).text() == TAX_TABLE_KEY:
+                POSMessageBox.error(self, title='Error', message="Tax can only be removed or added")
+                return
 
             # Disconnect existing connections and connect to update function
             self.ui.add_transaction_button.setText('Update')
@@ -255,8 +277,6 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.price_transaction_input.setEnabled(False)
             self.ui.product_name_transaction_input.setEnabled(False)
             self.ui.unit_value_transaction_input.setEnabled(False)
-            self.ui.discount_rp_transaction_input.setEnabled(False)
-            self.ui.discount_pct_transaction_input.setEnabled(False)
 
 
     def update_transaction(self):
@@ -286,6 +306,11 @@ class TransactionsWindow(QtWidgets.QWidget):
                 # Update payment change
                 self.set_payment_change_transaction_input(total, is_color_red=True)
 
+                # Re-calculate tax if any
+                self.remove_tax_transaction()
+                self.on_tax_transaction_input_changed()
+                self.add_tax_transaction()
+
                 # Reset the form
                 self.clear_data_transaction()
                 
@@ -299,8 +324,6 @@ class TransactionsWindow(QtWidgets.QWidget):
                 
                 # Re-enable all inputs
                 self.ui.sku_transaction_input.setEnabled(True)
-                self.ui.discount_rp_transaction_input.setEnabled(True)
-                self.ui.discount_pct_transaction_input.setEnabled(True)
 
                 # Clear wholesale transactions data
                 self.clear_wholesale_transactions_data()
@@ -315,6 +338,11 @@ class TransactionsWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title='Warning', message="Please select a transaction to delete")
             return
 
+
+        if self.transactions_table.item(selected_rows[0].row(), 0).text() == TAX_TABLE_KEY:
+            POSMessageBox.error(self, title='Error', message="Tax can only be removed or added")
+            return
+
         # Confirm deletion
         confirm = POSMessageBox.confirm(self, title="Confirm Deletion", 
                                         message="Are you sure you want to delete this transaction ?")
@@ -326,26 +354,29 @@ class TransactionsWindow(QtWidgets.QWidget):
             transaction_form_data: TransactionTableItemModel = self.get_selected_transaction_table_data()
             sku = transaction_form_data.sku
             unit = transaction_form_data.unit
-            subtotal = transaction_form_data.subtotal
-            discount_rp = transaction_form_data.discount_rp
 
             # Remove from cached index
             transaction_index_key = f'{sku}_{unit}'
             if transaction_index_key in self.cached_transaction_index:
                 del self.cached_transaction_index[transaction_index_key]
 
-
-            # Update total amount
-            total_amount: int = self.calculate_total_transactions() - int(subtotal)
-            self.ui.total_transaction_input.setText(add_prefix(format_number(str(total_amount))))
-
-            # Update total discount
-            total_discount = self.calculate_total_discount() - int(discount_rp)
-            self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
-
             # Remove the row from table
             self.transactions_table.removeRow(row)
 
+            # Update total amount
+            total_amount: int = self.calculate_total_transactions()
+            self.ui.total_transaction_input.setText(add_prefix(format_number(str(total_amount))))
+
+            # Update total discount
+            total_discount = self.calculate_total_discount()
+            self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
+
+            # Re-calculate tax if any
+            self.remove_tax_transaction()
+            self.on_tax_transaction_input_changed()
+            self.add_tax_transaction()  
+
+            
             # Update payment change if payment exists
             payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text()) if self.ui.payment_transaction_input.text().strip() else '0'
             if payment_rp:
@@ -370,12 +401,15 @@ class TransactionsWindow(QtWidgets.QWidget):
             return
 
         # Create transaction id
-        transaction_id: str = self.transaction_service.create_transaction_id()
+        transaction_id: str = self.transaction_service.create_transaction_id(is_pending=False)
         for detail in detail_transactions_data:
             detail.transaction_id = transaction_id
 
         # Calculate total amount
         total_amount: int = self.calculate_total_transactions()
+
+        # Calculate total discount
+        total_discount: int = self.calculate_total_discount()
 
         # Calculate payment change
         payment_change: int = total_amount - int(payment_rp)
@@ -383,16 +417,21 @@ class TransactionsWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title='Error', message="Payment cannot be less than total amount")
             return
 
-        
+        customer_id: str = self.ui.customer_id_transaction_input.text().strip() if self.ui.customer_id_transaction_input.text().strip() else None
+
         # Create transaction data
         transaction_data: TransactionModel = TransactionModel(
+            customer_id = customer_id,
             transaction_id = transaction_id,
             total_amount = total_amount,
+            total_discount = total_discount,
+            payment_method = self.ui.payment_method_transaction_combobox.currentText(),
             payment_amount = payment_rp,
             payment_change = payment_change,
-            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            payment_method = self.ui.payment_method_transaction_combobox.currentText(),
             payment_remarks = self.ui.remarks_transaction_input.toPlainText().strip(),
+            tax_pct = self.ui.tax_pct_transaction_input.text(),
+            tax_amount = self.ui.tax_rp_transaction_input.text(),
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         )
 
         # Submit transaction
@@ -409,7 +448,8 @@ class TransactionsWindow(QtWidgets.QWidget):
 
     def create_pending_transaction(self):
         transaction_id: str = self.transaction_service.create_transaction_id(is_pending=True)
-
+        customer_id: str = self.ui.customer_id_transaction_input.text().strip() if self.ui.customer_id_transaction_input.text().strip() else None
+        
         # Get detail transactions from transactions table
         detail_transactions_data: list[DetailTransactionModel] = self.get_detail_transactions()
         for detail in detail_transactions_data:
@@ -422,24 +462,29 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Calculate total amount
         total_amount: int = self.calculate_total_transactions()
 
+        # Calculate total discount
+        total_discount: int = self.calculate_total_discount()
+
         # Create pending transaction data
         pending_transaction_data: PendingTransactionModel = PendingTransactionModel(
             transaction_id = transaction_id,
+            customer_id = customer_id,
             total_amount = total_amount,
             discount_transaction_id = 1,
-            discount_amount = 0,
+            discount_amount = total_discount,
             created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             payment_remarks = self.ui.remarks_transaction_input.toPlainText().strip()
         )
 
         result = self.transaction_service.create_pending_transaction(pending_transaction_data, detail_transactions_data)
         if result.success:
-            POSMessageBox.info(self, "Success", result.message)
-        else:
-            POSMessageBox.error(self, "Error", result.message)
+            POSMessageBox.info(self, title="Success", message=result.message)
+            
+            # Clear the transactions table and total
+            self.clear_transaction()
 
-        # Clear the transactions table and total
-        self.clear_transaction()
+        else:
+            POSMessageBox.error(self, title="Error", message=result.message)
 
     
     def filter_transactions(self):
@@ -469,21 +514,40 @@ class TransactionsWindow(QtWidgets.QWidget):
     # Signal Handlers
     #================
     def handle_pending_transaction_selected(self, pending_transaction_data):
-        result = self.transaction_service.get_pending_transactions_by_transaction_id(pending_transaction_data['transaction_id'])
-        if result['message'].success == False:
-            POSMessageBox.error(self, "Error", result['message'].message)
+        # Get pending transaction data
+        result_pending_transaction = self.transaction_service.get_pending_transactions_by_id(pending_transaction_data['transaction_id'])
+        if result_pending_transaction.success == False:
+            POSMessageBox.error(self, title="Error", message=result_pending_transaction.message)
+            return
+        
+        # Get pending transaction details
+        result_pending_details = self.transaction_service.get_pending_transactions_details_by_id(pending_transaction_data['transaction_id'])
+        if result_pending_details.success == False:
+            POSMessageBox.error(self, title="Error", message=result_pending_details.message)
+            return
+
+        # Get customer data
+        result_customer = self.transaction_service.get_customer_by_id(result_pending_transaction.data.customer_id)
+        if result_customer.success == False:
+            POSMessageBox.error(self, title="Error", message=result_customer.message)
             return
 
 
+        # Set customer data
+        self.ui.customer_id_transaction_input.setText(result_pending_transaction.data.customer_id)
+        self.ui.customer_name_transaction_input.setText(result_customer.data)
+
         # Put the data into transactions table
-        self.set_transactions_table_data(result['data'])
+        self.set_transactions_table_data(result_pending_details.data)
 
         # Calculate total transactions
         subtotal = self.calculate_total_transactions()
-
-        # Update total transactions
         self.ui.total_transaction_input.setText(add_prefix(format_number(str(subtotal))))
-        
+
+        # Calculate total discount
+        total_discount = self.calculate_total_discount()
+        self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
+
         # Update payment change
         self.set_payment_change_transaction_input(subtotal, is_color_red=True)
 
@@ -524,11 +588,21 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Show wholesale transactions data
         self.show_wholesale_transactions_data(sku)
 
+        # Show purchasing history data
+        self.show_history_transactions_data(sku)
+
         # Trigger qty input changed event
         self.on_qty_transaction_input_changed()
 
         # Reset loading flag
         self.is_loading_combo = False
+
+
+    def handle_customer_selected(self, customer_data):
+        self.ui.customer_id_transaction_input.setText(customer_data['customer_id'])
+        result = self.transaction_service.get_customer_by_id(customer_data['customer_id'])
+        if result.success:
+            self.ui.customer_name_transaction_input.setText(result.data)
 
 
     # Calculate
@@ -582,6 +656,10 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.wholesale_transactions_table.setRowCount(0)
 
 
+    def clear_history_transactions_data(self):
+        self.history_transactions_table.setRowCount(0)
+
+
     def clear_transaction(self):
         # Remove All Items from Transactions Table
         self.transactions_table.setRowCount(0)
@@ -590,6 +668,8 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.cached_transaction_index = {}
         self.cached_qty = {}
         self.current_selected_sku = None
+        self.ui.customer_id_transaction_input.clear()
+        self.ui.customer_name_transaction_input.clear()
         self.clear_data_transaction()
 
 
@@ -602,13 +682,12 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.unit_value_transaction_input.clear()
         self.ui.qty_transaction_input.clear()
         self.ui.qty_transaction_combobox.clear()
-        self.ui.discount_rp_transaction_input.clear()
-        self.ui.discount_pct_transaction_input.clear()
         self.ui.payment_transaction_input.clear()
         self.ui.discount_pct_transaction_input_2.clear()
         self.ui.discount_rp_per_item_transaction_input.clear()
         self.ui.discount_rp_total_transaction_input.clear()
         self.clear_wholesale_transactions_data()
+        self.clear_history_transactions_data()
     
 
     # Getters
@@ -621,14 +700,18 @@ class TransactionsWindow(QtWidgets.QWidget):
         '''
         detail_transactions: list[DetailTransactionModel] = []
         for row in range(self.transactions_table.rowCount()):
+            if self.transactions_table.item(row, 0).text() == TAX_TABLE_KEY:
+                continue
+
             sku = self.transactions_table.item(row, 0).text()
             price = remove_non_digit(self.transactions_table.item(row, 2).text())
             qty = remove_non_digit(self.transactions_table.item(row, 3).text())
             unit = self.transactions_table.item(row, 4).text()
             unit_value = self.transactions_table.item(row, 5).text()
-            discount_rp = remove_non_digit(self.transactions_table.item(row, 6).text())
-            discount_pct = remove_non_digit(self.transactions_table.item(row, 7).text())
-            subtotal = remove_non_digit(self.transactions_table.item(row, 8).text())
+            discount_pct = remove_non_digit(self.transactions_table.item(row, 6).text())
+            discount_rp_per_item = remove_non_digit(self.transactions_table.item(row, 7).text())
+            discount_rp = remove_non_digit(self.transactions_table.item(row, 8).text())
+            subtotal = remove_non_digit(self.transactions_table.item(row, 9).text())
 
             detail_transactions.append(
                 DetailTransactionModel(
@@ -638,7 +721,9 @@ class TransactionsWindow(QtWidgets.QWidget):
                     qty = qty,
                     unit = unit,
                     unit_value = unit_value,
-                    discount = discount_rp,
+                    discount_rp = discount_rp,
+                    discount_rp_per_item = discount_rp_per_item,
+                    discount_pct = discount_pct,
                     subtotal = subtotal,
                 )
             )
@@ -652,7 +737,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         disc_pct: int = remove_non_digit(self.ui.discount_pct_transaction_input_2.text()) if self.ui.discount_pct_transaction_input_2.text().strip() else 0
         disc_rp_per_item: int = remove_non_digit(self.ui.discount_rp_per_item_transaction_input.text()) if self.ui.discount_rp_per_item_transaction_input.text().strip() else 0
         disc_rp: int = remove_non_digit(self.ui.discount_rp_total_transaction_input.text()) if self.ui.discount_rp_total_transaction_input.text().strip() else 0
-        
+
         # Calculate subtotal
         subtotal = int(int(price) * int(qty)) - int(disc_rp)
 
@@ -811,7 +896,29 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.discount_pct_transaction_input_2.setText(str(data.discount_pct))
         self.ui.discount_rp_per_item_transaction_input.setText(str(data.discount_rp_per_item))
         self.ui.discount_rp_total_transaction_input.setText(str(data.discount_rp))
+    
 
+    def set_purchasing_history_table_data(self, data: list[PurchasingHistoryTableItemModel]):
+        # Clear Purchasing History Table
+        self.history_transactions_table.setRowCount(0)
+
+        for purchasing_history in data:
+            current_row = self.history_transactions_table.rowCount()
+            self.history_transactions_table.insertRow(current_row)
+
+            # Convert created_at string to datetime and format
+            created_at_dt = datetime.strptime(purchasing_history.created_at, '%Y-%m-%d %H:%M:%S')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+
+            table_items =  [ 
+                QtWidgets.QTableWidgetItem(formatted_date),
+                QtWidgets.QTableWidgetItem(format_number(purchasing_history.qty)),
+                QtWidgets.QTableWidgetItem(purchasing_history.unit),
+            ]
+            
+            for col, item in enumerate(table_items):
+                item.setFont(POSFonts.get_font(size=12))
+                self.history_transactions_table.setItem(current_row, col, item)
 
 
     # Event Listeners
@@ -891,11 +998,12 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Product found - fill the form
             self.handle_product_selected({'sku' : sku})
             self.show_wholesale_transactions_data(sku)
-            
+            self.show_history_transactions_data(sku)
+
         else:
             # Product not found - show dialog with filter
-            self.products_in_transaction_dialog.set_filter(sku)
-            self.products_in_transaction_dialog.show()
+            self.products_dialog.set_filter(sku)
+            self.products_dialog.show()
 
 
     def on_discount_transaction_radio_button_toggled(self):
@@ -968,3 +1076,21 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Calculate tax rp  
         tax_rp = int(int(total_amount) * int(tax_pct) / 100)
         self.ui.tax_rp_transaction_input.setText(add_prefix(format_number(str(tax_rp))))
+
+
+    def on_handle_customer_enter(self):
+        customer_id = self.ui.customer_id_transaction_input.text().strip().upper()
+        if not customer_id:
+            return
+
+        # Try to find exact customer match
+        result = self.transaction_service.get_customer_by_id(customer_id)
+
+        if result.success and result.data:
+            # Customer found - fill the form
+            self.ui.customer_name_transaction_input.setText(result.data)
+            
+        else:
+            # Customer not found - show dialog with filter
+            self.customers_dialog.set_filter(customer_id)
+            self.customers_dialog.show()

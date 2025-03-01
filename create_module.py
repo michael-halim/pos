@@ -45,9 +45,8 @@ class {module_name.replace('_', ' ').title().replace(' ', '')}Model:
     description: Optional[str] = None
 '''
                 elif "repositories" in file_path:
-                    content = f'''from typing import List, Optional
-from datetime import datetime, timedelta
-from connect_db import DatabaseConnection
+                    content = f'''from connect_db import DatabaseConnection
+from response.response_message import ResponseMessage
 
 class {module_name.replace('_', ' ').title().replace(' ', '')}Repository:
     def __init__(self):

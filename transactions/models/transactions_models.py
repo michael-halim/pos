@@ -26,25 +26,29 @@ class DetailTransactionModel:
     qty: int
     price: int
     discount_rp: int
+    discount_rp_per_item: int
     discount_pct: int
     subtotal: int
 
 
 @dataclass
 class TransactionModel:
+    customer_id: str | None
     transaction_id: str
     total_amount: int
+    total_discount: int
     payment_method: str
     payment_amount: int
     payment_change: int
     payment_remarks: str
     tax_pct: int
-    tax_rp: int
+    tax_amount: int
     created_at: datetime
 
 @dataclass 
 class PendingTransactionModel:
     transaction_id: str
+    customer_id: str | None
     total_amount: int
     discount_transaction_id: str
     discount_amount: int
@@ -64,3 +68,11 @@ class TransactionTableItemModel:
     discount_rp_per_item: int
     discount_rp: int
     subtotal: int
+
+
+@dataclass
+class PurchasingHistoryTableItemModel:
+    created_at: datetime
+    qty: int
+    unit: str
+

@@ -1,22 +1,18 @@
-from typing import List
-
-
-# Import Models
-from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from ..models.transactions_models import PendingTransactionModel, TransactionTableItemModel
-
-
 from connect_db import DatabaseConnection
 from datetime import datetime, timedelta
+from typing import List
+
+from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
+from ..models.transactions_models import PendingTransactionModel, TransactionTableItemModel, PurchasingHistoryTableItemModel
+
 from ..models.result import ResponseMessage
-
-
 
 class TransactionRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
     
+
     def submit_transaction(self, transaction: TransactionModel, detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
         try:
             # Start transaction
@@ -26,19 +22,21 @@ class TransactionRepository:
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Insert main transaction first
-            sql = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, 
-                                            payment_rp, payment_change, created_at, payment_remarks) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            sql = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
+                                                discount_amount, tax_pct, tax_amount, created_at, payment_remarks) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
             
             transaction_id = transaction.transaction_id
-            self.cursor.execute(sql, (transaction_id, transaction.total_amount, transaction.payment_method, 
-                                      transaction.payment_amount, transaction.payment_change, current_time, transaction.payment_remarks))
+
+            self.cursor.execute(sql, (transaction_id, transaction.customer_id, transaction.total_amount, transaction.payment_method, 
+                                      transaction.payment_amount, transaction.payment_change, transaction.total_discount, 
+                                      transaction.tax_pct, transaction.tax_amount, current_time, transaction.payment_remarks))
             
 
             # Insert all detail transactions
             sql = '''INSERT INTO detail_transactions 
-                    (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+                    (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
                 
 
             for detail in detail_transactions:  
@@ -49,7 +47,8 @@ class TransactionRepository:
                 stock_affected: int = int(qty) * int(unit_value)
                 # Insert detail transaction
                 self.cursor.execute(sql, (detail.transaction_id, sku, unit, unit_value, 
-                                          qty, detail.price,  detail.discount, detail.subtotal))
+                                          qty, detail.price, detail.discount_rp, detail.discount_rp_per_item, 
+                                          detail.discount_pct, detail.subtotal))
                 
                 # Update product stock
                 update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
@@ -72,17 +71,40 @@ class TransactionRepository:
         tomorrow = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
 
         # Get count of all transactions today   
-        sql = '''SELECT COUNT(*) FROM transactions WHERE created_at >= ? and created_at < ?'''
+        if is_pending:
+            sql = '''SELECT COUNT(*) FROM pending_transactions WHERE created_at >= ? and created_at < ?'''
+        else:
+            sql = '''SELECT COUNT(*) FROM transactions WHERE created_at >= ? and created_at < ?'''
+
         self.cursor.execute(sql, (f'{today}', f'{tomorrow}'))
 
         transaction_count_today = self.cursor.fetchone()[0]
         transaction_count_today += 1
 
+        transaction_id = f'A{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
         if is_pending:
-            return f'P{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
+            transaction_id = f'P{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
 
-        return f'A{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
-        
+        while True:
+            sql = '''SELECT COUNT(*) FROM transactions WHERE transaction_id = ?'''
+            if is_pending:
+                sql = '''SELECT COUNT(*) FROM pending_transactions WHERE transaction_id = ?'''
+
+            self.cursor.execute(sql, (transaction_id,))
+            count_id = self.cursor.fetchone()[0]
+
+            if count_id == 0:
+                break
+
+            transaction_count_today += 1
+            transaction_id = f'A{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
+            if is_pending:
+                transaction_id = f'P{datetime.now().strftime("%Y%m%d")}{transaction_count_today:04d}'
+
+        return transaction_id
+
+
+
     def create_pending_transaction(self, pending_transaction: PendingTransactionModel, detail_transactions: List[DetailTransactionModel]):
         try:
             # Start transaction
@@ -92,25 +114,25 @@ class TransactionRepository:
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Insert main transaction first
-            sql = '''INSERT INTO pending_transactions (transaction_id, total_amount, discount_transaction_id, discount_amount, created_at, payment_remarks) 
-                    VALUES (?, ?, ?, ?, ?, ?)'''
+            sql = '''INSERT INTO pending_transactions (transaction_id, customer_id, total_amount, discount_transaction_id, discount_amount, created_at, payment_remarks) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
             
-            self.cursor.execute(sql, (pending_transaction.transaction_id,  pending_transaction.total_amount, 
+            self.cursor.execute(sql, (pending_transaction.transaction_id, pending_transaction.customer_id, pending_transaction.total_amount, 
                                       pending_transaction.discount_transaction_id, pending_transaction.discount_amount, 
                                       current_time, pending_transaction.payment_remarks))
             
             # Insert all detail transactions
             sql = '''INSERT INTO pending_detail_transactions 
 
-                    (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+                    (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
                 
 
             for detail in detail_transactions:
                 # Insert detail transaction
                 self.cursor.execute(sql, (detail.transaction_id,  detail.sku, detail.unit, 
-                                          detail.unit_value, detail.qty, detail.price, detail.discount, 
-                                          detail.subtotal))
+                                          detail.unit_value, detail.qty, detail.price, detail.discount_rp, 
+                                          detail.discount_rp_per_item, detail.discount_pct, detail.subtotal))
                 
 
             # If everything successful, commit the transaction
@@ -124,12 +146,42 @@ class TransactionRepository:
 
             return ResponseMessage.fail(f"Failed to create pending transaction: {str(e)}")
 
-    def get_pending_transactions_by_transaction_id(self, transaction_id: str):
+
+    def get_pending_transactions_by_id(self, transaction_id: str):
+        try:
+            sql = '''SELECT pt.transaction_id, pt.customer_id, pt.total_amount, pt.discount_transaction_id, 
+                            pt.discount_amount, pt.created_at, pt.payment_remarks
+                    FROM pending_transactions pt
+                    WHERE pt.transaction_id = ?
+                    LIMIT 1'''
+            
+            self.cursor.execute(sql, (transaction_id,))
+            
+            result = self.cursor.fetchone()
+
+            pending_transactions = PendingTransactionModel(
+                transaction_id=result[0], customer_id=result[1], total_amount=result[2], discount_transaction_id=result[3],
+                discount_amount=result[4], created_at=result[5], payment_remarks=result[6]
+            )
+
+            return ResponseMessage.ok(
+                message="Transaction pending successfully!",
+                data=pending_transactions
+            )
+
+        except Exception as e:
+            # If any error occurs, rollback all changes
+            self.db.rollback()
+            return ResponseMessage.fail(f"Failed to add transaction: {str(e)}")
+
+
+    def get_pending_transactions_details_by_id(self, transaction_id: str):
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
-            sql = '''SELECT pdt.sku, p.product_name, pdt.price, pdt.qty, pdt.unit, pdt.unit_value, pdt.discount, pdt.sub_total 
+            sql = '''SELECT p.sku, p.product_name, pdt.price, pdt.qty, pdt.unit, pdt.unit_value, pdt.discount_pct, 
+                            pdt.discount_rp_per_item, pdt.discount_rp, pdt.sub_total
                     FROM pending_detail_transactions pdt
                     JOIN products p ON p.sku = pdt.sku and p.unit = pdt.unit
                     WHERE pdt.transaction_id = ?'''
@@ -157,41 +209,44 @@ class TransactionRepository:
                         sku=r[0], product_name=r[1],
                         price=r[2],qty=r[3],
                         unit=r[4],unit_value=r[5],
-                        discount=r[6], subtotal=r[7]
+                        discount_pct=r[6], discount_rp_per_item=r[7],
+                        discount_rp=r[8], subtotal=r[9]
                     )
                 )
 
-            return {
-                'message': ResponseMessage.ok("Transaction pending successfully!"),
-                'data': pending_detail_transactions
-            }
+            return ResponseMessage.ok(
+                message="Transaction pending successfully!",
+                data=pending_detail_transactions
+            )
 
         except Exception as e:
             # If any error occurs, rollback all changes
             self.db.rollback()
+            return ResponseMessage.fail(f"Failed to add transaction: {str(e)}")
 
-            return {
-                'message': ResponseMessage.fail(f"Failed to add transaction: {str(e)}"),
-                'data': []
-            }
 
     def get_product_unit_details(self, sku: str) -> list[ProductUnitDetailModel]:
-        sql = '''SELECT u.unit, u.unit_value, u.price 
-                    FROM units u
-                    WHERE u.sku = ?'''
+        try:
+            sql = '''SELECT u.unit, u.unit_value, u.price 
+                        FROM units u
+                        WHERE u.sku = ?'''
 
-        self.cursor.execute(sql, (sku,))
-        results =  self.cursor.fetchall()
+            self.cursor.execute(sql, (sku,))
+            results =  self.cursor.fetchall()
 
-        if results:
-            product_unit_details = [
-                ProductUnitDetailModel(unit=r[0], unit_value=r[1], price=r[2]) 
-                for r in results
-            ]
-            return product_unit_details
+            if results:
+                product_unit_details = [
+                    ProductUnitDetailModel(unit=r[0], unit_value=r[1], price=r[2]) 
+                    for r in results
+                ]
+                return product_unit_details
 
-        return []
-    
+            return []
+        
+        except Exception as e:
+            return []
+        
+
     def get_product_by_sku(self, sku: str):
         try:
             sql = 'SELECT product_name, price, unit, stock FROM products WHERE sku = ?'
@@ -218,3 +273,61 @@ class TransactionRepository:
                 'data': None
             }
 
+
+    def get_customer_by_id(self, customer_id: str):
+        try:
+            sql = '''SELECT customer_name
+                            FROM customers 
+                     WHERE customer_id = ? 
+                     LIMIT 1'''
+            
+            self.cursor.execute(sql, (customer_id,))
+            result = self.cursor.fetchone()
+            
+            if result:
+                return ResponseMessage.ok(
+                    message="Customer fetched successfully!",
+                    data=result[0]
+                )
+            
+            return ResponseMessage.ok(
+                message="Customer not found!",
+                data=None
+            )
+            
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+
+
+    def get_purchasing_history_by_sku(self, sku: str):
+        try:
+            sql = '''SELECT ph.created_at, dph.qty, dph.unit
+                    FROM detail_purchasing_history dph 
+                    JOIN purchasing_history ph on ph.purchasing_id = dph.purchasing_id
+                    WHERE dph.sku = ?
+                    ORDER BY ph.created_at DESC'''
+            
+            self.cursor.execute(sql, (sku,))
+
+            purchasing_history_results = self.cursor.fetchall()
+
+            if purchasing_history_results:
+                purchasing_history = [
+                    PurchasingHistoryTableItemModel(created_at=ph[0], 
+                                                    qty=ph[1], 
+                                                    unit=ph[2]) 
+                    for ph in purchasing_history_results
+                ]
+
+                return ResponseMessage.ok(
+                    message="Purchasing history fetched successfully!",
+                    data=purchasing_history
+                )
+            
+            return ResponseMessage.ok(
+                message="Purchasing history not found!",
+                data=None
+            )
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")

@@ -9,3 +9,4 @@ NO_EDIT_TRIGGERS = QTableWidget.EditTrigger.NoEditTriggers
 DATE_EDIT_NO_BUTTONS = QDateEdit.ButtonSymbols.NoButtons
 
 DATE_FORMAT_DDMMYYYY = "dd/MM/yyyy"
+TAX_TABLE_KEY = '= TAX ='

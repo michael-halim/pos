@@ -1,17 +1,20 @@
 from dataclasses import dataclass
+from typing import Optional
 from datetime import datetime
-from typing import List, Optional
 
-@dataclass
-class TransactionListModel:
-    created_at: datetime
+@dataclass 
+class PendingTransactionModel:
     transaction_id: str
-    payment_rp: int
-    payment_method: str
+    customer_id: str | None
+    total_amount: int
+    discount_transaction_id: str
+    discount_amount: int
+    created_at: datetime
     payment_remarks: str
 
+
 @dataclass
-class DetailTransactionListModel:
+class PendingDetailTransactionModel:
     sku: str
     product_name: str
     price: int
@@ -21,3 +24,4 @@ class DetailTransactionListModel:
     discount_rp_per_item: int
     discount_rp: int
     subtotal: int
+

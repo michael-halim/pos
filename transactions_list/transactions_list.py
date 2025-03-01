@@ -8,6 +8,8 @@ from helper import format_number, add_prefix
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
 from generals.build import resource_path
+from generals.message_box import POSMessageBox
+
 
 class TransactionsListWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -147,6 +149,8 @@ class TransactionsListWindow(QtWidgets.QWidget):
             dt_results = self.transaction_list_service.get_detail_transactions_list(self.current_selected_transaction_id)
             if dt_results.success :
                 self.set_detail_transactions_table_data(dt_results.data)
+            else:
+                POSMessageBox.error(self, "Error", dt_results.message)
 
 
     # Setters
@@ -187,8 +191,9 @@ class TransactionsListWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(detail_transaction.price))),
                 QtWidgets.QTableWidgetItem(format_number(detail_transaction.qty)),
                 QtWidgets.QTableWidgetItem(detail_transaction.unit),
-                QtWidgets.QTableWidgetItem(add_prefix(format_number(detail_transaction.discount_rp))),
                 QtWidgets.QTableWidgetItem(format_number(detail_transaction.discount_pct)),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(detail_transaction.discount_rp_per_item))),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(detail_transaction.discount_rp))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(detail_transaction.subtotal))),
             ]
 

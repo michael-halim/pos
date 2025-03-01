@@ -188,16 +188,17 @@ class SeedData:
             qty INT(10) NOT NULL,
             price INT(10) NOT NULL,
             discount_rp INT(10) NOT NULL DEFAULT 0,
+            discount_rp_per_item INT(10) NOT NULL DEFAULT 0,
             discount_pct INT(10) NOT NULL DEFAULT 0,
             sub_total INT(10) NOT NULL);'''
         
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_pct, sub_total) 
+        sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                         VALUES 
-                        ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 10000),
-                        ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 10000),
-                        ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 10000);'''
+                        ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                        ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                        ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000);'''
         
         self.cursor.execute(sql_insert)
         
@@ -206,20 +207,22 @@ class SeedData:
             sku VARCHAR(20) NOT NULL,
             unit VARCHAR(10) NOT NULL,
             unit_value INT(10) NOT NULL,
-            qty INT(10) NOT NULL,
+            qty INT(10) NOT NULL,   
             price INT(10) NOT NULL,
-            discount INT(10) NOT NULL DEFAULT 0,
+            discount_rp INT(10) NOT NULL DEFAULT 0,
+            discount_rp_per_item INT(10) NOT NULL DEFAULT 0,
+            discount_pct INT(10) NOT NULL DEFAULT 0,
             sub_total INT(10) NOT NULL);'''
         
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount, sub_total) 
+        sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                         VALUES 
-                        ('P202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 20000),
-                        ('P202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 10000),
-                        ('P202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 10000),
-                        ('P202502010002', 'SKU001', 'KODI', 20, 1, 1000, 0, 20000),
-                        ('P202502010002', 'SKU001', 'DUS', 10, 1, 1000, 0, 10000);'''
+                        ('P202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                        ('P202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                        ('P202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                        ('P202502010002', 'SKU001', 'KODI', 20, 1, 1000, 0, 0, 0, 10000),
+                        ('P202502010002', 'SKU001', 'DUS', 10, 1, 1000, 0, 0, 0, 10000);'''
 
         
         self.cursor.execute(sql_insert)
@@ -228,6 +231,7 @@ class SeedData:
     def create_transactions_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS transactions (
             transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
+            customer_id VARCHAR(20),
             total_amount INT(10) NOT NULL,
             payment_method VARCHAR(10) NOT NULL,
             payment_rp INT(10) NOT NULL,
@@ -242,18 +246,19 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO transactions (transaction_id, total_amount, payment_method, payment_rp, payment_change, 
+        sql_insert = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
                                                     discount_transaction_id, discount_amount, tax_pct, tax_amount, 
                                                     created_at, payment_remarks) 
                         VALUES 
-                        ('J202502010001', 30000, 'Cash', 30000, 0, 1, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('AB202502010002', 200000, 'Transfer', 200000, 0, 1, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('AB202502010003', 300000, 'Transfer', 300000, 0, 1, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
+                        ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
 
         self.cursor.execute(sql_insert)
 
         sql = '''CREATE TABLE IF NOT EXISTS pending_transactions (
             transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
+            customer_id VARCHAR(20),
             total_amount INT(10) NOT NULL,
             discount_transaction_id INT(10),
             discount_amount INT(10) NOT NULL DEFAULT 0,
@@ -263,12 +268,11 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO pending_transactions (transaction_id, total_amount, created_at, payment_remarks) 
+        sql_insert = '''INSERT INTO pending_transactions (transaction_id, customer_id, total_amount, created_at, payment_remarks) 
                         VALUES 
-                        ('P202502010001', 40000, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('P202502010002', 30000, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('P202502010003', 30000, CURRENT_TIMESTAMP, 'Remarks Three');'''
-        
+                        ('P202502010001', '1', 40000, CURRENT_TIMESTAMP, 'Remarks One'),
+                        ('P202502010002', '1', 30000, CURRENT_TIMESTAMP, 'Remarks Two'),
+                        ('P202502010003', '1', 30000, CURRENT_TIMESTAMP, 'Remarks Three');'''
 
 
         self.cursor.execute(sql_insert)

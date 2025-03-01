@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1182</width>
+    <width>1000</width>
     <height>494</height>
    </rect>
   </property>
@@ -179,13 +179,35 @@ QLineEdit:focus {
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="QPushButton" name="add_products_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Add Product</string>
               </property>
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="import_products_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Import</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="edit_products_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Edit</string>
               </property>
@@ -193,6 +215,11 @@ QLineEdit:focus {
             </item>
             <item>
              <widget class="QPushButton" name="delete_products_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Delete</string>
               </property>
@@ -213,6 +240,11 @@ QLineEdit:focus {
             </item>
             <item>
              <widget class="QPushButton" name="close_products_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Close</string>
               </property>

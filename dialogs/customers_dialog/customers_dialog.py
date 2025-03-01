@@ -41,6 +41,30 @@ class CustomersDialogWindow(QtWidgets.QWidget):
         # Show data
         self.show_customers_data()
 
+
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        # Refresh the data
+        self.show_customers_data()
+
+
+    def show(self):
+        """Override show to ensure data is refreshed"""
+        super().show()
+        # Refresh the data
+        self.show_customers_data()
+
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        # Refresh the data
+        self.show_customers_data()
+
+
     # Shows
     # ===============
     def show_customers_data(self):
@@ -89,3 +113,24 @@ class CustomersDialogWindow(QtWidgets.QWidget):
             # Emit signal with product data
             self.customer_selected.emit(customer_data)
             self.close()
+
+
+    def set_filter(self, search_text: str):
+        """Pre-fill the search filter"""
+        self.ui.filter_customers_dialog_input.setText(search_text)
+        
+        # Optionally trigger the filter
+        self.filter_customers()
+
+
+    def filter_customers(self):
+        search_text = self.ui.filter_customers_dialog_input.text().lower()
+        for row in range(self.customers_dialog_table.rowCount()):
+            match_found = False
+            for col in range(self.customers_dialog_table.columnCount()):
+                item = self.customers_dialog_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match_found = True
+                    break
+            self.customers_dialog_table.setRowHidden(row, not match_found)
+

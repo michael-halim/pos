@@ -56,7 +56,8 @@ class TransactionRepository:
         
     def get_detail_transactions_list(self, transaction_id: str):
         try:
-            sql = '''SELECT dt.sku, p.product_name, dt.price, dt.qty, dt.unit, dt.discount, dt.discount, dt.sub_total 
+            sql = '''SELECT dt.sku, p.product_name, dt.price, dt.qty, dt.unit, dt.discount_rp, 
+                            dt.discount_rp_per_item, dt.discount_pct, dt.sub_total 
                         FROM detail_transactions dt
                         JOIN products p ON dt.sku = p.sku
                         WHERE dt.transaction_id = ?'''
@@ -68,11 +69,10 @@ class TransactionRepository:
 
             detail_transactions_list = []
             detail_transactions_list = [
-                    DetailTransactionListModel(
-                        sku=row[0], product_name=row[1], 
-                    price=row[2], qty=row[3], unit=row[4], 
-                    discount_rp=row[5], discount_pct=row[6], subtotal=row[7]
-                )
+                    DetailTransactionListModel(sku=row[0], product_name=row[1], price=row[2], 
+                            qty=row[3], unit=row[4], discount_rp=row[5], 
+                            discount_rp_per_item=row[6], discount_pct=row[7], subtotal=row[8]
+                    )
                 for row in detail_transactions_result
             ]
 

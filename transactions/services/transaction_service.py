@@ -1,13 +1,11 @@
-from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import List
 
 # Import Models
 from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from ..models.transactions_models import PendingTransactionModel, TransactionTableItemModel
+from ..models.transactions_models import PendingTransactionModel
 
 from ..repositories.transaction_repository import TransactionRepository
 from ..models.result import ResponseMessage
-
 
 class TransactionService:
     def __init__(self):
@@ -25,8 +23,12 @@ class TransactionService:
         return self.repository.create_pending_transaction(pending_transaction, detail_transactions)
 
 
-    def get_pending_transactions_by_transaction_id(self, transaction_id: str):
-        return self.repository.get_pending_transactions_by_transaction_id(transaction_id)
+    def get_pending_transactions_by_id(self, transaction_id: str):
+        return self.repository.get_pending_transactions_by_id(transaction_id)
+
+
+    def get_pending_transactions_details_by_id(self, transaction_id: str):
+        return self.repository.get_pending_transactions_details_by_id(transaction_id)
 
 
     def get_product_unit_details(self, sku: str) -> list[ProductUnitDetailModel]:
@@ -35,3 +37,12 @@ class TransactionService:
 
     def get_product_by_sku(self, sku: str) -> ProductModel:
         return self.repository.get_product_by_sku(sku)
+
+
+    def get_customer_by_id(self, customer_id: str) -> str:
+        return self.repository.get_customer_by_id(customer_id)
+
+    
+    def get_purchasing_history_by_sku(self, sku: str):
+        return self.repository.get_purchasing_history_by_sku(sku)
+    

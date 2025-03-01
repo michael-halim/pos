@@ -2,6 +2,7 @@ from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from generals.build import resource_path
 from .services.products_services import ProductsService
 from dialogs.master_stock_dialog.master_stock_dialog import MasterStockDialogWindow
+from dialogs.import_products_dialog.import_products_dialog import ImportProductsDialogWindow
 from helper import format_number, add_prefix, remove_non_digit
 
 from .models.products_models import ProductsModel
@@ -21,6 +22,7 @@ class ProductsWindow(QtWidgets.QWidget):
 
         # Init Dialogs
         self.master_stock_dialog = MasterStockDialogWindow()    
+        self.import_products_dialog = ImportProductsDialogWindow()
 
         # Init Table
         self.products_table = self.ui.products_table
@@ -30,6 +32,7 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.add_products_button.clicked.connect(self.add_products)
         self.ui.edit_products_button.clicked.connect(self.edit_products)
         self.ui.delete_products_button.clicked.connect(self.delete_products)
+        self.ui.import_products_button.clicked.connect(self.import_products)
         self.ui.close_products_button.clicked.connect(lambda: self.close())
         
         # Connect search input to filter function
@@ -109,6 +112,10 @@ class ProductsWindow(QtWidgets.QWidget):
         products_result = self.products_service.get_products(search_text)
 
         self.set_products_table_data(products_result.data)
+
+
+    def import_products(self):
+        self.import_products_dialog.show()
 
 
     def add_products(self):

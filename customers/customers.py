@@ -73,7 +73,6 @@ class CustomersWindow(QtWidgets.QWidget):
 
     def update_customer(self):
         customer_form_data = self.get_customer_form_data()
-        print(customer_form_data)
         if customer_form_data.customer_name == '' or customer_form_data.customer_phone == '':
             POSMessageBox.error(self, title='Error', message='Customer name and phone are required')
             return
