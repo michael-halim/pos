@@ -1,4 +1,3 @@
-import os
 import sys
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 
@@ -18,6 +17,7 @@ from logs.logs import LogsWindow
 
 from generals.build import resource_path
 from connect_db import DatabaseConnection
+
 
 class POS(QtWidgets.QMainWindow):
     def __init__(self):
@@ -56,7 +56,7 @@ class POS(QtWidgets.QMainWindow):
         
         # Connect Button to Dialog in Master Data Menu
         self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
-        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.showMaximized())
+        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
         self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
         self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
@@ -70,7 +70,6 @@ class POS(QtWidgets.QMainWindow):
         self.ui.categories_dialog_button.clicked.connect(lambda: self.categories_dialog_show.show())
 
         
-        # TODO: Add an input for user to input suppliers in their products
         # TODO: Change the UI button, or layout to form layout to make it beautiful
 
         

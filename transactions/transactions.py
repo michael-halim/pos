@@ -90,7 +90,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.discount_rp_total_transaction_radio_button.toggled.connect(self.on_discount_transaction_radio_button_toggled)
 
         # Listen to discount pct input, price input, and qty input to update discount rp input
-        self.ui.discount_pct_transaction_input_2.textChanged.connect(self.on_calculate_discount_rp)
+        self.ui.discount_pct_transaction_input.textChanged.connect(self.on_calculate_discount_rp)
         self.ui.discount_rp_per_item_transaction_input.textChanged.connect(self.on_calculate_discount_rp)
         self.ui.discount_rp_total_transaction_input.textChanged.connect(self.on_calculate_discount_rp)
 
@@ -290,7 +290,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                 
                 # Update the row in the table
                 self.transactions_table.item(self.current_selected_sku, 3).setText(format_number(transaction_form_data.qty))
-                self.transactions_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(transaction_form_data.discount_pct))))
+                self.transactions_table.item(self.current_selected_sku, 6).setText(format_number(str(transaction_form_data.discount_pct)))
                 self.transactions_table.item(self.current_selected_sku, 7).setText(add_prefix(format_number(str(transaction_form_data.discount_rp_per_item))))
                 self.transactions_table.item(self.current_selected_sku, 8).setText(add_prefix(format_number(str(transaction_form_data.discount_rp))))
                 self.transactions_table.item(self.current_selected_sku, 9).setText(add_prefix(format_number(str(subtotal))))
@@ -307,9 +307,11 @@ class TransactionsWindow(QtWidgets.QWidget):
                 self.set_payment_change_transaction_input(total, is_color_red=True)
 
                 # Re-calculate tax if any
-                self.remove_tax_transaction()
-                self.on_tax_transaction_input_changed()
-                self.add_tax_transaction()
+                if not self.ui.tax_pct_transaction_input.isEnabled():
+                    self.remove_tax_transaction()
+                    self.on_tax_transaction_input_changed()
+                    self.add_tax_transaction()
+
 
                 # Reset the form
                 self.clear_data_transaction()
@@ -372,9 +374,10 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
 
             # Re-calculate tax if any
-            self.remove_tax_transaction()
-            self.on_tax_transaction_input_changed()
-            self.add_tax_transaction()  
+            if not self.ui.tax_pct_transaction_input.isEnabled():
+                self.remove_tax_transaction()
+                self.on_tax_transaction_input_changed()
+                self.add_tax_transaction()  
 
             
             # Update payment change if payment exists
@@ -665,6 +668,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.transactions_table.setRowCount(0)
         self.ui.total_transaction_input.setText(add_prefix('0'))
         self.ui.payment_change_transaction_input.setText(add_prefix('0'))
+        self.ui.total_discount_transaction_input.setText(add_prefix('0'))
         self.cached_transaction_index = {}
         self.cached_qty = {}
         self.current_selected_sku = None
@@ -683,7 +687,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.qty_transaction_input.clear()
         self.ui.qty_transaction_combobox.clear()
         self.ui.payment_transaction_input.clear()
-        self.ui.discount_pct_transaction_input_2.clear()
+        self.ui.discount_pct_transaction_input.clear()
         self.ui.discount_rp_per_item_transaction_input.clear()
         self.ui.discount_rp_total_transaction_input.clear()
         self.clear_wholesale_transactions_data()
@@ -734,7 +738,7 @@ class TransactionsWindow(QtWidgets.QWidget):
     def get_transactions_form_data(self) -> TransactionTableItemModel:
         price: int = remove_non_digit(self.ui.price_transaction_input.text()) if self.ui.price_transaction_input.text().strip() else 0
         qty: int = remove_non_digit(self.ui.qty_transaction_input.text()) if self.ui.qty_transaction_input.text().strip() else 0
-        disc_pct: int = remove_non_digit(self.ui.discount_pct_transaction_input_2.text()) if self.ui.discount_pct_transaction_input_2.text().strip() else 0
+        disc_pct: int = remove_non_digit(self.ui.discount_pct_transaction_input.text()) if self.ui.discount_pct_transaction_input.text().strip() else 0
         disc_rp_per_item: int = remove_non_digit(self.ui.discount_rp_per_item_transaction_input.text()) if self.ui.discount_rp_per_item_transaction_input.text().strip() else 0
         disc_rp: int = remove_non_digit(self.ui.discount_rp_total_transaction_input.text()) if self.ui.discount_rp_total_transaction_input.text().strip() else 0
 
@@ -893,7 +897,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.qty_transaction_input.setText(format_number(str(data.qty)))
         self.ui.qty_transaction_combobox.setCurrentText(data.unit)
         self.ui.unit_value_transaction_input.setText(format_number(str(data.unit_value)))
-        self.ui.discount_pct_transaction_input_2.setText(str(data.discount_pct))
+        self.ui.discount_pct_transaction_input.setText(str(data.discount_pct))
         self.ui.discount_rp_per_item_transaction_input.setText(str(data.discount_rp_per_item))
         self.ui.discount_rp_total_transaction_input.setText(str(data.discount_rp))
     
@@ -1008,9 +1012,9 @@ class TransactionsWindow(QtWidgets.QWidget):
 
     def on_discount_transaction_radio_button_toggled(self):
         if self.ui.discount_pct_transaction_radio_button.isChecked():
-            self.ui.discount_pct_transaction_input_2.clear()
-            self.ui.discount_pct_transaction_input_2.setEnabled(True)
-            self.ui.discount_pct_transaction_input_2.setClearButtonEnabled(True)
+            self.ui.discount_pct_transaction_input.clear()
+            self.ui.discount_pct_transaction_input.setEnabled(True)
+            self.ui.discount_pct_transaction_input.setClearButtonEnabled(True)
 
             self.ui.discount_rp_per_item_transaction_input.setEnabled(False)
             self.ui.discount_rp_per_item_transaction_input.setText('0')
@@ -1025,9 +1029,9 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.discount_rp_per_item_transaction_input.setEnabled(True)
             self.ui.discount_rp_per_item_transaction_input.setClearButtonEnabled(True)
             
-            self.ui.discount_pct_transaction_input_2.setEnabled(False)
-            self.ui.discount_pct_transaction_input_2.setText('0')
-            self.ui.discount_pct_transaction_input_2.setClearButtonEnabled(False)
+            self.ui.discount_pct_transaction_input.setEnabled(False)
+            self.ui.discount_pct_transaction_input.setText('0')
+            self.ui.discount_pct_transaction_input.setClearButtonEnabled(False)
 
             self.ui.discount_rp_total_transaction_input.setEnabled(False)
             self.ui.discount_rp_total_transaction_input.setText(add_prefix('0'))
@@ -1042,9 +1046,9 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.discount_rp_per_item_transaction_input.setText('0')
             self.ui.discount_rp_per_item_transaction_input.setClearButtonEnabled(False)
 
-            self.ui.discount_pct_transaction_input_2.setEnabled(False)
-            self.ui.discount_pct_transaction_input_2.setText('0')
-            self.ui.discount_pct_transaction_input_2.setClearButtonEnabled(False)
+            self.ui.discount_pct_transaction_input.setEnabled(False)
+            self.ui.discount_pct_transaction_input.setText('0')
+            self.ui.discount_pct_transaction_input.setClearButtonEnabled(False)
 
 
     def on_calculate_discount_rp(self):

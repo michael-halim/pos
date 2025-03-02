@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1626</width>
-    <height>850</height>
+    <height>852</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -434,7 +434,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>380</height>
+                <height>350</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -1035,7 +1035,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="discount_pct_transaction_input_2">
+                   <widget class="QLineEdit" name="discount_pct_transaction_input">
                     <property name="enabled">
                      <bool>false</bool>
                     </property>

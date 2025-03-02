@@ -24,7 +24,8 @@ class ProductsRepository:
                                                             search_text, search_text, search_text))
             else:
                 sql = '''SELECT sku, product_name, cost_price, price, stock, unit, remarks 
-                            FROM products'''
+                            FROM products
+                            LIMIT 100'''
                 products_result = self.cursor.execute(sql)
 
             products = [

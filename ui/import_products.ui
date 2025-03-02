@@ -86,19 +86,19 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QLabel" name="error_import_products_label">
+           <widget class="QLabel" name="log_import_products_label">
             <property name="font">
              <font>
               <pointsize>12</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>Errors :</string>
+             <string>Log :</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QTextEdit" name="error_import_products_input">
+           <widget class="QTextEdit" name="log_import_products_input">
             <property name="enabled">
              <bool>false</bool>
             </property>

@@ -94,7 +94,7 @@ class SeedData:
     def create_users_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS users (
             user_id INT NOT NULL,
-            user_name VARCHAR(20) NOT NULL,
+            username VARCHAR(20) NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
             user_salt VARCHAR(255) NOT NULL,
             role_id INT NOT NULL,
@@ -105,7 +105,7 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO users (user_id, user_name, password_hash, user_salt, role_id, is_active, created_at, updated_at) 
+        sql_insert = '''INSERT INTO users (user_id, username, password_hash, user_salt, role_id, is_active, created_at, updated_at) 
                         VALUES 
                         (1, 'Admin', 'password', 'salt', 1, TRUE, CURRENT_TIMESTAMP, NULL);'''
 
@@ -193,6 +193,10 @@ class SeedData:
             sub_total INT(10) NOT NULL);'''
         
         self.cursor.execute(sql)
+        
+        # Add indexes for faster transaction lookups
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_detail_transactions_id ON detail_transactions(transaction_id);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_detail_transactions_sku ON detail_transactions(sku);')
 
         sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                         VALUES 
@@ -215,6 +219,10 @@ class SeedData:
             sub_total INT(10) NOT NULL);'''
         
         self.cursor.execute(sql)
+        
+        # Add indexes for faster pending transaction lookups
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_pending_detail_transactions_id ON pending_detail_transactions(transaction_id);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_pending_detail_transactions_sku ON pending_detail_transactions(sku);')
 
         sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                         VALUES 
@@ -313,11 +321,18 @@ class SeedData:
             last_price INT(10) NOT NULL DEFAULT 0,
             average_price INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NULL DEFAULT NULL
+            updated_at DATETIME NULL DEFAULT NULL,
+            PRIMARY KEY (sku)
         );'''
 
         self.cursor.execute(sql)
 
+        # Add indexes for faster queries
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_products_product_name ON products(product_name);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_products_supplier_id ON products(supplier_id);')
+        
         sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
                     VALUES 
                     ('SKU001', 'Product One', 'barcode', 1, 1, 1000, 1500, 'Best seller', 50, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
@@ -338,6 +353,10 @@ class SeedData:
         );'''
 
         self.cursor.execute(sql)
+        
+        # Add indexes for faster joins with products
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_units_sku ON units(sku);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_units_barcode ON units(barcode);')
 
         sql_insert = '''INSERT INTO units (sku, barcode, unit, unit_value, price) 
                         VALUES 
@@ -354,7 +373,9 @@ class SeedData:
         );'''
 
         self.cursor.execute(sql)
-
+        
+        # Add index for category name searches
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(category_name);')
 
         sql_insert = '''INSERT INTO categories (category_name) 
                             VALUES 
@@ -372,6 +393,11 @@ class SeedData:
         );'''
 
         self.cursor.execute(sql)
+        
+        # Add indexes for faster joins
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_product_categories_sku ON product_categories_detail(sku);')
+        self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_product_categories_category_id ON product_categories_detail(category_id);')
+        self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_product_categories_unique ON product_categories_detail(sku, category_id);')
 
         sql_insert = '''INSERT INTO product_categories_detail (sku, category_id) 
                             VALUES 
@@ -404,6 +430,8 @@ class SeedData:
 
     def seed_all(self):
         """Run all seed functions in order."""
+        self.cursor.execute('BEGIN TRANSACTION')
+
         self.drop_all_tables()
 
         self.create_suppliers_table()
@@ -421,7 +449,7 @@ class SeedData:
         self.create_logs_table()
         self.create_users_table()
         self.create_customers_table()
-
+        
         self.db.commit()
         self.db.close()
 

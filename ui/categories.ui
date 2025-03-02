@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1302</width>
-    <height>846</height>
+    <width>1252</width>
+    <height>432</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,9 +33,14 @@
              <widget class="QLabel" name="filter_categories_label">
               <property name="maximumSize">
                <size>
-                <width>16777215</width>
+                <width>300</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Filter Category: </string>
@@ -50,7 +55,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>0</height>
+                <height>30</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -73,9 +78,14 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>16777215</width>
+              <width>300</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
             </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>150</number>
@@ -116,6 +126,11 @@
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QPushButton" name="delete_category_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Delete / Hapus</string>
               </property>
@@ -123,6 +138,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="edit_category_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Edit / Ubah</string>
               </property>
@@ -130,6 +150,11 @@
             </item>
             <item>
              <widget class="QPushButton" name="add_category_button">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Add / Tambah</string>
               </property>
@@ -251,6 +276,12 @@ QLineEdit:focus {
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>600</width>
+                <height>0</height>
+               </size>
+              </property>
               <column>
                <property name="text">
                 <string>#</string>
@@ -367,6 +398,11 @@ QLineEdit:focus {
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Clear Data</string>
               </property>
@@ -376,6 +412,11 @@ QLineEdit:focus {
              <widget class="QPushButton" name="submit_category_button">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Submit</string>
@@ -391,6 +432,11 @@ QLineEdit:focus {
               <width>300</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
             </property>
             <property name="text">
              <string>Close / Tutup</string>
