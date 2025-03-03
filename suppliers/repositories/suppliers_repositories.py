@@ -1,7 +1,7 @@
-from typing import List, Optional
-from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
-from ..models.suppliers_models import SuppliersModel
+
+from suppliers.models.suppliers_models import SuppliersModel
+
 from response.response_message import ResponseMessage
 
 

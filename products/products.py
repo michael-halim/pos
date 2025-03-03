@@ -1,11 +1,13 @@
-from PyQt6 import QtWidgets, uic, QtGui, QtCore
-from generals.build import resource_path
-from .services.products_services import ProductsService
+from PyQt6 import QtWidgets, uic, QtGui
+
+from products.services.products_services import ProductsService
+from products.models.products_models import ProductsModel
+
 from dialogs.master_stock_dialog.master_stock_dialog import MasterStockDialogWindow
 from dialogs.import_products_dialog.import_products_dialog import ImportProductsDialogWindow
-from helper import format_number, add_prefix, remove_non_digit
 
-from .models.products_models import ProductsModel
+from helper import format_number, add_prefix
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS

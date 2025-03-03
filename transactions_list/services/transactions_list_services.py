@@ -1,8 +1,5 @@
-from datetime import datetime, timedelta
-from typing import Optional, List
+from datetime import datetime
 
-# Import Models
-from transactions_list.models.transactions_list_models import TransactionListModel
 from transactions_list.repositories.transactions_list_repository import TransactionRepository
 
 class TransactionListService:

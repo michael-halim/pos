@@ -1,20 +1,12 @@
 from PyQt6 import QtWidgets, uic
 from datetime import datetime
 
-from helper import format_number, add_prefix, remove_non_digit
-
-from dialogs.products_dialog.products_dialog import ProductsDialogWindow
-
 from purchasing_list.services.purchasing_list_services import PurchasingListService
 from purchasing_list.models.purchasing_list_models import PurchasingListModel, DetailPurchasingModel
 
-from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, DATE_FORMAT_DDMMYYYY, DATE_EDIT_NO_BUTTONS
-
-from dialogs.suppliers_dialog.suppliers_dialog import SuppliersDialogWindow
-from dialogs.master_stock_dialog.master_stock_dialog import MasterStockDialogWindow
-from dialogs.price_unit_dialog.price_unit_dialog import PriceUnitDialogWindow
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from helper import format_number, add_prefix
 from generals.build import resource_path
 
 class PurchasingListWindow(QtWidgets.QWidget):

@@ -1,5 +1,4 @@
-from typing import List, Optional
-from ..repositories.products_repositories import ProductsRepository
+from products.repositories.products_repositories import ProductsRepository
 
 class ProductsService:
     def __init__(self):

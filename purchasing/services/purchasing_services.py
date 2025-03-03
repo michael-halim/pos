@@ -1,6 +1,10 @@
 from typing import List
-from ..repositories.purchasing_repositories import PurchasingRepository
-from ..models.purchasing_models import PurchasingModel, DetailPurchasingModel
+
+from purchasing.repositories.purchasing_repositories import PurchasingRepository
+from purchasing.models.purchasing_models import (
+    PurchasingModel, 
+    DetailPurchasingModel
+)
 
 from response.response_message import ResponseMessage
 class PurchasingService:

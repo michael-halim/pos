@@ -1,5 +1,6 @@
 from datetime import datetime
-from ..repositories.logs_repositories import LogsRepository
+
+from logs.repositories.logs_repositories import LogsRepository
 
 class LogsService:
     def __init__(self):

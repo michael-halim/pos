@@ -1,8 +1,7 @@
-from typing import List, Optional
-from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
 
 from dialogs.customers_dialog.models.customers_dialog_models import CustomersDialogModel
+
 from response.response_message import ResponseMessage
 
 class CustomersDialogRepository:

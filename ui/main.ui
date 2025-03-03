@@ -468,6 +468,25 @@
             <string>Customers Dialog</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="users_dialog_button">
+           <property name="geometry">
+            <rect>
+             <x>300</x>
+             <y>380</y>
+             <width>191</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
+	color: white;
+	font-size:24px;
+}</string>
+           </property>
+           <property name="text">
+            <string>Users</string>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -515,7 +534,7 @@
      <x>0</x>
      <y>0</y>
      <width>1346</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

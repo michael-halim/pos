@@ -1,13 +1,13 @@
 from PyQt6 import QtWidgets, uic, QtCore, QtGui
+from datetime import datetime
+
+from dialogs.products_dialog.models.products_dialog_models import ProductsDialogModel
+from dialogs.products_dialog.services.products_dialog_services import ProductsDialogService
 
 from helper import format_number, add_prefix
 from generals.fonts import POSFonts
 from generals.build import resource_path
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from dialogs.products_dialog.models.products_dialog_models import ProductsDialogModel
-from dialogs.products_dialog.services.products_dialog_services import ProductsDialogService    
-from datetime import datetime
-
 
 class ProductsDialogWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -47,23 +47,6 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         self.products_dialog_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
         self.show_products_data()
-
-
-    # Simple key press handler
-    def handle_key_press(self, event):
-        # Check for Enter key
-        if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
-            # Don't handle Enter if we're in a text field
-            if not isinstance(QtWidgets.QApplication.focusWidget(), QtWidgets.QLineEdit):
-                # If a row is selected or there are rows, send the data
-                if self.products_dialog_table.rowCount() > 0:
-                    if not self.products_dialog_table.selectedItems():
-                        self.products_dialog_table.selectRow(0)
-                    self.send_product_data()
-                    return
-        
-        # Let the parent class handle other keys
-        super().keyPressEvent(event)
 
 
     # Shows
@@ -167,3 +150,21 @@ class ProductsDialogWindow(QtWidgets.QWidget):
                     match_found = True
                     break
             self.products_dialog_table.setRowHidden(row, not match_found)
+
+
+    # Event Listeners
+    # ===============
+    def handle_key_press(self, event):
+        # Check for Enter key
+        if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            # Don't handle Enter if we're in a text field
+            if not isinstance(QtWidgets.QApplication.focusWidget(), QtWidgets.QLineEdit):
+                # If a row is selected or there are rows, send the data
+                if self.products_dialog_table.rowCount() > 0:
+                    if not self.products_dialog_table.selectedItems():
+                        self.products_dialog_table.selectRow(0)
+                    self.send_product_data()
+                    return
+        
+        # Let the parent class handle other keys
+        super().keyPressEvent(event)

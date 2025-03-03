@@ -1,10 +1,5 @@
-from PyQt6 import QtWidgets, uic, QtGui, QtCore
+from PyQt6 import QtWidgets, uic
 from datetime import datetime
-from helper import format_number, add_prefix, remove_non_digit
-
-from generals.message_box import POSMessageBox
-from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 
 from dialogs.suppliers_dialog.suppliers_dialog import SuppliersDialogWindow
 from dialogs.master_stock_dialog.models.master_stock_dialog_models import MasterStockModel, PurchasingHistoryTableItemModel, CategoriesModel
@@ -13,6 +8,11 @@ from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierMode
 from dialogs.price_unit_dialog.price_unit_dialog import PriceUnitDialogWindow
 from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 from dialogs.categories_dialog.categories_dialog import CategoriesDialogWindow
+
+from helper import format_number, add_prefix, remove_non_digit
+from generals.message_box import POSMessageBox
+from generals.fonts import POSFonts
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 
 class MasterStockDialogWindow(QtWidgets.QWidget):

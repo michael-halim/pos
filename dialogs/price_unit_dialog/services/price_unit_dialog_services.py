@@ -1,6 +1,5 @@
-from typing import List, Optional
-from ..repositories.price_unit_dialog_repositories import PriceUnitDialogRepository
-from ..models.price_unit_dialog_models import PriceUnitTableItemModel
+from dialogs.price_unit_dialog.repositories.price_unit_dialog_repositories import PriceUnitDialogRepository
+from dialogs.price_unit_dialog.models.price_unit_dialog_models import PriceUnitTableItemModel
 
 class PriceUnitDialogService:
     def __init__(self):

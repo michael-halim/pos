@@ -1,13 +1,10 @@
 from PyQt6 import QtWidgets, uic, QtCore
 
-from helper import format_number, add_prefix, remove_non_digit
-
-from generals.message_box import POSMessageBox
-from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-
 from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
 from dialogs.suppliers_dialog.services.suppliers_dialog_services import SuppliersDialogService
+
+from generals.fonts import POSFonts
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 
 class SuppliersDialogWindow(QtWidgets.QWidget):

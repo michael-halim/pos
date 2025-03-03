@@ -1,6 +1,8 @@
-from .services.import_products_dialog_services import ImportProductsDialogService
-from generals.build import resource_path
 from PyQt6 import QtWidgets, uic
+
+from dialogs.import_products_dialog.services.import_products_dialog_services import ImportProductsDialogService
+
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 
 class ImportProductsDialogWindow(QtWidgets.QWidget):

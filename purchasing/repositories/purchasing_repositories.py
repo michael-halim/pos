@@ -2,7 +2,13 @@ from typing import List
 from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
 
-from ..models.purchasing_models import ProductModel, ProductUnitsModel, PurchasingModel, DetailPurchasingModel, PurchasingHistoryTableItemModel
+from purchasing.models.purchasing_models import (
+    ProductModel, 
+    ProductUnitsModel, 
+    PurchasingModel, 
+    DetailPurchasingModel, 
+    PurchasingHistoryTableItemModel
+)
 from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
 
 from response.response_message import ResponseMessage

@@ -1,24 +1,20 @@
 from PyQt6 import QtWidgets, uic
-from PyQt6.QtWidgets import QDateEdit
 from datetime import datetime
 
-from helper import format_number, add_prefix, remove_non_digit
-
 from dialogs.pending_transactions_dialog.pending_transactions_dialog import PendingTransactionsDialogWindow
-
-from transactions.services.transaction_service import TransactionService
-
-from transactions.models.transactions_models import TransactionTableItemModel, TransactionModel, DetailTransactionModel, PurchasingHistoryTableItemModel
 from dialogs.pending_transactions_dialog.models.pending_transactions_dialog_models import PendingTransactionModel
-from transactions.models.wholesale_models import WholesaleTableModel
-
 from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
+
+from transactions.services.transaction_service import TransactionService
+from transactions.models.transactions_models import TransactionTableItemModel, TransactionModel, DetailTransactionModel, PurchasingHistoryTableItemModel
+from transactions.models.wholesale_models import WholesaleTableModel
+
+from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, TAX_TABLE_KEY
 from generals.build import resource_path
-
 
 class TransactionsWindow(QtWidgets.QWidget):
     def __init__(self):

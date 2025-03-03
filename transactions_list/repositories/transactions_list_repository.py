@@ -1,11 +1,9 @@
-from typing import List
-
-# Import Models
 from connect_db import DatabaseConnection
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
-from transactions_list.models.response_message import ResponseMessage
+
+from response.response_message import ResponseMessage
 
 class TransactionRepository:
     def __init__(self):

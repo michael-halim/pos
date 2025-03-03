@@ -1,5 +1,4 @@
-from typing import List, Optional
-from ..repositories.categories_dialog_repositories import CategoriesDialogRepository
+from dialogs.categories_dialog.repositories.categories_dialog_repositories import CategoriesDialogRepository
 
 class CategoriesDialogService:
     def __init__(self):

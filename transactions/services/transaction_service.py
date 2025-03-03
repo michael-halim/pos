@@ -1,11 +1,10 @@
 from typing import List
 
-# Import Models
-from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from ..models.transactions_models import PendingTransactionModel
+from transactions.models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
+from transactions.models.transactions_models import PendingTransactionModel
 
-from ..repositories.transaction_repository import TransactionRepository
-from ..models.result import ResponseMessage
+from transactions.repositories.transaction_repository import TransactionRepository
+from response.response_message import ResponseMessage
 
 class TransactionService:
     def __init__(self):

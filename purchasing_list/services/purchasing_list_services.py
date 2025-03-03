@@ -1,5 +1,6 @@
 from datetime import datetime
-from ..repositories.purchasing_list_repositories import PurchasingListRepository
+
+from purchasing_list.repositories.purchasing_list_repositories import PurchasingListRepository
 
 class PurchasingListService:
     def __init__(self):

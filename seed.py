@@ -93,7 +93,7 @@ class SeedData:
 
     def create_users_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS users (
-            user_id INT NOT NULL,
+            user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             username VARCHAR(20) NOT NULL,
             password_hash VARCHAR(255) NOT NULL,
             user_salt VARCHAR(255) NOT NULL,

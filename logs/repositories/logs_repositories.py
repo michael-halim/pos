@@ -1,7 +1,8 @@
-from datetime import datetime
 from connect_db import DatabaseConnection
+from datetime import datetime
 
 from logs.models.logs_models import LogsModel
+
 from response.response_message import ResponseMessage
 
 class LogsRepository:

@@ -1,7 +1,8 @@
 from connect_db import DatabaseConnection
 
+from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
+
 from response.response_message import ResponseMessage
-from ..models.suppliers_dialog_models import SupplierModel
 
 class SuppliersDialogRepository:
     def __init__(self):

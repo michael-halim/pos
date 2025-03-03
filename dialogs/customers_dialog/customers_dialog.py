@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets, uic, QtCore
 
-from .services.customers_dialog_services import CustomersDialogService
-from .models.customers_dialog_models import CustomersDialogModel
+from dialogs.customers_dialog.services.customers_dialog_services import CustomersDialogService
+from dialogs.customers_dialog.models.customers_dialog_models import CustomersDialogModel
 
 from helper import format_number, add_prefix
 from generals.fonts import POSFonts

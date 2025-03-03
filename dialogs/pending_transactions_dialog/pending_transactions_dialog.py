@@ -1,20 +1,14 @@
-from PyQt6 import QtWidgets, uic, QtCore, QtGui
+from PyQt6 import QtWidgets, uic
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QDateEdit
 from datetime import datetime
 
-from helper import format_number, add_prefix, remove_non_digit
+from dialogs.pending_transactions_dialog.services.pending_transactions_dialog_services import PendingTransactionsDialogService
+from dialogs.pending_transactions_dialog.models.pending_transactions_dialog_models import PendingTransactionModel, PendingDetailTransactionModel
 
-from generals.message_box import POSMessageBox
+from helper import format_number, add_prefix
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
-from generals.widget import create_checkbox_item
-from dialogs.pending_transactions_dialog.services.pending_transactions_dialog_services import PendingTransactionsDialogService
-
-from connect_db import DatabaseConnection
-from dialogs.pending_transactions_dialog.models.pending_transactions_dialog_models import PendingTransactionModel, PendingDetailTransactionModel
-
 
 class PendingTransactionsDialogWindow(QtWidgets.QWidget):
     pending_transaction_selected = pyqtSignal(dict)
@@ -25,9 +19,6 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         self.pending_transactions_dialog_service = PendingTransactionsDialogService()
 
         self.ui = uic.loadUi(resource_path('ui/pending_transactions_dialog.ui'), self)
-
-        self.db = DatabaseConnection().get_connection()
-        self.cursor = self.db.cursor()
 
         # Init Tables
         self.pending_transactions_table = self.ui.pending_transactions_table

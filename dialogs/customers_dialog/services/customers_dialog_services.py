@@ -1,4 +1,4 @@
-from ..repositories.customers_dialog_repositories import CustomersDialogRepository
+from dialogs.customers_dialog.repositories.customers_dialog_repositories import CustomersDialogRepository
 
 class CustomersDialogService:
     def __init__(self):

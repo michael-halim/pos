@@ -1,5 +1,5 @@
-from ..repositories.suppliers_repositories import SuppliersRepository
-from ..models.suppliers_models import SuppliersModel
+from suppliers.repositories.suppliers_repositories import SuppliersRepository
+from suppliers.models.suppliers_models import SuppliersModel
 
 class SuppliersService:
     def __init__(self):

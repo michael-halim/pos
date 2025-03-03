@@ -2,10 +2,12 @@ from connect_db import DatabaseConnection
 from datetime import datetime, timedelta
 from typing import List
 
-from ..models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from ..models.transactions_models import PendingTransactionModel, TransactionTableItemModel, PurchasingHistoryTableItemModel
+from transactions.models.transactions_models import (
+    ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel,
+    PendingTransactionModel, TransactionTableItemModel, PurchasingHistoryTableItemModel
+)
 
-from ..models.result import ResponseMessage
+from response.response_message import ResponseMessage
 
 class TransactionRepository:
     def __init__(self):

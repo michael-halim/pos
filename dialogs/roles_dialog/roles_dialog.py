@@ -1,19 +1,12 @@
 from PyQt6 import QtWidgets, uic, QtCore, QtGui
-from PyQt6.QtWidgets import QDateEdit
-from datetime import datetime
-
-from helper import format_number, add_prefix, remove_non_digit
 
 from dialogs.roles_dialog.models.roles_dialog_models import RolesModel, PermissionsModel
-
 from dialogs.roles_dialog.services.roles_dialog_services import RolesDialogService
 
-from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 from generals.widget import create_checkbox_item
-
 
 class RolesDialogWindow(QtWidgets.QWidget):
     role_selected = QtCore.pyqtSignal(dict)
@@ -41,6 +34,8 @@ class RolesDialogWindow(QtWidgets.QWidget):
         self.ui.filter_roles_input.textChanged.connect(self.show_roles_data)
         self.ui.filter_permissions_input.textChanged.connect(self.show_permissions_data)
 
+        # Simple key press event for the entire dialog
+        self.keyPressEvent = self.handle_key_press
         
         # Set selection behavior to select entire rows
         self.roles_table.setSelectionBehavior(SELECT_ROWS)
@@ -222,3 +217,38 @@ class RolesDialogWindow(QtWidgets.QWidget):
             allowed_permissions = self.roles_dialog_service.get_permissions_by_role_id(role_id)
         
             self.set_permissions_table_data(permissions.data, allowed_permissions.data)
+
+    
+    def set_filter(self, search_text: str):
+        """Pre-fill the search filter"""
+        self.ui.filter_roles_input.setText(search_text)
+        # Optionally trigger the filter
+        self.filter_roles()
+
+
+    def filter_roles(self):
+        search_text = self.ui.filter_roles_input.text().lower()
+        for row in range(self.roles_table.rowCount()):
+            match_found = False
+            for col in range(self.roles_table.columnCount()):
+                item = self.roles_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match_found = True
+                    break
+            self.roles_table.setRowHidden(row, not match_found)
+
+
+    def handle_key_press(self, event):
+        # Check for Enter key
+        if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            # Don't handle Enter if we're in a text field
+            if not isinstance(QtWidgets.QApplication.focusWidget(), QtWidgets.QLineEdit):
+                # If a row is selected or there are rows, send the data
+                if self.roles_table.rowCount() > 0:
+                    if not self.roles_table.selectedItems():
+                        self.roles_table.selectRow(0)
+                    self.send_role_data()
+                    return
+        
+        # Let the parent class handle other keys
+        super().keyPressEvent(event)

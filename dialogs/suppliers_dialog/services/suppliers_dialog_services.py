@@ -1,5 +1,6 @@
+from dialogs.suppliers_dialog.repositories.suppliers_dialog_repositories import SuppliersDialogRepository
+
 from response.response_message import ResponseMessage
-from ..repositories.suppliers_dialog_repositories import SuppliersDialogRepository
 
 class SuppliersDialogService:
     def __init__(self):

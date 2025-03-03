@@ -1,15 +1,14 @@
 from PyQt6 import QtWidgets, uic
 from datetime import datetime
 
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from generals.fonts import POSFonts
-from helper import format_number, add_prefix
-
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
+
+from helper import format_number, add_prefix
+from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from generals.fonts import POSFonts
 from generals.build import resource_path
 from generals.message_box import POSMessageBox
-
 
 class TransactionsListWindow(QtWidgets.QWidget):
     def __init__(self):

@@ -1,10 +1,11 @@
-from PyQt6 import QtWidgets, uic, QtGui, QtCore
-from connect_db import DatabaseConnection
+from PyQt6 import QtWidgets, uic, QtCore
+
+from categories.services.categories_services import CategoriesService
+from categories.models.categories_models import CategoriesTableModel, ProcuctsTableModel
+
+from helper import add_prefix, format_number
 from generals.build import resource_path
-from .services.categories_services import CategoriesService
-from .models.categories_models import CategoriesTableModel, ProcuctsTableModel
 from generals.fonts import POSFonts
-from helper import add_prefix, format_number, remove_non_digit
 from generals.widget import create_checkbox_item
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.message_box import POSMessageBox
@@ -17,8 +18,6 @@ class CategoriesWindow(QtWidgets.QWidget):
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/categories.ui'), self)
-        self.db = DatabaseConnection().get_connection()
-        self.cursor = self.db.cursor()
         
         # Init Tables
         self.categories_table = self.ui.categories_table

@@ -1,6 +1,3 @@
-from typing import List, Optional
-
-from response.response_message import ResponseMessage
 from dialogs.master_stock_dialog.repositories.master_stock_dialog_repositories import MasterStockDialogRepository
 from dialogs.master_stock_dialog.models.master_stock_dialog_models import MasterStockModel
 

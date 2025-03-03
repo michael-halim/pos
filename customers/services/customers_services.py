@@ -1,5 +1,5 @@
-from ..repositories.customers_repositories import CustomersRepository
-from ..models.customers_models import CustomersModel
+from customers.repositories.customers_repositories import CustomersRepository
+from customers.models.customers_models import CustomersModel
 
 class CustomersService:
     def __init__(self):

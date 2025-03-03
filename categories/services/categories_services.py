@@ -1,6 +1,5 @@
-from ..repositories.categories_repositories import CategoriesRepository
-from ..models.categories_models import CategoriesTableModel
-
+from categories.repositories.categories_repositories import CategoriesRepository
+from categories.models.categories_models import CategoriesTableModel
 
 class CategoriesService:
     def __init__(self):

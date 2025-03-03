@@ -1,8 +1,9 @@
-from PyQt6 import QtWidgets, uic, QtGui, QtCore
+from PyQt6 import QtWidgets, uic
 from generals.build import resource_path
 
 from suppliers.services.suppliers_services import SuppliersService  
 from suppliers.models.suppliers_models import SuppliersModel
+
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.message_box import POSMessageBox

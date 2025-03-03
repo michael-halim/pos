@@ -1,5 +1,10 @@
 import sys
-from PyQt6 import QtWidgets, uic, QtGui, QtCore
+from connect_db import DatabaseConnection
+from PyQt6 import QtWidgets, uic
+
+from dialogs.roles_dialog.roles_dialog import RolesDialogWindow
+from dialogs.categories_dialog.categories_dialog import CategoriesDialogWindow
+from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
 
 from products.products import ProductsWindow
 from categories.categories import CategoriesWindow
@@ -8,16 +13,12 @@ from transactions.transactions import TransactionsWindow
 from transactions_list.transactions_list import TransactionsListWindow
 from purchasing.purchasing import PurchasingWindow
 from purchasing_list.purchasing_list import PurchasingListWindow
-from dialogs.roles_dialog.roles_dialog import RolesDialogWindow
 from role_permissions.role_permissions import RolePermissionsWindow
-from dialogs.categories_dialog.categories_dialog import CategoriesDialogWindow
 from customers.customers import CustomersWindow
-from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
 from logs.logs import LogsWindow
+from users.users import UsersWindow
 
 from generals.build import resource_path
-from connect_db import DatabaseConnection
-
 
 class POS(QtWidgets.QMainWindow):
     def __init__(self):
@@ -27,19 +28,21 @@ class POS(QtWidgets.QMainWindow):
         ui_file = resource_path('ui/main.ui')
         self.ui = uic.loadUi(ui_file, self)
 
-        self.products_dialog = ProductsWindow()
-        self.categories_dialog = CategoriesWindow()
-        self.categories_dialog_show = CategoriesDialogWindow()
-        self.suppliers_dialog = SuppliersWindow()
-        self.transactions_dialog = TransactionsWindow()
-        self.transactions_list_dialog = TransactionsListWindow()
-        self.purchasing_dialog = PurchasingWindow()
-        self.purchasing_list_dialog = PurchasingListWindow()
-        self.roles_dialog = RolesDialogWindow()
-        self.role_permissions_dialog = RolePermissionsWindow()
-        self.customers_dialog = CustomersWindow()
-        self.logs_dialog = LogsWindow()
-        self.customers_dialog_window = CustomersDialogWindow()
+        # Initialize dialog attributes to None - they'll be created only when needed
+        self._products_dialog = None
+        self._categories_dialog = None
+        self._categories_dialog_show = None
+        self._suppliers_dialog = None
+        self._transactions_dialog = None
+        self._transactions_list_dialog = None
+        self._purchasing_dialog = None
+        self._purchasing_list_dialog = None
+        self._roles_dialog = None
+        self._role_permissions_dialog = None
+        self._customers_dialog = None
+        self._logs_dialog = None
+        self._customers_dialog_window = None
+        self._users_dialog = None
 
         # Use resource_path for database
         self.db_path = resource_path('database/pos.db')
@@ -54,7 +57,7 @@ class POS(QtWidgets.QMainWindow):
         self.ui.export_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.export_page))
         self.ui.backup_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.backup_page))
         
-        # Connect Button to Dialog in Master Data Menu
+        # Connect Button to Dialog in Master Data Menu - using property getters
         self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
         self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
@@ -68,11 +71,119 @@ class POS(QtWidgets.QMainWindow):
         self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
         self.ui.customers_dialog_button.clicked.connect(lambda: self.customers_dialog_window.show())
         self.ui.categories_dialog_button.clicked.connect(lambda: self.categories_dialog_show.show())
+        self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
 
         
-        # TODO: Change the UI button, or layout to form layout to make it beautiful
+        # TODO: Login Page and its logic
+        # TODO: Update seed.py using login logic and permissions
+        # TODO: Change Password Dialog
+        # TODO: Users Login with credentials / permissions that can be taken from anywhere
+        # TODO: Edit Transaction
+        # TODO: Delete Transaction
+        # TODO: Permission for actions
+        # TODO: Stock Opname
+        # TODO: Card Stock
 
-        
+
+    # Property getters for lazy initialization
+    @property
+    def products_dialog(self):
+        if self._products_dialog is None:
+            self._products_dialog = ProductsWindow()
+        return self._products_dialog
+    
+
+    @property
+    def categories_dialog(self):
+        if self._categories_dialog is None:
+            self._categories_dialog = CategoriesWindow()
+        return self._categories_dialog
+    
+
+    @property
+    def categories_dialog_show(self):
+        if self._categories_dialog_show is None:
+            self._categories_dialog_show = CategoriesDialogWindow()
+        return self._categories_dialog_show
+    
+
+    @property
+    def suppliers_dialog(self):
+        if self._suppliers_dialog is None:
+            self._suppliers_dialog = SuppliersWindow()
+        return self._suppliers_dialog
+    
+
+    @property
+    def transactions_dialog(self):
+        if self._transactions_dialog is None:
+            self._transactions_dialog = TransactionsWindow()
+        return self._transactions_dialog
+    
+
+    @property
+    def transactions_list_dialog(self):
+        if self._transactions_list_dialog is None:
+            self._transactions_list_dialog = TransactionsListWindow()
+        return self._transactions_list_dialog
+    
+
+    @property
+    def purchasing_dialog(self):
+        if self._purchasing_dialog is None:
+            self._purchasing_dialog = PurchasingWindow()
+        return self._purchasing_dialog
+    
+
+    @property
+    def purchasing_list_dialog(self):
+        if self._purchasing_list_dialog is None:
+            self._purchasing_list_dialog = PurchasingListWindow()
+        return self._purchasing_list_dialog
+    
+
+    @property
+    def roles_dialog(self):
+        if self._roles_dialog is None:
+            self._roles_dialog = RolesDialogWindow()
+        return self._roles_dialog
+    
+
+    @property
+    def role_permissions_dialog(self):
+        if self._role_permissions_dialog is None:
+            self._role_permissions_dialog = RolePermissionsWindow()
+        return self._role_permissions_dialog
+    
+
+    @property
+    def customers_dialog(self):
+        if self._customers_dialog is None:
+            self._customers_dialog = CustomersWindow()
+        return self._customers_dialog
+    
+
+    @property
+    def logs_dialog(self):
+        if self._logs_dialog is None:
+            self._logs_dialog = LogsWindow()
+        return self._logs_dialog
+    
+
+    @property
+    def customers_dialog_window(self):
+        if self._customers_dialog_window is None:
+            self._customers_dialog_window = CustomersDialogWindow()
+        return self._customers_dialog_window
+
+
+    @property
+    def users_dialog_window(self):
+        if self._users_dialog is None:
+            self._users_dialog = UsersWindow()
+        return self._users_dialog
+
+
     def closeEvent(self, event):
         # Close database connection
         self.db = DatabaseConnection().get_connection()

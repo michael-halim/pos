@@ -1,6 +1,4 @@
-from typing import List, Optional
-from ..repositories.products_dialog_repositories import ProductsDialogRepository
-from ..models.products_dialog_models import ProductsDialogModel
+from dialogs.products_dialog.repositories.products_dialog_repositories import ProductsDialogRepository
 
 class ProductsDialogService:
     def __init__(self):

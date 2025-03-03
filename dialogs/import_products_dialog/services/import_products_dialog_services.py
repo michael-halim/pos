@@ -1,10 +1,9 @@
-from ..repositories.import_products_dialog_repositories import ImportProductsDialogRepository
-from threads.thread_service import ThreadManager
 import openpyxl
-from dialogs.import_products_dialog.models.import_products_dialog_models import ImportProductsModel
 from typing import List
 
-
+from dialogs.import_products_dialog.repositories.import_products_dialog_repositories import ImportProductsDialogRepository
+from dialogs.import_products_dialog.models.import_products_dialog_models import ImportProductsModel
+from threads.thread_service import ThreadManager
 
 class ImportProductsDialogService:
     def __init__(self):
@@ -140,6 +139,3 @@ class ImportProductsDialogService:
             products,
             batch_size
         )
-
-        # # Perform the batch import
-        # return self.repository.import_products_to_database(products, batch_size)

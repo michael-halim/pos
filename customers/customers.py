@@ -1,9 +1,9 @@
 from PyQt6 import QtWidgets, uic
 
-from helper import format_number, add_prefix, remove_non_digit
-
 from customers.services.customers_services import CustomersService
 from customers.models.customers_models import CustomersModel
+
+from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS

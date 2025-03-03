@@ -1,12 +1,11 @@
 from PyQt6 import QtWidgets, uic, QtCore
 
-from helper import format_number, add_prefix
+from dialogs.categories_dialog.models.categories_dialog_models import CategoriesDialogModel
+from dialogs.categories_dialog.services.categories_dialog_services import CategoriesDialogService
+
 from generals.fonts import POSFonts
 from generals.build import resource_path
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
-from dialogs.categories_dialog.models.categories_dialog_models import CategoriesDialogModel
-from dialogs.categories_dialog.services.categories_dialog_services import CategoriesDialogService
-from datetime import datetime
 
 class CategoriesDialogWindow(QtWidgets.QDialog):
     # Add signal to communicate with main window

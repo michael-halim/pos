@@ -1,5 +1,5 @@
-from ..repositories.role_permissions_repositories import RolePermissionsRepository
-from ..models.role_permissions_models import RolesModel
+from role_permissions.repositories.role_permissions_repositories import RolePermissionsRepository
+from role_permissions.models.role_permissions_models import RolesModel
 
 class RolePermissionsService:
     def __init__(self):

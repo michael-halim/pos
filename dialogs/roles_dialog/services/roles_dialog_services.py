@@ -1,4 +1,4 @@
-from ..repositories.roles_dialog_repositories import RolesDialogRepository
+from dialogs.roles_dialog.repositories.roles_dialog_repositories import RolesDialogRepository
 
 class RolesDialogService:
     def __init__(self):
