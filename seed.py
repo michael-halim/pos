@@ -1,4 +1,7 @@
 from connect_db import DatabaseConnection
+import hashlib
+import random
+import string
 
 class SeedData:
     def __init__(self):
@@ -34,14 +37,16 @@ class SeedData:
 
         sql_insert = '''INSERT INTO permissions (permission_id, permission_name) 
                         VALUES 
-                        ('add_products', 'Add Products'),
-                        ('edit_products', 'Edit Products'),
-                        ('delete_products', 'Delete Products'),
-                        ('view_products', 'View Products'),
-                        ('add_suppliers', 'Add Suppliers'),
-                        ('edit_suppliers', 'Edit Suppliers'),
-                        ('delete_suppliers', 'Delete Suppliers'),
-                        ('view_suppliers', 'View Suppliers');'''
+                        ('create_products', 'Create Products'), ('read_products', 'Read Products'), ('update_products', 'Update Products'), ('delete_products', 'Delete Products'), 
+                        ('create_categories', 'Create Categories'), ('read_categories', 'Read Categories'), ('update_categories', 'Update Categories'), ('delete_categories', 'Delete Categories'),
+                        ('create_suppliers', 'Create Suppliers'), ('read_suppliers', 'Read Suppliers'), ('update_suppliers', 'Update Suppliers'), ('delete_suppliers', 'Delete Suppliers'),
+                        ('create_transactions', 'Create Transactions'), ('read_transactions', 'Read Transactions'), ('update_transactions', 'Update Transactions'), ('delete_transactions', 'Delete Transactions'),
+                        ('create_purchasing', 'Create Purchasing'), ('read_purchasing', 'Read Purchasing'), ('update_purchasing', 'Update Purchasing'), ('delete_purchasing', 'Delete Purchasing'),
+                        ('create_customers', 'Create Customers'), ('read_customers', 'Read Customers'), ('update_customers', 'Update Customers'), ('delete_customers', 'Delete Customers'),
+                        ('create_users', 'Create Users'), ('read_users', 'Read Users'), ('update_users', 'Update Users'), ('delete_users', 'Delete Users'),
+                        ('create_roles', 'Create Roles'), ('read_roles', 'Read Roles'), ('update_roles', 'Update Roles'), ('delete_roles', 'Delete Roles'),
+                        ('create_permissions', 'Create Permissions'), ('read_permissions', 'Read Permissions'), ('update_permissions', 'Update Permissions'), ('delete_permissions', 'Delete Permissions'),
+                        ('create_logs', 'Create Logs'), ('read_logs', 'Read Logs'), ('update_logs', 'Update Logs'), ('delete_logs', 'Delete Logs');'''
 
         self.cursor.execute(sql_insert)
 
@@ -56,15 +61,17 @@ class SeedData:
 
         sql_insert = '''INSERT INTO role_permissions (role_id, permission_id) 
                         VALUES 
-                        (1, 'add_products'),
-                        (1, 'edit_products'),
-                        (1, 'delete_products'),
-                        (1, 'view_products'),
-                        (1, 'add_suppliers'),
-                        (1, 'edit_suppliers'),
-                        (1, 'delete_suppliers'),
-                        (1, 'view_suppliers');'''
-
+                        (1, 'create_products'), (1, 'read_products'), (1, 'update_products'), (1, 'delete_products'),
+                        (1, 'create_categories'), (1, 'read_categories'), (1, 'update_categories'), (1, 'delete_categories'),
+                        (1, 'create_suppliers'), (1, 'read_suppliers'), (1, 'update_suppliers'), (1, 'delete_suppliers'),
+                        (1, 'create_transactions'), (1, 'read_transactions'), (1, 'update_transactions'), (1, 'delete_transactions'),
+                        (1, 'create_purchasing'), (1, 'read_purchasing'), (1, 'update_purchasing'), (1, 'delete_purchasing'),
+                        (1, 'create_customers'), (1, 'read_customers'), (1, 'update_customers'), (1, 'delete_customers'),
+                        (1, 'create_users'), (1, 'read_users'), (1, 'update_users'), (1, 'delete_users'),
+                        (1, 'create_roles'), (1, 'read_roles'), (1, 'update_roles'), (1, 'delete_roles'),
+                        (1, 'create_permissions'), (1, 'read_permissions'), (1, 'update_permissions'), (1, 'delete_permissions'),
+                        (1, 'create_logs'), (1, 'read_logs'), (1, 'update_logs'), (1, 'delete_logs');'''
+        
         self.cursor.execute(sql_insert)
 
 
@@ -104,12 +111,16 @@ class SeedData:
         );'''
 
         self.cursor.execute(sql)
+        password = 'admin'
+        salt = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+        password = salt + password
+        password_hash = hashlib.sha512(password.encode()).hexdigest()
 
-        sql_insert = '''INSERT INTO users (user_id, username, password_hash, user_salt, role_id, is_active, created_at, updated_at) 
+        sql_insert = '''INSERT INTO users (username, password_hash, user_salt, role_id, is_active, created_at, updated_at) 
                         VALUES 
-                        (1, 'Admin', 'password', 'salt', 1, TRUE, CURRENT_TIMESTAMP, NULL);'''
+                        (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL);'''
 
-        self.cursor.execute(sql_insert)     
+        self.cursor.execute(sql_insert, ('Admin', password_hash, salt, 1, True))     
 
 
     def create_customers_table(self):

@@ -156,6 +156,9 @@
                    <pointsize>12</pointsize>
                   </font>
                  </property>
+                 <property name="echoMode">
+                  <enum>QLineEdit::Password</enum>
+                 </property>
                  <property name="clearButtonEnabled">
                   <bool>true</bool>
                  </property>

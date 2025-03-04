@@ -2,6 +2,7 @@ from PyQt6 import QtWidgets, uic, QtGui
 from datetime import datetime
 
 from dialogs.roles_dialog.roles_dialog import RolesDialogWindow
+from dialogs.change_password_dialog.change_password_dialog import ChangePasswordDialogWindow
 
 from users.services.users_services import UsersService
 from users.models.users_models import UsersTableItemModel, UsersFormModel
@@ -21,6 +22,7 @@ class UsersWindow(QtWidgets.QWidget):
 
         # Init Dialog
         self.roles_dialog = RolesDialogWindow()
+        self.change_password_dialog = ChangePasswordDialogWindow()
 
         # Init Services
         self.users_service = UsersService()
@@ -36,12 +38,17 @@ class UsersWindow(QtWidgets.QWidget):
         self.ui.edit_users_button.clicked.connect(self.edit_users)
         self.ui.delete_users_button.clicked.connect(self.delete_users)
         self.ui.submit_users_button.clicked.connect(self.submit_users)
+        self.ui.change_password_users_button.clicked.connect(lambda: self.change_password_dialog.show())
+        self.ui.close_users_button.clicked.connect(lambda: self.close())
 
         # Listen selected row in tables
         self.users_table.itemSelectionChanged.connect(self.on_user_selected)
 
         # Connect the role_selected signal to handle_role_selected method
         self.roles_dialog.role_selected.connect(self.handle_role_selected)
+
+        # Connect to handle change password dialog
+        self.change_password_dialog.password_changed.connect(self.handle_change_password)
 
         # Connect the find_role_users_button to the roles_dialog
         self.ui.find_role_users_button.clicked.connect(lambda: self.roles_dialog.show())
@@ -108,6 +115,7 @@ class UsersWindow(QtWidgets.QWidget):
     def create_new_users(self):
         self.clear_users_form_data()
         self.set_enabled_users_form_group(True)
+        self.ui.change_password_users_button.setEnabled(False)
         self.ui.user_id_users_input.setEnabled(False)
         self.ui.user_id_users_input.setFocus()
 
@@ -115,7 +123,10 @@ class UsersWindow(QtWidgets.QWidget):
     def edit_users(self):
         # Get the selected row
         selected_user = self.ui.users_table.selectedItems()
+
         if selected_user:
+            self.users_table.setSortingEnabled(False)
+
             row = selected_user[0].row()
             user_id = self.ui.users_table.item(row, 0).text()
             user_result = self.users_service.get_user_by_id(user_id)
@@ -128,6 +139,8 @@ class UsersWindow(QtWidgets.QWidget):
                 self.ui.user_id_users_input.setEnabled(False)
                 self.ui.username_users_input.setEnabled(False)
                 self.ui.password_users_input.setEnabled(False)
+                self.ui.change_password_users_button.setEnabled(True)
+
                 self.ui.role_id_users_input.setFocus()
 
                 # Set the submit button text and connect to update function
@@ -135,8 +148,15 @@ class UsersWindow(QtWidgets.QWidget):
                 self.ui.submit_users_button.clicked.disconnect()
                 self.ui.submit_users_button.clicked.connect(self.update_users)
 
+                self.users_table.setSortingEnabled(True)
+
+        else:
+            POSMessageBox.error(self, title="Error", message="Please select a user to edit")
     
+
     def update_users(self):
+        self.users_table.setSortingEnabled(False)
+
         user_data = self.get_users_form_data()
         user_result = self.users_service.update_user(user_data)
         if user_result.success:
@@ -153,6 +173,8 @@ class UsersWindow(QtWidgets.QWidget):
 
         else:
             POSMessageBox.error(self, title="Error", message=user_result.message)
+
+        self.users_table.setSortingEnabled(True)
 
 
     def delete_users(self):
@@ -182,15 +204,22 @@ class UsersWindow(QtWidgets.QWidget):
 
 
     def submit_users(self):
+        # Disable Sorting to prevent data from being sorted
+        self.users_table.setSortingEnabled(False)
+
         user_data = self.get_users_form_data()
         user_result = self.users_service.submit_user(user_data)
         if user_result.success:
             POSMessageBox.info(self, title="Success", message=user_result.message)
             self.clear_users_form_data()
+            self.set_enabled_users_form_group(False)
             self.show_users_data()
 
         else:
             POSMessageBox.error(self, title="Error", message=user_result.message)
+
+        # Re-enable Sorting
+        self.users_table.setSortingEnabled(True)
 
 
     # Setters
@@ -220,7 +249,7 @@ class UsersWindow(QtWidgets.QWidget):
                 is_active.setText('Active')
                 is_active.setBackground(QtGui.QColor(0xD1, 0xE7, 0xDD))
 
-            table_items =  [ 
+            table_items = [ 
                 QtWidgets.QTableWidgetItem(str(user.user_id)),
                 QtWidgets.QTableWidgetItem(user.username),
                 QtWidgets.QTableWidgetItem(user.role_name),
@@ -241,6 +270,7 @@ class UsersWindow(QtWidgets.QWidget):
         self.ui.find_role_users_button.setEnabled(is_enabled)
         self.ui.clear_users_button.setEnabled(is_enabled)
         self.ui.submit_users_button.setEnabled(is_enabled)
+        self.ui.change_password_users_button.setEnabled(is_enabled)
 
 
     # Getters
@@ -258,12 +288,18 @@ class UsersWindow(QtWidgets.QWidget):
     # Shows
     # ===============
     def show_users_data(self):
+        # Disable Sorting to prevent data from being sorted
+        self.users_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_users_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
         users_result = self.users_service.get_users(search_text)
 
         self.set_users_table_data(users_result.data)
+
+        # Re-enable Sorting
+        self.users_table.setSortingEnabled(True)
 
 
     # Signal Handlers
@@ -275,6 +311,17 @@ class UsersWindow(QtWidgets.QWidget):
             self.ui.role_name_users_input.setText(role_result.data.role_name)
 
     
+    def handle_change_password(self, password_data: dict):
+        user_id = self.ui.user_id_users_input.text().strip()
+        result = self.users_service.change_password(user_id, password_data['old_password'], password_data['new_password'])
+        
+        if result.success:
+            POSMessageBox.info(self, title="Success", message=result.message)
+            self.show_users_data()
+
+        else:
+            POSMessageBox.error(self, title="Error", message=result.message)
+
 
     # Event Listeners
     # ===============
@@ -317,4 +364,8 @@ class UsersWindow(QtWidgets.QWidget):
         self.ui.password_users_input.clear()
         self.ui.role_id_users_input.clear()
         self.ui.role_name_users_input.clear()
-
+        
+        # Set the submit button text and connect to submit function
+        self.ui.submit_users_button.setText('Submit')
+        self.ui.submit_users_button.clicked.disconnect()
+        self.ui.submit_users_button.clicked.connect(self.submit_users)

@@ -33,3 +33,6 @@ class UsersService:
     def get_role_by_id(self, role_id: int):
         return self.repository.get_role_by_id(role_id)
 
+
+    def change_password(self, user_id: int, old_password: str, new_password: str):
+        return self.repository.change_password(user_id, old_password, new_password)

@@ -20,10 +20,10 @@ class UsersRepository:
                 sql = '''SELECT u.user_id, u.username, u.role_id, r.role_name, u.is_active, u.created_at 
                             FROM users u
                             JOIN roles r ON u.role_id = r.role_id
-                            WHERE u.user_id LIKE ? OR u.username LIKE ? OR u.role_id LIKE ? OR r.role_name LIKE ? OR u.is_active LIKE ?'''
+                            WHERE u.user_id LIKE ? OR u.username LIKE ? OR r.role_name LIKE ?'''
                 
                 search_text = f'%{search_text}%'
-                users_result = self.cursor.execute(sql, (search_text, search_text, search_text, search_text))
+                users_result = self.cursor.execute(sql, (search_text, search_text, search_text))
             else:
                 sql = '''SELECT u.user_id, u.username, u.role_id, r.role_name, u.is_active, u.created_at 
                             FROM users u
@@ -89,7 +89,9 @@ class UsersRepository:
             
             # Hash the password
             salt = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
-            hashed_password = hashlib.sha512(user_data.password.encode()).hexdigest()
+            new_password = salt + user_data.password
+
+            hashed_password = hashlib.sha512(new_password.encode()).hexdigest()
             today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             sql = '''INSERT INTO users (username, password_hash, user_salt, role_id, created_at) VALUES (?, ?, ?, ?, ?)'''
 
@@ -157,3 +159,47 @@ class UsersRepository:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
             
             
+    def change_password(self, user_id: int, old_password: str, new_password: str):
+        try:
+            self.cursor.execute('BEGIN TRANSACTION')
+            # Check if old password is correct
+            sql = 'SELECT user_salt, password_hash FROM users WHERE user_id = ? LIMIT 1'
+            self.cursor.execute(sql, (user_id,))
+            user_data = self.cursor.fetchone()
+
+            
+            if user_data:
+                # Get the salt
+                salt, current_password_hash = user_data[0], user_data[1]
+
+                # Hash the old password
+                old_password = salt + old_password
+                old_password_hash = hashlib.sha512(old_password.encode()).hexdigest()
+
+                # Check if the old password is correct
+                if current_password_hash != old_password_hash:
+                    return ResponseMessage.fail(message="Old password is incorrect!")
+                
+
+                # Generate New Salt
+                new_salt = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+                new_password = new_salt + new_password
+
+                # Hash the new password
+                hashed_password = hashlib.sha512(new_password.encode()).hexdigest()
+
+                # Update the password
+                sql = 'UPDATE users SET user_salt = ?, password_hash = ? WHERE user_id = ?'
+                
+                self.cursor.execute(sql, (new_salt, hashed_password, user_id))
+
+                self.db.commit()
+
+                return ResponseMessage.ok(message="Password changed successfully!")
+            
+            else:
+                return ResponseMessage.fail(message="User not found!")
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+

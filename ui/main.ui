@@ -37,18 +37,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="settings_button">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Settings</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="transaction_button">
          <property name="font">
           <font>
@@ -69,6 +57,18 @@
          </property>
          <property name="text">
           <string>Report</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="settings_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Settings</string>
          </property>
         </widget>
        </item>
@@ -134,7 +134,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_5">
+        <widget class="QPushButton" name="logout_button">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
