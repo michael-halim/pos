@@ -5,6 +5,7 @@ from products.models.products_models import ProductsModel
 
 from dialogs.master_stock_dialog.master_stock_dialog import MasterStockDialogWindow
 from dialogs.import_products_dialog.import_products_dialog import ImportProductsDialogWindow
+from dialogs.stock_card_dialog.stock_card_dialog import StockCardDialogWindow
 
 from helper import format_number, add_prefix
 from generals.build import resource_path
@@ -28,6 +29,7 @@ class ProductsWindow(QtWidgets.QWidget):
         # Init Dialogs
         self.master_stock_dialog = MasterStockDialogWindow()    
         self.import_products_dialog = ImportProductsDialogWindow()
+        self.stock_card_dialog = StockCardDialogWindow()
 
         # Init Table
         self.products_table = self.ui.products_table
@@ -38,6 +40,8 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.edit_products_button.clicked.connect(self.edit_products)
         self.ui.delete_products_button.clicked.connect(self.delete_products)
         self.ui.import_products_button.clicked.connect(self.import_products)
+        self.ui.stock_card_products_button.clicked.connect(self.stock_card_products)
+
         self.ui.close_products_button.clicked.connect(lambda: self.close())
         
         # Connect search input to filter function
@@ -112,7 +116,6 @@ class ProductsWindow(QtWidgets.QWidget):
     # ===============
     def show_products_data(self):
         """Load and display products data"""
-        print('show products data called')
         search_text = self.ui.filter_products_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
@@ -151,6 +154,21 @@ class ProductsWindow(QtWidgets.QWidget):
             self.data_loaded = False
         else:
             POSMessageBox.warning(self, "Error", "Please select a product to edit")
+
+
+
+    def stock_card_products(self):
+        """Show the stock card products dialog"""
+        selected_rows = self.products_table.selectedItems()
+        if selected_rows:
+            row = selected_rows[0].row()
+            sku = self.products_table.item(row, 0).text().strip()
+            self.stock_card_dialog.show_stock_card_data(sku)
+            self.stock_card_dialog.show()
+        
+        else:
+            POSMessageBox.warning(self, title="Error", message="Please select a product to view stock card")
+        
 
 
     def delete_products(self):

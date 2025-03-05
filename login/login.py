@@ -20,6 +20,10 @@ class LoginWindow(QtWidgets.QWidget):
         # Connect Button to Stacked Widget
         self.ui.submit_login_button.clicked.connect(self.login)
 
+        # Handle Enter Key
+        self.ui.username_input.returnPressed.connect(lambda: self.ui.password_input.setFocus())
+        self.ui.password_input.returnPressed.connect(self.login)
+
 
     def login(self):
         username = self.ui.username_input.text()

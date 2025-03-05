@@ -9,6 +9,27 @@ class SeedData:
         self.cursor = self.db.cursor()
 
 
+    def create_stock_card_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS stock_card (
+            sku VARCHAR(20) NOT NULL,
+            date DATE NOT NULL,
+            time TIME NOT NULL,
+            transaction_id VARCHAR(20) NOT NULL,
+            stock_in INT(10) NULL,
+            stock_out INT(10) NULL,
+            running_balance INT(10) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+        
+        sql_insert = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, stock_out, running_balance)
+                        VALUES 
+                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 50, NULL, 50),
+                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40);'''
+
+        self.cursor.execute(sql_insert)
+
+
     def create_roles_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS roles (
             role_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -120,7 +141,7 @@ class SeedData:
                         VALUES 
                         (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL);'''
 
-        self.cursor.execute(sql_insert, ('Admin', password_hash, salt, 1, True))     
+        self.cursor.execute(sql_insert, ('admin', password_hash, salt, 1, True))     
 
 
     def create_customers_table(self):
@@ -346,7 +367,7 @@ class SeedData:
         
         sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
                     VALUES 
-                    ('SKU001', 'Product One', 'barcode', 1, 1, 1000, 1500, 'Best seller', 50, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
+                    ('SKU001', 'Product One', 'barcode', 1, 1, 1000, 1500, 'Best seller', 40, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
                     ('SKU002', 'Product Two', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 30, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
                     ('SKU003', 'Product Three', 'barcode', 3, 3, 3000, 20, 'New arrival', 20, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
         
@@ -411,10 +432,10 @@ class SeedData:
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_product_categories_unique ON product_categories_detail(sku, category_id);')
 
         sql_insert = '''INSERT INTO product_categories_detail (sku, category_id) 
-                            VALUES 
-                            ('SKU001', 1),
-                            ('SKU002', 2),
-                            ('SKU003', 3);'''
+                        VALUES 
+                        ('SKU001', 1),
+                        ('SKU002', 2),
+                        ('SKU003', 3);'''
         
         self.cursor.execute(sql_insert)
 
@@ -445,6 +466,7 @@ class SeedData:
 
         self.drop_all_tables()
 
+        self.create_stock_card_table()
         self.create_suppliers_table()
         self.create_purchasing_history_table()
         self.create_detail_purchasing_history_table()

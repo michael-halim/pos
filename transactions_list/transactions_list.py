@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets, uic
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
@@ -38,7 +38,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.transactions_table.itemSelectionChanged.connect(self.on_transaction_selected)
         
         # Set date input
-        self.ui.start_date_transactions_list_input.setDate(datetime.now())
+        self.ui.start_date_transactions_list_input.setDate(datetime.now() - timedelta(days=1))
         self.ui.end_date_transactions_list_input.setDate(datetime.now())
 
         self.ui.start_date_transactions_list_input.setDisplayFormat("dd/MM/yyyy")
@@ -142,14 +142,15 @@ class TransactionsListWindow(QtWidgets.QWidget):
         selected_rows = self.transactions_table.selectedItems()
         if selected_rows:
             # Get the first selected row
-            row = selected_rows[1].row()
+            row = selected_rows[0].row()
             self.current_selected_transaction_id = self.transactions_table.item(row, 1).text()
             
             dt_results = self.transaction_list_service.get_detail_transactions_list(self.current_selected_transaction_id)
-            if dt_results.success :
+            if dt_results.success:
                 self.set_detail_transactions_table_data(dt_results.data)
+                
             else:
-                POSMessageBox.error(self, "Error", dt_results.message)
+                POSMessageBox.error(self, title="Error", message=dt_results.message)
 
 
     # Setters
