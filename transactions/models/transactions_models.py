@@ -76,3 +76,14 @@ class PurchasingHistoryTableItemModel:
     qty: int
     unit: str
 
+@dataclass
+class TransactionHistoryTableModel:
+    created_at: datetime
+    qty: int
+    unit: str
+
+@dataclass
+class WholesaleTableModel:
+    unit: str
+    unit_value: int
+    price: int

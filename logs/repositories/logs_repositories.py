@@ -19,13 +19,13 @@ class LogsRepository:
                             FROM logs l
                             JOIN users u ON l.created_by = u.user_id
                             WHERE l.created_at BETWEEN ? AND ? 
-                                AND (log_type LIKE ? OR log_description LIKE ? OR old_data LIKE ? OR new_data LIKE ? OR u.user_name LIKE ?)'''
+                                AND (log_type LIKE ? OR log_description LIKE ? OR old_data LIKE ? OR new_data LIKE ? OR u.username LIKE ?)'''
                 
                 search_text = f'%{search_text}%'
                 logs_result = self.cursor.execute(sql, (start_date, end_date, search_text, search_text, search_text, search_text, search_text))
             else:
 
-                sql = '''SELECT l.created_at, l.log_type, l.log_description, l.old_data, l.new_data, u.user_name
+                sql = '''SELECT l.created_at, l.log_type, l.log_description, l.old_data, l.new_data, u.username
                             FROM logs l
                             JOIN users u ON l.created_by = u.user_id
                             WHERE l.created_at BETWEEN ? AND ?'''

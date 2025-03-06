@@ -441,6 +441,7 @@ class SeedData:
 
 
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS stock_card')
         self.cursor.execute('DROP TABLE IF EXISTS roles')
         self.cursor.execute('DROP TABLE IF EXISTS permissions')
         self.cursor.execute('DROP TABLE IF EXISTS role_permissions')

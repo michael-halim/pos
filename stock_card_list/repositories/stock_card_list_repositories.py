@@ -15,10 +15,10 @@ class StockCardListRepository:
             if search_text:
                 sql = '''SELECT sku, product_name, stock, unit 
                             FROM products
-                            WHERE sku LIKE ? OR product_name LIKE ? OR stock LIKE ? OR unit LIKE ?'''
+                            WHERE sku LIKE ? OR product_name LIKE ? OR unit LIKE ?'''
                 
                 search_text = f'%{search_text}%'
-                products_result = self.cursor.execute(sql, (search_text, search_text))
+                products_result = self.cursor.execute(sql, (search_text, search_text, search_text))
             else:
                 sql = '''SELECT sku, product_name, stock, unit FROM products LIMIT 100'''
                 products_result = self.cursor.execute(sql)

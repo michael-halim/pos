@@ -125,6 +125,21 @@ class PurchasingRepository:
                                 WHERE sku = ?'''
                 self.cursor.execute(update_sql, (stock_affected, net_price, net_price, stock_affected, stock_affected, sku))
 
+
+                # Get Updated Stock Value
+                get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
+                self.cursor.execute(get_updated_stock_sql, (sku,))
+                updated_stock = self.cursor.fetchone()[0]
+
+
+                # Update Stock Card
+                stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
+                                                            stock_out, running_balance) 
+                                    VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?)'''
+                
+                self.cursor.execute(stock_card_sql, (sku, purchasing_id, stock_affected, None, updated_stock))
+
+
             # If everything successful, commit the transaction
             self.db.commit()
             

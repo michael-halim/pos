@@ -4,7 +4,8 @@ from typing import List
 
 from transactions.models.transactions_models import (
     ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel,
-    PendingTransactionModel, TransactionTableItemModel, PurchasingHistoryTableItemModel
+    PendingTransactionModel, TransactionTableItemModel, PurchasingHistoryTableItemModel,
+    TransactionHistoryTableModel
 )
 
 from response.response_message import ResponseMessage
@@ -55,6 +56,20 @@ class TransactionRepository:
                 # Update product stock
                 update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
                 self.cursor.execute(update_sql, (stock_affected, sku))
+
+                # Get updated stock value directly after update
+                get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
+                self.cursor.execute(get_updated_stock_sql, (sku,))
+                
+                updated_stock = self.cursor.fetchone()[0]
+
+                # Update Stock Card by Inserting Data to Stock Card Table
+                stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
+                                                            stock_out, running_balance) 
+                                    VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?)'''
+                
+                self.cursor.execute(stock_card_sql, (sku, transaction_id, None, stock_affected, updated_stock))
+                
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -328,6 +343,40 @@ class TransactionRepository:
             
             return ResponseMessage.ok(
                 message="Purchasing history not found!",
+                data=None
+            )
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+
+
+    def get_transaction_history_by_sku(self, sku: str):
+        try:
+            sql = '''SELECT t.created_at, dt.qty, dt.unit
+                        FROM detail_transactions dt
+                        JOIN transactions t ON t.transaction_id = dt.transaction_id
+                        WHERE dt.sku = ?
+                        ORDER BY t.created_at DESC'''
+            
+            self.cursor.execute(sql, (sku,))
+
+            transaction_history_results = self.cursor.fetchall()
+
+            if transaction_history_results:
+                transaction_history = [
+                    TransactionHistoryTableModel(created_at=th[0], 
+                                                    qty=th[1], 
+                                                    unit=th[2]) 
+                    for th in transaction_history_results
+                ]
+
+                return ResponseMessage.ok(
+                    message="Transaction history fetched successfully!",
+                    data=transaction_history
+                )
+            
+            return ResponseMessage.ok(
+                message="Transaction history not found!",
                 data=None
             )
         

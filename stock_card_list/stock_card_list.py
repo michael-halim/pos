@@ -68,14 +68,20 @@ class StockCardListWindow(QtWidgets.QWidget):
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+        self.show_products_data()
+        self.ui.stock_card_table.setRowCount(0)
 
 
     def show(self):
         super().show()
-    
+        self.show_products_data()
+        self.ui.stock_card_table.setRowCount(0)
    
+
     def showMaximized(self):
         super().showMaximized()
+        self.show_products_data()
+        self.ui.stock_card_table.setRowCount(0)
 
 
     # Shows

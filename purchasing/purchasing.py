@@ -647,6 +647,10 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.cached_purchasing_index = {}
         self.cached_qty = {}
         self.current_selected_sku = None
+        self.ui.invoice_number_purchasing_input.clear()
+        self.ui.supplier_in_purchasing_input.clear()
+        self.ui.supplier_name_in_purchasing_input.clear()
+        self.ui.remarks_purchasing_input.clear()
         self.clear_data_purchasing()
 
 

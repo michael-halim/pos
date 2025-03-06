@@ -7,8 +7,10 @@ from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 from dialogs.customers_dialog.customers_dialog import CustomersDialogWindow
 
 from transactions.services.transaction_service import TransactionService
-from transactions.models.transactions_models import TransactionTableItemModel, TransactionModel, DetailTransactionModel, PurchasingHistoryTableItemModel
-from transactions.models.wholesale_models import WholesaleTableModel
+from transactions.models.transactions_models import (
+    TransactionTableItemModel, TransactionModel, DetailTransactionModel, PurchasingHistoryTableItemModel, 
+    WholesaleTableModel, TransactionHistoryTableModel
+)
 
 from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
@@ -43,11 +45,11 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Init Tables
         self.transactions_table = self.ui.transactions_table
-        self.history_transactions_table = self.ui.history_transactions_table
+        self.purchase_history_table = self.ui.purchase_history_table
         self.wholesale_transactions_table = self.ui.wholesale_transactions_table
 
         self.transactions_table.setSortingEnabled(True)
-        self.history_transactions_table.setSortingEnabled(True)
+        self.purchase_history_table.setSortingEnabled(True)
         self.wholesale_transactions_table.setSortingEnabled(True)
 
         # Connect the add button to add_transaction method
@@ -115,27 +117,35 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Connect customer id input to update customer name input
         self.ui.customer_id_transaction_input.returnPressed.connect(self.on_handle_customer_enter)
 
+        # Enter in Payment will trigger submit transaction
+        self.ui.payment_transaction_input.returnPressed.connect(self.submit_transaction)
 
         # Set selection behavior to select entire rows
         self.transactions_table.setSelectionBehavior(SELECT_ROWS)
         self.transactions_table.setSelectionMode(SINGLE_SELECTION)
         self.wholesale_transactions_table.setSelectionBehavior(SELECT_ROWS)
         self.wholesale_transactions_table.setSelectionMode(SINGLE_SELECTION)
-        self.history_transactions_table.setSelectionBehavior(SELECT_ROWS)
-        self.history_transactions_table.setSelectionMode(SINGLE_SELECTION)
+        self.purchase_history_table.setSelectionBehavior(SELECT_ROWS)
+        self.purchase_history_table.setSelectionMode(SINGLE_SELECTION)
+        self.transaction_history_table.setSelectionBehavior(SELECT_ROWS)
+        self.transaction_history_table.setSelectionMode(SINGLE_SELECTION)
+
 
         # Set wholesale transactions table to be read only
         self.transactions_table.setEditTriggers(NO_EDIT_TRIGGERS)
         self.wholesale_transactions_table.setEditTriggers(NO_EDIT_TRIGGERS)
-        self.history_transactions_table.setEditTriggers(NO_EDIT_TRIGGERS)
+        self.purchase_history_table.setEditTriggers(NO_EDIT_TRIGGERS)
+        self.transaction_history_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties to resize to contents
         self.transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.wholesale_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.wholesale_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        self.history_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        self.history_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.purchase_history_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.purchase_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.transaction_history_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.transaction_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
     def add_tax_transaction(self):
@@ -185,8 +195,9 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
 
 
-    def show_history_transactions_data(self, sku: str):
-        self.clear_history_transactions_data()
+    def show_purchasing_history_data(self, sku: str):
+        self.clear_purchasing_history_data()
+
 
         if sku == '':
             sku = self.ui.sku_transaction_input.text().strip()
@@ -213,12 +224,28 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.set_wholesale_transactions_table_data(wholesale_transactions_data)
     
 
+    def show_transaction_history_data(self, sku: str):
+        self.clear_transaction_history_data()
+
+        if sku == '':
+            sku = self.ui.sku_transaction_input.text().strip()
+
+        result = self.transaction_service.get_transaction_history_by_sku(sku)
+        if result.success and result.data:
+            self.set_transaction_history_table_data(result.data)
+
+
     def add_transaction(self):
         # Stop temporary sorting
         self.transactions_table.setSortingEnabled(False)
+        transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
+        if transaction_form_data.sku == '' or transaction_form_data.price == '' or transaction_form_data.product_name == '' \
+            or transaction_form_data.unit == '' or transaction_form_data.qty == '' or int(transaction_form_data.qty) <= 0:
+            POSMessageBox.error(self, title='Error', message="Please select a product and enter quantity minimum 1")
+            return
+
 
         try:
-            transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
             
             self.set_transactions_table_data([transaction_form_data])
                 
@@ -245,6 +272,8 @@ class TransactionsWindow(QtWidgets.QWidget):
         finally:
             # Re-enable sorting
             self.transactions_table.setSortingEnabled(True)
+            self.clear_purchasing_history_data()
+            self.clear_transaction_history_data()
             self.clear_wholesale_transactions_data()
 
 
@@ -323,8 +352,10 @@ class TransactionsWindow(QtWidgets.QWidget):
                 # Re-enable all inputs
                 self.ui.sku_transaction_input.setEnabled(True)
 
-                # Clear wholesale transactions data
+                # Clear wholesale, purchasing history and transaction history data
                 self.clear_wholesale_transactions_data()
+                self.clear_purchasing_history_data()
+                self.clear_transaction_history_data()
                 
             except Exception as e:
                 POSMessageBox.error(self, title='Error', message=f"Failed to update transaction: {str(e)}")
@@ -584,11 +615,10 @@ class TransactionsWindow(QtWidgets.QWidget):
                 self.ui.stock_transaction_input.setStyleSheet('color: red;')
                 self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
         
-        # Show wholesale transactions data
+        # Show wholesale, purchasing history and transaction history data
         self.show_wholesale_transactions_data(sku)
-
-        # Show purchasing history data
-        self.show_history_transactions_data(sku)
+        self.show_purchasing_history_data(sku)
+        self.show_transaction_history_data(sku)
 
         # Trigger qty input changed event
         self.on_qty_transaction_input_changed()
@@ -655,8 +685,12 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.wholesale_transactions_table.setRowCount(0)
 
 
-    def clear_history_transactions_data(self):
-        self.history_transactions_table.setRowCount(0)
+    def clear_purchasing_history_data(self):
+        self.purchase_history_table.setRowCount(0)
+
+
+    def clear_transaction_history_data(self):
+        self.transaction_history_table.setRowCount(0)
 
 
     def clear_transaction(self):
@@ -670,6 +704,9 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.current_selected_sku = None
         self.ui.customer_id_transaction_input.clear()
         self.ui.customer_name_transaction_input.clear()
+        self.ui.tax_pct_transaction_input.clear()
+        self.ui.tax_rp_transaction_input.clear()
+        self.ui.remarks_transaction_input.clear()
         self.clear_data_transaction()
 
 
@@ -687,7 +724,8 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.discount_rp_per_item_transaction_input.clear()
         self.ui.discount_rp_total_transaction_input.clear()
         self.clear_wholesale_transactions_data()
-        self.clear_history_transactions_data()
+        self.clear_purchasing_history_data()
+        self.clear_transaction_history_data()
     
 
     # Getters
@@ -808,7 +846,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                 updated_amount: int = int(price) * int(updated_qty)
 
                 self.transactions_table.item(idx, 3).setText(format_number(str(updated_qty)))
-                self.transactions_table.item(idx, 8).setText(add_prefix(format_number(str(updated_amount))))
+                self.transactions_table.item(idx, 9).setText(add_prefix(format_number(str(updated_amount))))
 
             else:
                 current_row = self.transactions_table.rowCount()
@@ -900,11 +938,11 @@ class TransactionsWindow(QtWidgets.QWidget):
 
     def set_purchasing_history_table_data(self, data: list[PurchasingHistoryTableItemModel]):
         # Clear Purchasing History Table
-        self.history_transactions_table.setRowCount(0)
+        self.purchase_history_table.setRowCount(0)
 
         for purchasing_history in data:
-            current_row = self.history_transactions_table.rowCount()
-            self.history_transactions_table.insertRow(current_row)
+            current_row = self.purchase_history_table.rowCount()
+            self.purchase_history_table.insertRow(current_row)
 
             # Convert created_at string to datetime and format
             created_at_dt = datetime.strptime(purchasing_history.created_at, '%Y-%m-%d %H:%M:%S')
@@ -918,12 +956,40 @@ class TransactionsWindow(QtWidgets.QWidget):
             
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
-                self.history_transactions_table.setItem(current_row, col, item)
+                self.purchase_history_table.setItem(current_row, col, item)
+
+
+    def set_transaction_history_table_data(self, data: list[TransactionHistoryTableModel]):
+        # Clear Purchasing History Table
+        self.transaction_history_table.setRowCount(0)
+
+        for transaction_history in data:
+            current_row = self.transaction_history_table.rowCount()
+            self.transaction_history_table.insertRow(current_row)
+
+            # Convert created_at string to datetime and format
+            created_at_dt = datetime.strptime(transaction_history.created_at, '%Y-%m-%d %H:%M:%S')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+
+            table_items =  [ 
+                QtWidgets.QTableWidgetItem(formatted_date),
+                QtWidgets.QTableWidgetItem(format_number(transaction_history.qty)),
+                QtWidgets.QTableWidgetItem(transaction_history.unit),
+            ]
+            
+            for col, item in enumerate(table_items):
+                item.setFont(POSFonts.get_font(size=12))
+                self.transaction_history_table.setItem(current_row, col, item)
 
 
     # Event Listeners
     #====================
     def on_qty_transaction_input_changed(self):
+        if '-' in self.ui.qty_transaction_input.text():
+            POSMessageBox.error(self, title='Error', message="Quantity cannot be negative")
+            self.ui.qty_transaction_input.clear()
+            return
+
         sku = self.ui.sku_transaction_input.text().strip()
         unit = self.ui.qty_transaction_combobox.currentText()
         unit_value = remove_non_digit(self.ui.unit_value_transaction_input.text())
@@ -967,7 +1033,14 @@ class TransactionsWindow(QtWidgets.QWidget):
 
 
     def on_payment_transaction_input_changed(self):
-        payment_rp = remove_non_digit(self.ui.payment_transaction_input.text())
+        self.ui.payment_transaction_input.textChanged.disconnect()
+
+        # Format payment input
+        payment_rp = remove_non_digit(self.ui.payment_transaction_input.text().strip()) if remove_non_digit(self.ui.payment_transaction_input.text().strip()) != '' else '0'
+
+        self.ui.payment_transaction_input.setText(add_prefix(format_number(str(int(payment_rp)))))
+        self.ui.payment_transaction_input.textChanged.connect(self.on_payment_transaction_input_changed)
+
         total_amount = remove_non_digit(self.ui.total_transaction_input.text())
         if payment_rp == '':
             self.set_payment_change_transaction_input(total_amount, is_color_red=True)
@@ -998,7 +1071,8 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Product found - fill the form
             self.handle_product_selected({'sku' : sku})
             self.show_wholesale_transactions_data(sku)
-            self.show_history_transactions_data(sku)
+            self.show_purchasing_history_data(sku)
+            self.show_transaction_history_data(sku)
 
         else:
             # Product not found - show dialog with filter
@@ -1048,6 +1122,15 @@ class TransactionsWindow(QtWidgets.QWidget):
 
 
     def on_calculate_discount_rp(self):
+        if '-' in self.ui.discount_rp_total_transaction_input.text() or \
+            '-' in self.ui.discount_rp_per_item_transaction_input.text() or \
+                '-' in self.ui.discount_pct_transaction_input.text():
+            POSMessageBox.error(self, title='Error', message="Discount cannot be negative")
+            self.ui.discount_rp_total_transaction_input.clear()
+            self.ui.discount_rp_per_item_transaction_input.clear()
+            self.ui.discount_pct_transaction_input.clear()
+            return
+        
         if self.ui.discount_rp_total_transaction_radio_button.isChecked():
             return
         
@@ -1094,3 +1177,4 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Customer not found - show dialog with filter
             self.customers_dialog.set_filter(customer_id)
             self.customers_dialog.show()
+

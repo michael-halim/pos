@@ -45,3 +45,6 @@ class TransactionService:
     def get_purchasing_history_by_sku(self, sku: str):
         return self.repository.get_purchasing_history_by_sku(sku)
     
+
+    def get_transaction_history_by_sku(self, sku: str):
+        return self.repository.get_transaction_history_by_sku(sku)

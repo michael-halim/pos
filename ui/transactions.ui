@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1626</width>
-    <height>852</height>
+    <width>1477</width>
+    <height>822</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -30,7 +30,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
       <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_25">
           <item>
@@ -428,13 +428,13 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_28">
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_8">
+           <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
              <widget class="QTableWidget" name="transactions_table">
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>350</height>
+                <height>330</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -1607,16 +1607,92 @@
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
                <item row="0" column="0">
-                <widget class="QTableWidget" name="history_transactions_table">
+                <widget class="QTableWidget" name="purchase_history_table">
                  <property name="minimumSize">
                   <size>
-                   <width>280</width>
-                   <height>0</height>
+                   <width>230</width>
+                   <height>220</height>
                   </size>
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>280</width>
+                   <width>230</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <column>
+                  <property name="text">
+                   <string>Date</string>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="textAlignment">
+                   <set>AlignCenter</set>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Qty</string>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="textAlignment">
+                   <set>AlignCenter</set>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Unit</string>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>12</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="textAlignment">
+                   <set>AlignCenter</set>
+                  </property>
+                 </column>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_3">
+              <property name="maximumSize">
+               <size>
+                <width>300</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="title">
+               <string>Transaction History Table</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_4">
+               <item row="0" column="0">
+                <widget class="QTableWidget" name="transaction_history_table">
+                 <property name="minimumSize">
+                  <size>
+                   <width>230</width>
+                   <height>220</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>230</width>
                    <height>16777215</height>
                   </size>
                  </property>
@@ -1686,14 +1762,14 @@
                 <widget class="QTableWidget" name="wholesale_transactions_table">
                  <property name="minimumSize">
                   <size>
-                   <width>280</width>
+                   <width>230</width>
                    <height>0</height>
                   </size>
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>280</width>
-                   <height>16777215</height>
+                   <width>230</width>
+                   <height>120</height>
                   </size>
                  </property>
                  <column>
