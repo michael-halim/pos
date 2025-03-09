@@ -34,7 +34,7 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         self.ui.delete_role_permissions_button.clicked.connect(self.delete_role_permissions)
         self.ui.submit_role_permissions_button.clicked.connect(self.submit_role_permissions)
         
-         # Set selection behavior to select entire rows
+        # Set selection behavior to select entire rows
         self.roles_table.setSelectionBehavior(SELECT_ROWS)
         self.roles_table.setSelectionMode(SINGLE_SELECTION)
         self.permissions_table.setSelectionBehavior(SELECT_ROWS)

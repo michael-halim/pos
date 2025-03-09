@@ -24,8 +24,11 @@ class WorkerThread(QThread):
         This method is automatically called when the thread starts.
         """
         try:
+            self.progress.emit(0)
             result = self.function(*self.args, **self.kwargs)
+            self.progress.emit(50)
             self.finished.emit(result)
+            self.progress.emit(100)
 
         except Exception as e:
             error_msg = f"Error in worker thread: {str(e)}"

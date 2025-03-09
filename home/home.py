@@ -17,6 +17,7 @@ from customers.customers import CustomersWindow
 from logs.logs import LogsWindow
 from users.users import UsersWindow
 from stock_card_list.stock_card_list import StockCardListWindow
+from stock_opname.stock_opname import StockOpnameWindow
 
 from generals.build import resource_path
 
@@ -27,6 +28,9 @@ class HomeWindow(QtWidgets.QMainWindow):
         # Use resource_path for UI files
         ui_file = resource_path('ui/main.ui')
         self.ui = uic.loadUi(ui_file, self)
+
+        # Give user permissions
+        self.user_permissions = set()
 
         # Initialize dialog attributes to None - they'll be created only when needed
         self._products_dialog = None
@@ -43,7 +47,8 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._logs_dialog = None
         self._customers_dialog_window = None
         self._users_dialog_window = None
-        self._stock_card_list_window = StockCardListWindow()
+        self._stock_card_list_window = None
+        self._stock_opname_window = None
         
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -70,26 +75,14 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.customers_dialog_button.clicked.connect(lambda: self.customers_dialog_window.show())
         self.ui.categories_dialog_button.clicked.connect(lambda: self.categories_dialog_show.show())
         self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
-        self.ui.stock_card_list_button.clicked.connect(lambda: self._stock_card_list_window.show())
+        self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.show())
+        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_window.show())
 
         self.ui.logout_button.clicked.connect(lambda: self.close())
         
-        # TODO: Update seed.py using login logic and permissions
-        # TODO: Users Login with credentials / permissions that can be taken from anywhere
-        # TODO: submit transactions and submit purchase order affects stock card
-        # TODO: Stock Opname
-        # TODO: after submit transaction, tax rp tax pct, remarks must gone
-        # TODO: add table to see how many sku sell, inverse of purchase history
-        # TODO: whole sale table needs to be smaller by height and width
-        # TODO: give group box to purchase history table in master stock
-        # TODO: resset invoice number, supplier_id, remarks when submit purchasing
-        # TODO: logs error when clicked
-        # TODO: payment wants automatically using comma
         # TODO: Edit Transaction
         # TODO: Delete Transaction
         # TODO: Permission for actions
-        # TODO: Stock Opname
-        # TODO: Card Stock
 
 
     # Property getters for lazy initialization
@@ -191,11 +184,26 @@ class HomeWindow(QtWidgets.QMainWindow):
         return self._users_dialog_window
 
 
-    # @property
-    # def stock_card_list_window(self):
-    #     if self._stock_card_list_window is None:
-    #         self._stock_card_list_window = StockCardListWindow()
-    #     return self._stock_card_list_window
+    @property
+    def stock_card_list_window(self):
+        if self._stock_card_list_window is None:
+            self._stock_card_list_window = StockCardListWindow()
+        return self._stock_card_list_window
+
+
+    @property
+    def stock_opname_window(self):
+        if self._stock_opname_window is None:
+            self._stock_opname_window = StockOpnameWindow()
+        return self._stock_opname_window
+
+
+    def get_user_permissions(self) -> set:
+        return self.user_permissions
+    
+
+    def set_user_permissions(self, permissions: set) -> None:
+        self.user_permissions = permissions
 
 
     def closeEvent(self, event):

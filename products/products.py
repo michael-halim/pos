@@ -12,10 +12,16 @@ from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from generals.permission_manager import PermissionManager
 
 class ProductsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        
+        # Set up button visibility based on permissions
+        # self.setup_permissions()
 
         # Flag to track if data has been loaded
         self.data_loaded = False
@@ -56,6 +62,7 @@ class ProductsWindow(QtWidgets.QWidget):
         # Set table properties
         self.products_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.products_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        
         
 
     # Overrides
@@ -172,6 +179,16 @@ class ProductsWindow(QtWidgets.QWidget):
 
 
     def delete_products(self):
+        """Delete a product"""
+        # Check permission before allowing action
+        if not self.permission_manager.has_permission('delete_products'):
+            QtWidgets.QMessageBox.warning(
+                self, 
+                "Permission Denied",
+                "You don't have permission to delete products"
+            )
+            return
+            
         selected_rows = self.products_table.selectedItems()
         if not selected_rows:
             POSMessageBox.warning(self, "Error", "Please select a product to delete")
@@ -192,5 +209,19 @@ class ProductsWindow(QtWidgets.QWidget):
                 # Just refresh the data directly
                 self.data_loaded = False
                 self.show_products_data()
-        else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+
+            else:
+                POSMessageBox.error(self, title='Error', message=result.message)
+
+    # def setup_permissions(self):
+    #     """Set up UI elements based on user permissions"""
+    #     # Hide/show buttons based on permissions
+    #     self.ui.add_products_button.setVisible(
+    #         self.permission_manager.has_permission('create_products')
+    #     )
+    #     self.ui.edit_products_button.setVisible(
+    #         self.permission_manager.has_permission('update_products')
+    #     )
+    #     self.ui.delete_products_button.setVisible(
+    #         self.permission_manager.has_permission('delete_products')
+    #     )

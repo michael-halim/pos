@@ -36,7 +36,7 @@ class LoginRepository:
                 
                 permissions_result = self.cursor.execute(sql, (role_id,))
 
-                permissions = [permission[0] for permission in permissions_result]
+                permissions = set(p[0] for p in permissions_result)
 
                 return ResponseMessage.ok(message="Login successful!", data=permissions)
 
@@ -44,6 +44,5 @@ class LoginRepository:
             return ResponseMessage.fail(message="Invalid username or password!")
         
         except Exception as e:
-            print(e)
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 

@@ -1,7 +1,6 @@
 from PyQt6 import QtWidgets, uic
 
 from home.home import HomeWindow
-
 from login.services.login_services import LoginService
 
 from generals.message_box import POSMessageBox
