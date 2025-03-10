@@ -3,6 +3,8 @@ from PyQt6.QtWidgets import QDateEdit
 
 
 RESIZE_TO_CONTENTS = QHeaderView.ResizeMode.ResizeToContents
+RESIZE_MODE_INTERACTIVE = QHeaderView.ResizeMode.Interactive
+RESIZE_MODE_FIXED = QHeaderView.ResizeMode.Fixed
 SELECT_ROWS = QAbstractItemView.SelectionBehavior.SelectRows
 SINGLE_SELECTION = QAbstractItemView.SelectionMode.SingleSelection
 NO_EDIT_TRIGGERS = QTableWidget.EditTrigger.NoEditTriggers
@@ -10,3 +12,60 @@ DATE_EDIT_NO_BUTTONS = QDateEdit.ButtonSymbols.NoButtons
 
 DATE_FORMAT_DDMMYYYY = "dd/MM/yyyy"
 TAX_TABLE_KEY = '= TAX ='
+
+# Permissions
+PERM_C_PRODUCTS = 'create_products'
+PERM_R_PRODUCTS = 'read_products'
+PERM_U_PRODUCTS = 'update_products'
+PERM_D_PRODUCTS = 'delete_products'
+PERM_I_PRODUCTS = 'import_products'
+
+PERM_C_CATEGORIES = 'create_categories'
+PERM_R_CATEGORIES = 'read_categories'
+PERM_U_CATEGORIES = 'update_categories'
+PERM_D_CATEGORIES = 'delete_categories'
+
+PERM_C_SUPPLIERS = 'create_suppliers'
+PERM_R_SUPPLIERS = 'read_suppliers'
+PERM_U_SUPPLIERS = 'update_suppliers'
+PERM_D_SUPPLIERS = 'delete_suppliers'
+
+PERM_C_TRANSACTIONS = 'create_transactions'
+PERM_R_TRANSACTIONS = 'read_transactions'
+PERM_U_TRANSACTIONS = 'update_transactions'
+PERM_D_TRANSACTIONS = 'delete_transactions'
+
+PERM_C_PURCHASING = 'create_purchasing'
+PERM_R_PURCHASING = 'read_purchasing'
+PERM_U_PURCHASING = 'update_purchasing'
+PERM_D_PURCHASING = 'delete_purchasing'
+
+PERM_C_CUSTOMERS = 'create_customers'
+PERM_R_CUSTOMERS = 'read_customers'
+PERM_U_CUSTOMERS = 'update_customers'
+PERM_D_CUSTOMERS = 'delete_customers'
+
+PERM_C_USERS = 'create_users'
+PERM_R_USERS = 'read_users'
+PERM_U_USERS = 'update_users'
+PERM_D_USERS = 'delete_users'
+
+PERM_C_ROLES = 'create_roles'
+PERM_R_ROLES = 'read_roles'
+PERM_U_ROLES = 'update_roles'
+PERM_D_ROLES = 'delete_roles'
+
+PERM_C_PERMISSIONS = 'create_permissions'
+PERM_R_PERMISSIONS = 'read_permissions'
+PERM_U_PERMISSIONS = 'update_permissions'
+PERM_D_PERMISSIONS = 'delete_permissions'
+
+PERM_C_LOGS = 'create_logs'
+PERM_R_LOGS = 'read_logs'
+PERM_U_LOGS = 'update_logs'
+PERM_D_LOGS = 'delete_logs'
+
+PERM_R_STOCK_CARD = 'read_stock_card'
+
+PERM_R_STOCK_OPNAME = 'read_stock_opname'
+PERM_E_STOCK_OPNAME = 'export_stock_opname'

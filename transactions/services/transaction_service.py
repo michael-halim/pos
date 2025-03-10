@@ -12,6 +12,13 @@ class TransactionService:
 
     def submit_transaction(self, transaction: TransactionModel, detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
         return self.repository.submit_transaction(transaction, detail_transactions)
+    
+    
+    def update_transaction(self, transaction: TransactionModel, 
+                            added_detail_transactions: List[DetailTransactionModel], 
+                            updated_detail_transactions: List[DetailTransactionModel],
+                            deleted_detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
+        return self.repository.update_transaction(transaction, added_detail_transactions, updated_detail_transactions, deleted_detail_transactions)
 
 
     def create_transaction_id(self, is_pending: bool = False) -> str:
@@ -48,3 +55,11 @@ class TransactionService:
 
     def get_transaction_history_by_sku(self, sku: str):
         return self.repository.get_transaction_history_by_sku(sku)
+
+
+    def get_detail_transactions_by_id(self, transaction_id: str):
+        return self.repository.get_detail_transactions_by_id(transaction_id)
+
+
+    def get_transactions_by_id(self, transaction_id: str):
+        return self.repository.get_transactions_by_id(transaction_id)

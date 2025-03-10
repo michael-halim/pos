@@ -40,7 +40,7 @@ class StockCardListRepository:
     def get_stock_card(self, sku: str, start_date: date, end_date: date):
         try:
             stock_card_result = []
-            sql = '''SELECT date, time, transaction_id, stock_in, stock_out, running_balance 
+            sql = '''SELECT date, time, transaction_id, stock_in, stock_out, running_balance, remarks 
                         FROM stock_card 
                         WHERE sku = ? AND date BETWEEN ? AND ?'''
             
@@ -49,7 +49,7 @@ class StockCardListRepository:
             stock_card_list = [
                 StockCardListModel(
                     date=row[0], time=row[1], transaction_id=row[2],
-                    stock_in=row[3], stock_out=row[4], running_balance=row[5]
+                    stock_in=row[3], stock_out=row[4], running_balance=row[5], remarks=row[6]
                 )
                 for row in stock_card_result
             ]

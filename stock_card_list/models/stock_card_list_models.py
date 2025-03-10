@@ -18,3 +18,4 @@ class StockCardListModel:
     stock_in: int
     stock_out: int
     running_balance: int
+    remarks: str

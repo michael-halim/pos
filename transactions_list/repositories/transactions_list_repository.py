@@ -52,6 +52,7 @@ class TransactionRepository:
                 message=f"Failed to fetch transaction list {str(e)}",
             )
         
+        
     def get_detail_transactions_list(self, transaction_id: str):
         try:
             sql = '''SELECT dt.sku, p.product_name, dt.price, dt.qty, dt.unit, dt.discount_rp, 
@@ -85,3 +86,26 @@ class TransactionRepository:
             return ResponseMessage.fail(
                 message=f"Failed to fetch transaction detail {str(e)}",
             )
+
+
+    def delete_transactions_by_id(self, transaction_id: str):
+        try:
+            self.cursor.execute('BEGIN TRANSACTION')
+
+            # Delete the transaction
+            sql = '''DELETE FROM transactions WHERE transaction_id = ?'''
+            self.cursor.execute(sql, (transaction_id,))
+
+            # Delete the detail transactions
+            sql = '''DELETE FROM detail_transactions WHERE transaction_id = ?'''
+            self.cursor.execute(sql, (transaction_id,))
+
+            # Commit the transaction
+            self.db.commit()
+            return ResponseMessage.ok(message="Transaction deleted successfully!")
+        
+        except Exception as e:
+            self.db.rollback()
+            return ResponseMessage.fail(
+                message=f"Failed to delete transaction {str(e)}",
+            )   

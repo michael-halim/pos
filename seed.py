@@ -17,15 +17,16 @@ class SeedData:
             transaction_id VARCHAR(20) NOT NULL,
             stock_in INT(10) NULL,
             stock_out INT(10) NULL,
-            running_balance INT(10) NOT NULL
+            running_balance INT(10) NOT NULL,
+            remarks TEXT DEFAULT ''
         );'''
 
         self.cursor.execute(sql)
         
-        sql_insert = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, stock_out, running_balance)
+        sql_insert = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, stock_out, running_balance, remarks)
                         VALUES 
-                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 50, NULL, 50),
-                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40);'''
+                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 50, NULL, 50, 'By Administrator'),
+                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40, 'By Manager');'''
 
         self.cursor.execute(sql_insert)
 
@@ -58,7 +59,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO permissions (permission_id, permission_name) 
                         VALUES 
-                        ('create_products', 'Create Products'), ('read_products', 'Read Products'), ('update_products', 'Update Products'), ('delete_products', 'Delete Products'), 
+                        ('create_products', 'Create Products'), ('read_products', 'Read Products'), ('update_products', 'Update Products'), ('delete_products', 'Delete Products'), ('import_products', 'Import Products'),
                         ('create_categories', 'Create Categories'), ('read_categories', 'Read Categories'), ('update_categories', 'Update Categories'), ('delete_categories', 'Delete Categories'),
                         ('create_suppliers', 'Create Suppliers'), ('read_suppliers', 'Read Suppliers'), ('update_suppliers', 'Update Suppliers'), ('delete_suppliers', 'Delete Suppliers'),
                         ('create_transactions', 'Create Transactions'), ('read_transactions', 'Read Transactions'), ('update_transactions', 'Update Transactions'), ('delete_transactions', 'Delete Transactions'),
@@ -67,7 +68,9 @@ class SeedData:
                         ('create_users', 'Create Users'), ('read_users', 'Read Users'), ('update_users', 'Update Users'), ('delete_users', 'Delete Users'),
                         ('create_roles', 'Create Roles'), ('read_roles', 'Read Roles'), ('update_roles', 'Update Roles'), ('delete_roles', 'Delete Roles'),
                         ('create_permissions', 'Create Permissions'), ('read_permissions', 'Read Permissions'), ('update_permissions', 'Update Permissions'), ('delete_permissions', 'Delete Permissions'),
-                        ('create_logs', 'Create Logs'), ('read_logs', 'Read Logs'), ('update_logs', 'Update Logs'), ('delete_logs', 'Delete Logs');'''
+                        ('create_logs', 'Create Logs'), ('read_logs', 'Read Logs'), ('update_logs', 'Update Logs'), ('delete_logs', 'Delete Logs'),
+                        ('read_stock_card', 'Read Stock Card'),
+                        ('read_stock_opname', 'Read Stock Opname'), ('export_stock_opname', 'Export Stock Opname');'''
 
         self.cursor.execute(sql_insert)
 
@@ -82,7 +85,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO role_permissions (role_id, permission_id) 
                         VALUES 
-                        (1, 'create_products'), (1, 'read_products'), (1, 'update_products'), (1, 'delete_products'),
+                        (1, 'create_products'), (1, 'read_products'), (1, 'update_products'), (1, 'delete_products'), (1, 'import_products'),
                         (1, 'create_categories'), (1, 'read_categories'), (1, 'update_categories'), (1, 'delete_categories'),
                         (1, 'create_suppliers'), (1, 'read_suppliers'), (1, 'update_suppliers'), (1, 'delete_suppliers'),
                         (1, 'create_transactions'), (1, 'read_transactions'), (1, 'update_transactions'), (1, 'delete_transactions'),
@@ -91,7 +94,9 @@ class SeedData:
                         (1, 'create_users'), (1, 'read_users'), (1, 'update_users'), (1, 'delete_users'),
                         (1, 'create_roles'), (1, 'read_roles'), (1, 'update_roles'), (1, 'delete_roles'),
                         (1, 'create_permissions'), (1, 'read_permissions'), (1, 'update_permissions'), (1, 'delete_permissions'),
-                        (1, 'create_logs'), (1, 'read_logs'), (1, 'update_logs'), (1, 'delete_logs');'''
+                        (1, 'create_logs'), (1, 'read_logs'), (1, 'update_logs'), (1, 'delete_logs'),
+                        (1, 'read_stock_card'),
+                        (1, 'read_stock_opname'), (1, 'export_stock_opname');'''
         
         self.cursor.execute(sql_insert)
 
@@ -122,7 +127,7 @@ class SeedData:
     def create_users_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-            username VARCHAR(20) NOT NULL,
+            username VARCHAR(20) NOT NULL UNIQUE,
             password_hash VARCHAR(255) NOT NULL,
             user_salt VARCHAR(255) NOT NULL,
             role_id INT NOT NULL,
@@ -281,18 +286,21 @@ class SeedData:
             tax_pct INT(10) NOT NULL DEFAULT 0,
             tax_amount INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            payment_remarks TEXT DEFAULT ''
+            created_by INT NOT NULL,
+            payment_remarks TEXT DEFAULT '',
+            updated_at DATETIME NULL DEFAULT NULL,
+            updated_by INT NULL DEFAULT NULL
         );'''
 
         self.cursor.execute(sql)
 
         sql_insert = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
                                                     discount_transaction_id, discount_amount, tax_pct, tax_amount, 
-                                                    created_at, payment_remarks) 
+                                                    created_at, created_by, payment_remarks, updated_at, updated_by) 
                         VALUES 
-                        ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 'Remarks Three');'''
+                        ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks One', NULL, NULL),
+                        ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Two', NULL, NULL),
+                        ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Three', NULL, NULL);'''
 
         self.cursor.execute(sql_insert)
 

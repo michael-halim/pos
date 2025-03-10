@@ -14,7 +14,7 @@ class StockCardDialogRepository:
     def get_stock_card(self, sku: str, start_date: date, end_date: date):
         try:
             stock_card_result = []
-            sql = '''SELECT date, time, transaction_id, stock_in, stock_out, running_balance 
+            sql = '''SELECT date, time, transaction_id, stock_in, stock_out, running_balance, remarks 
                         FROM stock_card 
                         WHERE sku = ? AND date BETWEEN ? AND ?'''
             
@@ -23,7 +23,8 @@ class StockCardDialogRepository:
             stock_card_list = [
                 StockCardTableItemModel(
                     date=row[0], time=row[1], transaction_id=row[2],
-                    stock_in=row[3], stock_out=row[4], running_balance=row[5]
+                    stock_in=row[3], stock_out=row[4], running_balance=row[5], 
+                    remarks=row[6]
                 )
                 for row in stock_card_result
             ]
@@ -40,9 +41,3 @@ class StockCardDialogRepository:
             # If any error occurs, rollback all changes
             self.db.rollback()
             return ResponseMessage.fail(message=f"Failed to fetch stock card {str(e)}")
-        
-
-
-    def get_stock_card_by_sku_and_date(self, sku: str, start_date: str, end_date: str):
-        pass
-

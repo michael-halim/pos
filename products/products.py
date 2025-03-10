@@ -11,23 +11,33 @@ from helper import format_number, add_prefix
 from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_PRODUCTS, PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS, PERM_I_PRODUCTS,
+) 
+from generals.messages import (
+    ERR, ERR_PERM_R_PRODUCTS, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS, ERR_PERM_I_PRODUCTS, PERM_DENIED
+)
+
 from generals.permission_manager import PermissionManager
 
 class ProductsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.permission_manager = PermissionManager()
-        
-        # Set up button visibility based on permissions
-        # self.setup_permissions()
-
         # Flag to track if data has been loaded
         self.data_loaded = False
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            return
+        
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/products.ui'), self)
+        
+        # Setup permissions
+        self.setup_permissions()    
 
         # Init Services
         self.products_service = ProductsService()
@@ -37,10 +47,6 @@ class ProductsWindow(QtWidgets.QWidget):
         self.import_products_dialog = ImportProductsDialogWindow()
         self.stock_card_dialog = StockCardDialogWindow()
 
-        # Init Table
-        self.products_table = self.ui.products_table
-        self.products_table.setSortingEnabled(True)
-        
         # Init Button
         self.ui.add_products_button.clicked.connect(self.add_products)
         self.ui.edit_products_button.clicked.connect(self.edit_products)
@@ -54,23 +60,27 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.filter_products_input.textChanged.connect(self.show_products_data)
 
         # Set selection behavior to select entire rows
-        self.products_table.setSelectionBehavior(SELECT_ROWS)
-        self.products_table.setSelectionMode(SINGLE_SELECTION)
+        self.ui.products_table.setSelectionBehavior(SELECT_ROWS)
+        self.ui.products_table.setSelectionMode(SINGLE_SELECTION)
 
-        self.products_table.setEditTriggers(NO_EDIT_TRIGGERS)
+        self.ui.products_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties
-        self.products_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        self.products_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        
-        
+        self.ui.products_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.ui.products_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+
+
 
     # Overrides
     # ===============
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
-
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PRODUCTS)
+            self.close()
+            return
+        
         # Only refresh data if it hasn't been loaded yet or if we need to refresh
         if not self.data_loaded:
             self.show_products_data()
@@ -80,14 +90,16 @@ class ProductsWindow(QtWidgets.QWidget):
     def show(self):
         """Override show to ensure data is refreshed"""
         super().show()
-        # We'll let showEvent handle the data loading
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            self.close()
 
 
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
-        # We'll let showEvent handle the data loading
-
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            self.close()
+        
 
     # Setters
     # ===============
@@ -119,14 +131,25 @@ class ProductsWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.products_table.setItem(current_row, col, item)
 
+
     # Shows
     # ===============
     def show_products_data(self):
         """Load and display products data"""
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PRODUCTS)
+            self.close()
+            return
+        
+
         search_text = self.ui.filter_products_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
         products_result = self.products_service.get_products(search_text)
+
+        if not products_result.success:
+            POSMessageBox.error(self, title=ERR, message=products_result.message)
+            return
 
         self.set_products_table_data(products_result.data)
         
@@ -136,13 +159,22 @@ class ProductsWindow(QtWidgets.QWidget):
 
     def import_products(self):
         """Show the import products dialog and refresh data when closed"""
+        if not self.permission_manager.has_permission(PERM_I_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_I_PRODUCTS)
+            return
+
         self.import_products_dialog.show()
+
         # Set data_loaded to False so it will refresh when this window is shown again
         self.data_loaded = False
 
 
     def add_products(self):
         """Show the add products dialog and refresh data when closed"""
+        if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_PRODUCTS)
+            return
+
         self.master_stock_dialog.clear_master_stock_form()
         self.master_stock_dialog.show()
         # Set data_loaded to False so it will refresh when this window is shown again
@@ -151,6 +183,10 @@ class ProductsWindow(QtWidgets.QWidget):
 
     def edit_products(self):
         """Show the edit products dialog and refresh data when closed"""
+        if not self.permission_manager.has_permission(PERM_U_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_PRODUCTS)
+            return
+
         selected_rows = self.products_table.selectedItems()
         if selected_rows:
             row = selected_rows[0].row()
@@ -160,8 +196,7 @@ class ProductsWindow(QtWidgets.QWidget):
             # Set data_loaded to False so it will refresh when this window is shown again
             self.data_loaded = False
         else:
-            POSMessageBox.warning(self, "Error", "Please select a product to edit")
-
+            POSMessageBox.warning(self, title="Error", message="Please select a product to edit")
 
 
     def stock_card_products(self):
@@ -177,21 +212,15 @@ class ProductsWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title="Error", message="Please select a product to view stock card")
         
 
-
     def delete_products(self):
         """Delete a product"""
-        # Check permission before allowing action
-        if not self.permission_manager.has_permission('delete_products'):
-            QtWidgets.QMessageBox.warning(
-                self, 
-                "Permission Denied",
-                "You don't have permission to delete products"
-            )
+        if not self.permission_manager.has_permission(PERM_D_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_D_PRODUCTS)
             return
-            
+
         selected_rows = self.products_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, "Error", "Please select a product to delete")
+            POSMessageBox.warning(self, title="Error", message="Please select a product to delete")
             return
         
         row = selected_rows[0].row()
@@ -213,15 +242,21 @@ class ProductsWindow(QtWidgets.QWidget):
             else:
                 POSMessageBox.error(self, title='Error', message=result.message)
 
-    # def setup_permissions(self):
-    #     """Set up UI elements based on user permissions"""
-    #     # Hide/show buttons based on permissions
-    #     self.ui.add_products_button.setVisible(
-    #         self.permission_manager.has_permission('create_products')
-    #     )
-    #     self.ui.edit_products_button.setVisible(
-    #         self.permission_manager.has_permission('update_products')
-    #     )
-    #     self.ui.delete_products_button.setVisible(
-    #         self.permission_manager.has_permission('delete_products')
-    #     )
+
+    # Setup Permissions
+    # ===============
+    def setup_permissions(self):
+        """Set up UI elements based on user permissions"""
+        # Hide/show buttons based on permissions
+        self.ui.add_products_button.setVisible(
+            self.permission_manager.has_permission(PERM_C_PRODUCTS)
+        )
+        self.ui.edit_products_button.setVisible(
+            self.permission_manager.has_permission(PERM_U_PRODUCTS)
+        )
+        self.ui.delete_products_button.setVisible(
+            self.permission_manager.has_permission(PERM_D_PRODUCTS)
+        )
+        self.ui.import_products_button.setVisible(
+            self.permission_manager.has_permission(PERM_I_PRODUCTS)
+        )

@@ -18,6 +18,7 @@ from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, TAX_TABLE_KEY
 from generals.build import resource_path
 
+
 class TransactionsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -55,10 +56,10 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Connect the add button to add_transaction method
         self.ui.clear_data_transaction_button.clicked.connect(self.clear_data_transaction)
         self.ui.clear_transaction_button.clicked.connect(self.clear_transaction)
-        self.ui.add_transaction_button.clicked.connect(self.add_transaction)
+        self.ui.add_transaction_button.clicked.connect(self.add_detail_transaction)
         self.ui.find_sku_transaction_button.clicked.connect(lambda: self.products_dialog.show())
-        self.ui.edit_transaction_button.clicked.connect(self.edit_transaction)
-        self.ui.delete_transaction_button.clicked.connect(self.delete_transaction)
+        self.ui.edit_transaction_button.clicked.connect(self.edit_detail_transaction)
+        self.ui.delete_transaction_button.clicked.connect(self.delete_detail_transaction)
         self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
         self.ui.pending_transaction_button.clicked.connect(self.create_pending_transaction)
         self.ui.open_pending_transaction_button.clicked.connect(lambda: self.pending_transactions_dialog.showMaximized())
@@ -195,47 +196,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
 
 
-    def show_purchasing_history_data(self, sku: str):
-        self.clear_purchasing_history_data()
-
-
-        if sku == '':
-            sku = self.ui.sku_transaction_input.text().strip()
-        
-        result = self.transaction_service.get_purchasing_history_by_sku(sku)
-
-        if result.success and result.data:
-            self.set_purchasing_history_table_data(result.data)
-    
-    
-    def show_wholesale_transactions_data(self, sku: str):
-        self.clear_wholesale_transactions_data()
-        
-        # Get wholesale transactions from cached qty
-        wholesale_transactions_data: list[WholesaleTableModel] = []
-        for key in self.cached_qty:
-            if key.split('_')[0] == sku:
-                wholesale_transactions_data.append(WholesaleTableModel(
-                    unit=key.split('_')[1],
-                    unit_value=self.cached_qty[key][0],
-                    price=self.cached_qty[key][1]
-                ))
-
-        self.set_wholesale_transactions_table_data(wholesale_transactions_data)
-    
-
-    def show_transaction_history_data(self, sku: str):
-        self.clear_transaction_history_data()
-
-        if sku == '':
-            sku = self.ui.sku_transaction_input.text().strip()
-
-        result = self.transaction_service.get_transaction_history_by_sku(sku)
-        if result.success and result.data:
-            self.set_transaction_history_table_data(result.data)
-
-
-    def add_transaction(self):
+    def add_detail_transaction(self):
         # Stop temporary sorting
         self.transactions_table.setSortingEnabled(False)
         transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
@@ -277,7 +238,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.clear_wholesale_transactions_data()
 
 
-    def edit_transaction(self):
+    def edit_detail_transaction(self):
         # Get selected row
         selected_rows = self.transactions_table.selectedItems()
         if selected_rows:
@@ -289,7 +250,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Disconnect existing connections and connect to update function
             self.ui.add_transaction_button.setText('Update')
             self.ui.add_transaction_button.clicked.disconnect()
-            self.ui.add_transaction_button.clicked.connect(self.update_transaction)
+            self.ui.add_transaction_button.clicked.connect(self.update_detail_transaction)
 
             # Get Selected Transaction Table Data
             transaction_table_data: TransactionTableItemModel = self.get_selected_transaction_table_data()
@@ -304,7 +265,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.unit_value_transaction_input.setEnabled(False)
 
 
-    def update_transaction(self):
+    def update_detail_transaction(self):
         if self.current_selected_sku is not None:
             try:
                 # Get the updated values
@@ -344,7 +305,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                 # Reset button and connection
                 self.ui.add_transaction_button.setText('Add')
                 self.ui.add_transaction_button.clicked.disconnect()
-                self.ui.add_transaction_button.clicked.connect(self.add_transaction)
+                self.ui.add_transaction_button.clicked.connect(self.add_detail_transaction)
                 
                 # Reset selection
                 self.current_selected_sku = None
@@ -361,7 +322,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                 POSMessageBox.error(self, title='Error', message=f"Failed to update transaction: {str(e)}")
 
 
-    def delete_transaction(self):
+    def delete_detail_transaction(self):
         selected_rows = self.transactions_table.selectedItems()
         if not selected_rows:
             POSMessageBox.warning(self, title='Warning', message="Please select a transaction to delete")
@@ -476,6 +437,77 @@ class TransactionsWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title='Error', message=result.message)
 
 
+    def update_transaction(self):
+        # Get payment amount
+        payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text())
+        if payment_rp == '':
+            POSMessageBox.error(self, title='Error', message="Payment cannot be empty")
+            return
+        
+        # Get detail transactions from transactions table
+        detail_transactions_data: list[DetailTransactionModel] = self.get_detail_transactions()
+        if len(detail_transactions_data) == 0:
+            POSMessageBox.error(self, title='Error', message="No transactions to submit")
+            return
+
+        # Create transaction id
+        transaction_id: str = self.ui.transaction_id_transaction_input.text().strip()
+
+        # Calculate total amount
+        total_amount: int = self.calculate_total_transactions()
+
+        # Calculate total discount
+        total_discount: int = self.calculate_total_discount()
+
+        # Calculate payment change
+        payment_change: int = total_amount - int(payment_rp)
+        if payment_change > 0:
+            POSMessageBox.error(self, title='Error', message="Payment cannot be less than total amount")
+            return
+
+        customer_id: str = self.ui.customer_id_transaction_input.text().strip() if self.ui.customer_id_transaction_input.text().strip() else None
+
+        # Create transaction data
+        transaction_data: TransactionModel = TransactionModel(
+            customer_id = customer_id,
+            transaction_id = transaction_id,
+            total_amount = total_amount,
+            total_discount = total_discount,
+            payment_method = self.ui.payment_method_transaction_combobox.currentText(),
+            payment_amount = payment_rp,
+            payment_change = payment_change,
+            payment_remarks = self.ui.remarks_transaction_input.toPlainText().strip(),
+            tax_pct = self.ui.tax_pct_transaction_input.text(),
+            tax_amount = self.ui.tax_rp_transaction_input.text(),
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        )
+
+        added_detail_transactions, updated_detail_transactions, deleted_detail_transactions = self.get_added_updated_deleted_detail_transactions(transaction_id, detail_transactions_data)
+
+        print(f'added_detail_transactions: {added_detail_transactions}')
+        print(f'updated_detail_transactions: {updated_detail_transactions}')
+        print(f'deleted_detail_transactions: {deleted_detail_transactions}')
+
+        # Submit transaction
+        result = self.transaction_service.update_transaction(transaction_data, 
+                                                             added_detail_transactions, 
+                                                             updated_detail_transactions, 
+                                                             deleted_detail_transactions)
+        if result.success:
+            POSMessageBox.info(self, title='Success', message=result.message)
+            
+            # Clear the transactions table and total
+            self.clear_transaction()
+
+            self.ui.submit_transaction_button.setText('Submit')
+            self.ui.submit_transaction_button.clicked.disconnect()
+            self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
+
+        else:
+            POSMessageBox.error(self, title='Error', message=result.message)
+        
+
+
     def create_pending_transaction(self):
         transaction_id: str = self.transaction_service.create_transaction_id(is_pending=True)
         customer_id: str = self.ui.customer_id_transaction_input.text().strip() if self.ui.customer_id_transaction_input.text().strip() else None
@@ -539,6 +571,48 @@ class TransactionsWindow(QtWidgets.QWidget):
             
             # Hide/show row based on whether match was found
             self.transactions_table.setRowHidden(row, not match_found)
+
+
+    # Shows
+    #================
+    def show_purchasing_history_data(self, sku: str):
+        self.clear_purchasing_history_data()
+
+
+        if sku == '':
+            sku = self.ui.sku_transaction_input.text().strip()
+        
+        result = self.transaction_service.get_purchasing_history_by_sku(sku)
+
+        if result.success and result.data:
+            self.set_purchasing_history_table_data(result.data)
+    
+    
+    def show_wholesale_transactions_data(self, sku: str):
+        self.clear_wholesale_transactions_data()
+        
+        # Get wholesale transactions from cached qty
+        wholesale_transactions_data: list[WholesaleTableModel] = []
+        for key in self.cached_qty:
+            if key.split('_')[0] == sku:
+                wholesale_transactions_data.append(WholesaleTableModel(
+                    unit=key.split('_')[1],
+                    unit_value=self.cached_qty[key][0],
+                    price=self.cached_qty[key][1]
+                ))
+
+        self.set_wholesale_transactions_table_data(wholesale_transactions_data)
+    
+
+    def show_transaction_history_data(self, sku: str):
+        self.clear_transaction_history_data()
+
+        if sku == '':
+            sku = self.ui.sku_transaction_input.text().strip()
+
+        result = self.transaction_service.get_transaction_history_by_sku(sku)
+        if result.success and result.data:
+            self.set_transaction_history_table_data(result.data)
 
 
     # Signal Handlers
@@ -633,100 +707,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         if result.success:
             self.ui.customer_name_transaction_input.setText(result.data)
 
-
-    # Calculate
-    #==========
-    def calculate_total_transactions(self) -> int:
-        total_amount = 0
-        for row in range(self.transactions_table.rowCount()):
-            total_amount += int(remove_non_digit(self.transactions_table.item(row, 9).text()))
-        return total_amount
-
-
-    def calculate_total_discount(self) -> int:
-        total_discount = 0
-        for row in range(self.transactions_table.rowCount()):
-            total_discount += int(remove_non_digit(self.transactions_table.item(row, 8).text()))
-        return total_discount
-
-
-    def calculate_stock_after_transactions(self, sku: str, unit: str):
-        cache_key = f'{sku}_{unit}'
-        if cache_key in self.cached_qty:
-            # Get initial stock
-            initial_stock = self.transaction_service.get_product_by_sku(sku)['data'].stock
-
-            self.ui.stock_transaction_input.setStyleSheet('color: black;')
-            self.ui.stock_transaction_input.setText(format_number(str(initial_stock)))
-
-            if initial_stock < 0:
-                self.ui.stock_transaction_input.setText(f'-{format_number(str(abs(initial_stock)))}')
-                self.ui.stock_transaction_input.setStyleSheet('color: red;')
-            
-
-            # Get total qty in transaction table for this sku and unit
-            total_qty_in_transactions = self.get_total_qty_in_transactions(sku)
-            
-            # Calculate and display stock after transactions
-            stock_after = initial_stock - total_qty_in_transactions
-            
-            # Set color based on stock level
-            self.ui.stock_after_transaction_input.setText(format_number(str(stock_after)))
-            self.ui.stock_after_transaction_input.setStyleSheet('color: black;')
-
-            if stock_after < 0:
-                self.ui.stock_after_transaction_input.setText(f'-{format_number(str(abs(stock_after)))}')
-                self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
-
-
-    # Clear Inputs
-    #==========
-    def clear_wholesale_transactions_data(self):
-        self.wholesale_transactions_table.setRowCount(0)
-
-
-    def clear_purchasing_history_data(self):
-        self.purchase_history_table.setRowCount(0)
-
-
-    def clear_transaction_history_data(self):
-        self.transaction_history_table.setRowCount(0)
-
-
-    def clear_transaction(self):
-        # Remove All Items from Transactions Table
-        self.transactions_table.setRowCount(0)
-        self.ui.total_transaction_input.setText(add_prefix('0'))
-        self.ui.payment_change_transaction_input.setText(add_prefix('0'))
-        self.ui.total_discount_transaction_input.setText(add_prefix('0'))
-        self.cached_transaction_index = {}
-        self.cached_qty = {}
-        self.current_selected_sku = None
-        self.ui.customer_id_transaction_input.clear()
-        self.ui.customer_name_transaction_input.clear()
-        self.ui.tax_pct_transaction_input.clear()
-        self.ui.tax_rp_transaction_input.clear()
-        self.ui.remarks_transaction_input.clear()
-        self.clear_data_transaction()
-
-
-    def clear_data_transaction(self):
-        self.ui.sku_transaction_input.clear()
-        self.ui.product_name_transaction_input.clear()
-        self.ui.price_transaction_input.clear()
-        self.ui.stock_transaction_input.clear()
-        self.ui.stock_after_transaction_input.clear()
-        self.ui.unit_value_transaction_input.clear()
-        self.ui.qty_transaction_input.clear()
-        self.ui.qty_transaction_combobox.clear()
-        self.ui.payment_transaction_input.clear()
-        self.ui.discount_pct_transaction_input.clear()
-        self.ui.discount_rp_per_item_transaction_input.clear()
-        self.ui.discount_rp_total_transaction_input.clear()
-        self.clear_wholesale_transactions_data()
-        self.clear_purchasing_history_data()
-        self.clear_transaction_history_data()
-    
 
     # Getters
     #==========
@@ -826,8 +806,101 @@ class TransactionsWindow(QtWidgets.QWidget):
         return total_qty
     
 
+    def get_added_updated_deleted_detail_transactions(self, transaction_id: str, detail_transactions_data: list[DetailTransactionModel]) -> tuple[list[DetailTransactionModel], list[DetailTransactionModel], list[DetailTransactionModel]]:
+        '''
+            Added -> The New DT not in the old DT
+
+            Updated -> The Old DT in the new DT
+
+            Deleted -> The Old DT not in the new DT
+
+            Returns: (added_dt, updated_dt, deleted_dt)
+        '''
+        
+        added_detail_transactions: list[DetailTransactionModel] = []
+        updated_detail_transactions: list[DetailTransactionModel] = []
+        deleted_detail_transactions: list[DetailTransactionModel] = []
+
+        if transaction_id == '':
+            transaction_id = self.ui.transaction_id_transaction_input.text().strip()
+
+        # old_dt_result is the detail transactions of the old transaction
+        old_dt_result = self.transaction_service.get_detail_transactions_by_id(transaction_id)
+        if not old_dt_result.success:
+            return added_detail_transactions, added_detail_transactions
+
+        # Get Set of Old Detail Transaction        
+        set_of_old_dt: set[tuple[str, str]] = set()
+        map_of_old_dt: dict[tuple[str, str], DetailTransactionModel] = {}
+        for dt in old_dt_result.data:
+            set_of_old_dt.add((dt.sku, dt.unit))
+            map_of_old_dt[(dt.sku, dt.unit)] = dt
+
+        # Get Set of New Detail Transaction and Get Added and Updated Detail Transaction
+        set_of_new_dt: set[tuple[str, str]] = set()
+        for dt in detail_transactions_data:
+            if (dt.sku, dt.unit) in set_of_old_dt: # If the new DT is in the old DT, then it is an updated DT
+                updated_detail_transactions.append(dt)
+
+            elif (dt.sku, dt.unit) not in set_of_old_dt: # If the new DT not in the old DT, then it is an added DT
+                added_detail_transactions.append(dt)
+
+            set_of_new_dt.add((dt.sku, dt.unit))
+
+        print(f'set_of_new_dt: {set_of_new_dt}')
+        # Get Deleted Detail Transaction
+        for old_dt in set_of_old_dt:
+            if old_dt not in set_of_new_dt:
+                # If the old DT not in the new DT, then it is a deleted DT
+                deleted_detail_transactions.append(map_of_old_dt[old_dt])
+
+
+        return (added_detail_transactions, updated_detail_transactions, deleted_detail_transactions)
+
+
     # Setters
     #==========
+    def set_transactions_by_id(self, transaction_id: str):
+        self.transaction_id = transaction_id
+
+        transactions_result = self.transaction_service.get_transactions_by_id(transaction_id)
+        detail_transactions_result = self.transaction_service.get_detail_transactions_by_id(transaction_id)
+        print(transactions_result)
+        print(detail_transactions_result)
+        if not transactions_result.success:
+            POSMessageBox.error(self, title="Error", message=transactions_result.message)
+            return
+
+
+        if not detail_transactions_result.success:
+            POSMessageBox.error(self, title="Error", message=detail_transactions_result.message)
+            return
+        
+
+        # Set Transactions Data
+        self.ui.customer_id_transaction_input.setText(transactions_result.data.customer_id)
+        self.on_handle_customer_enter()
+
+        self.ui.transaction_id_transaction_input.setText(transaction_id)
+        self.ui.total_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.total_amount))))
+        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.payment_change))))
+        self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.total_discount))))
+        self.ui.tax_pct_transaction_input.setText(str(transactions_result.data.tax_pct))
+        self.ui.tax_rp_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.tax_amount))))
+
+        self.ui.payment_method_transaction_combobox.setCurrentText(transactions_result.data.payment_method)
+        self.ui.payment_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.payment_amount))))
+        self.ui.remarks_transaction_input.setText(transactions_result.data.payment_remarks)
+
+        # Set Detail Transactions Data
+        self.set_transactions_table_data(detail_transactions_result.data)
+
+        # Change Submit Button to Update Button
+        self.ui.submit_transaction_button.setText('Update')
+        self.ui.submit_transaction_button.clicked.disconnect()
+        self.ui.submit_transaction_button.clicked.connect(self.update_transaction)
+
+
     def set_transactions_table_data(self, data: list[TransactionTableItemModel]) -> None:
         '''
             Set data into transactions table
@@ -1178,3 +1251,101 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.customers_dialog.set_filter(customer_id)
             self.customers_dialog.show()
 
+
+    # Calculate
+    #==========
+    def calculate_total_transactions(self) -> int:
+        total_amount = 0
+        for row in range(self.transactions_table.rowCount()):
+            total_amount += int(remove_non_digit(self.transactions_table.item(row, 9).text()))
+        return total_amount
+
+
+    def calculate_total_discount(self) -> int:
+        total_discount = 0
+        for row in range(self.transactions_table.rowCount()):
+            total_discount += int(remove_non_digit(self.transactions_table.item(row, 8).text()))
+        return total_discount
+
+
+    def calculate_stock_after_transactions(self, sku: str, unit: str):
+        cache_key = f'{sku}_{unit}'
+        if cache_key in self.cached_qty:
+            # Get initial stock
+            initial_stock = self.transaction_service.get_product_by_sku(sku)['data'].stock
+
+            self.ui.stock_transaction_input.setStyleSheet('color: black;')
+            self.ui.stock_transaction_input.setText(format_number(str(initial_stock)))
+
+            if initial_stock < 0:
+                self.ui.stock_transaction_input.setText(f'-{format_number(str(abs(initial_stock)))}')
+                self.ui.stock_transaction_input.setStyleSheet('color: red;')
+            
+
+            # Get total qty in transaction table for this sku and unit
+            total_qty_in_transactions = self.get_total_qty_in_transactions(sku)
+            
+            # Calculate and display stock after transactions
+            stock_after = initial_stock - total_qty_in_transactions
+            
+            # Set color based on stock level
+            self.ui.stock_after_transaction_input.setText(format_number(str(stock_after)))
+            self.ui.stock_after_transaction_input.setStyleSheet('color: black;')
+
+            if stock_after < 0:
+                self.ui.stock_after_transaction_input.setText(f'-{format_number(str(abs(stock_after)))}')
+                self.ui.stock_after_transaction_input.setStyleSheet('color: red;')
+
+
+    # Clear Inputs
+    #==========
+    def clear_wholesale_transactions_data(self):
+        self.wholesale_transactions_table.setRowCount(0)
+
+
+    def clear_purchasing_history_data(self):
+        self.purchase_history_table.setRowCount(0)
+
+
+    def clear_transaction_history_data(self):
+        self.transaction_history_table.setRowCount(0)
+
+
+    def clear_transaction(self):
+        # Remove All Items from Transactions Table
+        self.transactions_table.setRowCount(0)
+        self.ui.total_transaction_input.setText(add_prefix('0'))
+        self.ui.payment_change_transaction_input.setText(add_prefix('0'))
+        self.ui.total_discount_transaction_input.setText(add_prefix('0'))
+        self.cached_transaction_index = {}
+        self.cached_qty = {}
+        self.current_selected_sku = None
+        self.ui.customer_id_transaction_input.clear()
+        self.ui.customer_name_transaction_input.clear()
+        self.ui.tax_pct_transaction_input.clear()
+        self.ui.tax_rp_transaction_input.clear()
+        self.ui.remarks_transaction_input.clear()
+        self.ui.transaction_id_transaction_input.clear()
+        self.ui.submit_transaction_button.setText('Submit')
+        self.ui.submit_transaction_button.clicked.disconnect()
+        self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
+        self.clear_data_transaction()
+
+
+    def clear_data_transaction(self):
+        self.ui.sku_transaction_input.clear()
+        self.ui.product_name_transaction_input.clear()
+        self.ui.price_transaction_input.clear()
+        self.ui.stock_transaction_input.clear()
+        self.ui.stock_after_transaction_input.clear()
+        self.ui.unit_value_transaction_input.clear()
+        self.ui.qty_transaction_input.clear()
+        self.ui.qty_transaction_combobox.clear()
+        self.ui.payment_transaction_input.clear()
+        self.ui.discount_pct_transaction_input.clear()
+        self.ui.discount_rp_per_item_transaction_input.clear()
+        self.ui.discount_rp_total_transaction_input.clear()
+        self.clear_wholesale_transactions_data()
+        self.clear_purchasing_history_data()
+        self.clear_transaction_history_data()
+    

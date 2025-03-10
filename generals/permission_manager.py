@@ -10,6 +10,7 @@ class PermissionManager:
             cls._instance._permissions = set()
             cls._instance._role_id = None
             cls._instance._username = None
+            cls._instance._user_id = None
         return cls._instance
 
     
@@ -21,7 +22,12 @@ class PermissionManager:
     def set_username(self, username: str):
         """Set username"""
         self._username = username
+
     
+    def set_user_id(self, user_id: int):
+        """Set user id"""
+        self._user_id = user_id
+
 
     def has_permission(self, permission: str) -> bool:
         """Check if user has specific permission"""
@@ -38,8 +44,14 @@ class PermissionManager:
         return self._username
     
 
+    def get_user_id(self) -> int:
+        """Get user id"""
+        return self._user_id
+
+
     def clear_permissions(self):
         """Clear all permissions (e.g., on logout)"""
         self._permissions.clear()
         self._role_id = None
-        self._username = None 
+        self._username = None
+        self._user_id = None

@@ -36,4 +36,4 @@ class LoginWindow(QtWidgets.QWidget):
             self.close()
 
         else:
-            POSMessageBox.warning(self, "Login Failed", response.message)
+            POSMessageBox.warning(self, title="Login Failed", message=response.message)

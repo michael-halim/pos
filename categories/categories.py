@@ -13,12 +13,14 @@ from generals.message_box import POSMessageBox
 class CategoriesWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        # Init Services
-        self.categories_service = CategoriesService()
+        
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/categories.ui'), self)
         
+        # Init Services
+        self.categories_service = CategoriesService()
+
         # Init Tables
         self.categories_table = self.ui.categories_table
         self.products_table_in_categories = self.ui.products_table_in_categories
@@ -33,9 +35,9 @@ class CategoriesWindow(QtWidgets.QWidget):
         self.ui.add_category_button.clicked.connect(self.add_category)
         self.ui.edit_category_button.clicked.connect(self.edit_category)
         self.ui.delete_category_button.clicked.connect(self.delete_category)
-        self.ui.close_category_button.clicked.connect(lambda: self.close())
         self.ui.clear_category_button.clicked.connect(self.clear_category)
         self.ui.submit_category_button.clicked.connect(self.submit_category)
+        self.ui.close_category_button.clicked.connect(lambda: self.close())
 
         # Connect search input to filter function
         self.ui.product_filter_input_in_categories.textChanged.connect(self.show_products_data)

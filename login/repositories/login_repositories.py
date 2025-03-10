@@ -24,9 +24,9 @@ class LoginRepository:
                 user_salt, password_hash, role_id = user[0], user[1], user[2]
                 # Check if the password is correct
                 password = user_salt + password
-                password_hash = hashlib.sha512(password.encode()).hexdigest()
+                password_hash_input = hashlib.sha512(password.encode()).hexdigest()
 
-                if password_hash != password_hash:
+                if password_hash != password_hash_input:
                     return ResponseMessage.fail(message="Invalid username or password!")
                 
                 # Get user permissions based on role 
@@ -42,6 +42,25 @@ class LoginRepository:
 
   
             return ResponseMessage.fail(message="Invalid username or password!")
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+
+
+    def get_user_id(self, username: str):
+        try:
+            sql = '''SELECT user_id
+                    FROM users
+                    WHERE username = ?
+                    LIMIT 1'''
+            user_result = self.cursor.execute(sql, (username,))
+
+            user = user_result.fetchone()
+
+            if user:
+                return ResponseMessage.ok(message="User found!", data=user[0])  
+            
+            return ResponseMessage.fail(message="User not found!")
         
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")

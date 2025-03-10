@@ -134,10 +134,10 @@ class PurchasingRepository:
 
                 # Update Stock Card
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
-                                                            stock_out, running_balance) 
-                                    VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?)'''
+                                                            stock_out, running_balance, remarks) 
+                                    VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
                 
-                self.cursor.execute(stock_card_sql, (sku, purchasing_id, stock_affected, None, updated_stock))
+                self.cursor.execute(stock_card_sql, (sku, purchasing_id, stock_affected, None, updated_stock, ''))
 
 
             # If everything successful, commit the transaction

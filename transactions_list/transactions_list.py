@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
+from transactions.transactions import TransactionsWindow
 
 from helper import format_number, add_prefix
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
@@ -17,8 +18,14 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/transactions_list.ui'), self)
 
+        # Init Transactions Window
+        self.transactions_window = TransactionsWindow()
+
         # Init Services
         self.transaction_list_service = TransactionListService()
+
+        self.ui.delete_transactions_button.clicked.connect(self.delete_transactions)
+        self.ui.edit_transactions_button.clicked.connect(self.edit_transactions)
 
         # Connect Filter Transactions
         self.ui.filter_transactions_input.textChanged.connect(self.show_transactions_data)
@@ -67,11 +74,18 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.show_transactions_data()
 
 
+    # Overrides
+    # ==============
+    def show(self):
+        """Override show to refresh data when window is shown"""
+        super().show()
+        # Refresh the data
+        self.show_transactions_data()
+
+
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
-        # Reset the current selection
-        self.current_selected_transaction_id = None
         # Refresh the data
         self.show_transactions_data()
 
@@ -79,12 +93,51 @@ class TransactionsListWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
-        # Reset the current selection
-        self.current_selected_transaction_id = None
         # Refresh the data
         self.show_transactions_data()
 
+    
+    def edit_transactions(self):
+        selected_rows = self.transactions_table.selectedItems()
+        if not selected_rows:
+            POSMessageBox.warning(self, title="Error", message="Please select a transaction to edit")
+            return
+        
+        row = selected_rows[0].row()
+        transaction_id = self.transactions_table.item(row, 1).text()
 
+        self.transactions_window.set_transactions_by_id(transaction_id)
+        self.transactions_window.showMaximized()
+
+
+    def delete_transactions(self):
+        selected_rows = self.transactions_table.selectedItems()
+        if not selected_rows:
+            POSMessageBox.warning(self, title="Error", message="Please select a transaction to delete")
+            return
+        
+        row = selected_rows[0].row()
+        transaction_id = self.transactions_table.item(row, 1).text()
+
+        confirm = POSMessageBox.confirm(
+                    self, title='Confirm Deletion', 
+                    message=f'Are you sure you want to delete {transaction_id} ?')
+
+        if confirm:
+            result = self.transaction_list_service.delete_transactions_by_id(transaction_id)
+            if result.success:
+                POSMessageBox.info(self, title='Success', message=result.message)
+
+                # Just refresh the data directly
+                self.show_transactions_data()
+
+            else:
+                POSMessageBox.error(self, title='Error', message=result.message)
+
+
+
+    # Shows
+    # ==============
     def show_transactions_data(self):
         # Temporarily disable sorting
         self.transactions_table.setSortingEnabled(False)
@@ -138,21 +191,6 @@ class TransactionsListWindow(QtWidgets.QWidget):
             self.detail_transactions_table.setRowHidden(row, not match_found)
     
 
-    def on_transaction_selected(self):
-        selected_rows = self.transactions_table.selectedItems()
-        if selected_rows:
-            # Get the first selected row
-            row = selected_rows[0].row()
-            self.current_selected_transaction_id = self.transactions_table.item(row, 1).text()
-            
-            dt_results = self.transaction_list_service.get_detail_transactions_list(self.current_selected_transaction_id)
-            if dt_results.success:
-                self.set_detail_transactions_table_data(dt_results.data)
-                
-            else:
-                POSMessageBox.error(self, title="Error", message=dt_results.message)
-
-
     # Setters
     # ==============
     def set_transactions_table_data(self, data: list[TransactionListModel]):
@@ -200,3 +238,20 @@ class TransactionsListWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.detail_transactions_table.setItem(current_row, col, item)
+
+
+    # Event Listeners
+    # ==============
+    def on_transaction_selected(self):
+        selected_rows = self.transactions_table.selectedItems()
+        if selected_rows:
+            # Get the first selected row
+            row = selected_rows[0].row()
+            selected_transaction = self.transactions_table.item(row, 1).text()
+            
+            dt_results = self.transaction_list_service.get_detail_transactions_list(selected_transaction)
+            if dt_results.success:
+                self.set_detail_transactions_table_data(dt_results.data)
+                
+            else:
+                POSMessageBox.error(self, title="Error", message=dt_results.message)

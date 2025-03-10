@@ -107,6 +107,7 @@ class StockCardDialogWindow(QtWidgets.QWidget):
                stock_in,
                stock_out,
                running_balance,
+               QtWidgets.QTableWidgetItem(stock_card.remarks),
             ]
             
             for col, item in enumerate(table_items):
