@@ -14,3 +14,6 @@ class PurchasingListService:
     def get_detail_purchasing_by_id(self, purchasing_id: str):
         return self.repository.get_detail_purchasing_by_id(purchasing_id)
 
+
+    def delete_purchasing_by_id(self, purchasing_id: str):
+        return self.repository.delete_purchasing_by_id(purchasing_id)

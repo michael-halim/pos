@@ -99,25 +99,26 @@ class TransactionRepository:
             # Update main transaction
             sql = '''UPDATE transactions 
                     SET customer_id = ?, total_amount = ?, payment_method = ?, payment_rp = ?, payment_change = ?, 
-                        discount_amount = ?, tax_pct = ?, tax_amount = ?, created_at = ?, payment_remarks = ?,
+                        discount_amount = ?, tax_pct = ?, tax_amount = ?, payment_remarks = ?,
                         updated_at = ?, updated_by = ?
                     WHERE transaction_id = ?'''
 
             self.cursor.execute(sql, (transaction.customer_id, transaction.total_amount, transaction.payment_method, transaction.payment_amount, transaction.payment_change, 
-                                      transaction.total_discount, transaction.tax_pct, transaction.tax_amount, current_time, transaction.payment_remarks, current_time, 
+                                      transaction.total_discount, transaction.tax_pct, transaction.tax_amount, transaction.payment_remarks, current_time, 
                                       self.permission_manager.get_user_id(), transaction.transaction_id))
-            
+
 
             # Update updated detail transactions
             for updated_detail in updated_detail_transactions:
                 # Get Old Stock
                 get_old_stock_sql = 'SELECT qty FROM detail_transactions WHERE sku = ? and unit = ? and transaction_id = ?'
                 self.cursor.execute(get_old_stock_sql, (updated_detail.sku, updated_detail.unit, updated_detail.transaction_id))
-                
+
                 old_stock = self.cursor.fetchone()[0]
 
                 # If now stock is less than old stock, then update stock
-                if updated_detail.qty < old_stock:
+                if int(updated_detail.qty) < int(old_stock):
+
                     # Add Stock if updated detail qty is less than old detail qty
                     stock_affected: int = int(old_stock) - int(updated_detail.qty)
                     update_sql = 'UPDATE products SET stock = stock + ? WHERE sku = ?'
@@ -126,39 +127,43 @@ class TransactionRepository:
                     # Get updated stock value directly after update
                     get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
                     self.cursor.execute(get_updated_stock_sql, (updated_detail.sku,))
-                    
+
                     updated_stock = self.cursor.fetchone()[0]
+
 
                     # Update Stock Card by Inserting Data to Stock Card Table
                     remarks = f'Correction Stock from Edit Transaction#{transaction.transaction_id} by {self.permission_manager.get_username()}'
-                    print(f'remarks in update transaction updated_detail < old_stock: {remarks}')
+
                     stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
-                    
+
                     self.cursor.execute(stock_card_sql, (updated_detail.sku, transaction.transaction_id, stock_affected, None, updated_stock, remarks))
 
+
                 
-                elif updated_detail.qty > old_stock:
+                elif int(updated_detail.qty) > int(old_stock):
                     # Subtract Stock if updated detail qty is more than old detail qty
                     stock_affected: int = int(updated_detail.qty) - int(old_stock)
+
                     update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
                     self.cursor.execute(update_sql, (stock_affected, updated_detail.sku))
+
 
                     # Get updated stock value directly after update
                     get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
                     self.cursor.execute(get_updated_stock_sql, (updated_detail.sku,))
-                    
+
                     updated_stock = self.cursor.fetchone()[0]
                     
                     # Update Stock Card by Inserting Data to Stock Card Table
                     remarks = f'Correction Stock from Edit Transaction#{transaction.transaction_id} by {self.permission_manager.get_username()}'
-                    print(f'remarks in update transaction updated_detail > old_stock: {remarks}')
+
                     stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''    
                     
-                    self.cursor.execute(stock_card_sql, (updated_detail.sku, transaction.transaction_id, stock_affected, None, updated_stock, remarks)) 
+                    self.cursor.execute(stock_card_sql, (updated_detail.sku, transaction.transaction_id, None, stock_affected, updated_stock, remarks)) 
 
 
                 sql = '''UPDATE detail_transactions 
@@ -168,7 +173,6 @@ class TransactionRepository:
                 self.cursor.execute(sql, (updated_detail.qty, updated_detail.price, updated_detail.discount_rp, 
                                         updated_detail.discount_rp_per_item, updated_detail.discount_pct, updated_detail.subtotal, 
                                         updated_detail.transaction_id, updated_detail.sku, updated_detail.unit))
-     
 
 
             # Delete detail transactions
@@ -176,24 +180,27 @@ class TransactionRepository:
                 sql = '''DELETE FROM detail_transactions WHERE transaction_id = ? AND sku = ? and unit = ?'''
                 self.cursor.execute(sql, (transaction.transaction_id, deleted_detail.sku, deleted_detail.unit))
 
+
                 # Update product stock
                 stock_affected: int = int(deleted_detail.qty) * int(deleted_detail.unit_value)
                 update_sql = 'UPDATE products SET stock = stock + ? WHERE sku = ?'
                 self.cursor.execute(update_sql, (stock_affected, deleted_detail.sku))
 
+
                 # Get updated stock value directly after update
                 get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
                 self.cursor.execute(get_updated_stock_sql, (deleted_detail.sku,))
-                
+
                 updated_stock = self.cursor.fetchone()[0]
+
 
                 # Update Stock Card by Inserting Data to Stock Card Table
                 remarks = f'Correction Stock from Edit Transaction#{transaction.transaction_id} by {self.permission_manager.get_username()}'
-                print(f'remarks in update transaction deleted_detail: {remarks}')
+
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
-                
+
                 self.cursor.execute(stock_card_sql, (deleted_detail.sku, transaction.transaction_id, stock_affected, None, updated_stock, remarks))
 
 
@@ -203,7 +210,7 @@ class TransactionRepository:
                                                             price, discount_rp, discount_rp_per_item, 
                                                             discount_pct, sub_total) 
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
-                
+
                 self.cursor.execute(sql, (added_detail.transaction_id, added_detail.sku, added_detail.unit, added_detail.unit_value, 
                                           added_detail.qty, added_detail.price, added_detail.discount_rp, added_detail.discount_rp_per_item, 
                                           added_detail.discount_pct, added_detail.subtotal))
@@ -217,19 +224,19 @@ class TransactionRepository:
                 get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
                 self.cursor.execute(get_updated_stock_sql, (added_detail.sku,))  
 
+
                 updated_stock = self.cursor.fetchone()[0]
 
                 # Update Stock Card by Inserting Data to Stock Card Table
                 remarks = f'Correction Stock from Edit Transaction#{transaction.transaction_id} by {self.permission_manager.get_username()}'
-                print(f'remarks in update transaction added_detail: {remarks}')
+
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
-                
+
                 self.cursor.execute(stock_card_sql, (added_detail.sku, transaction.transaction_id, None, stock_affected, updated_stock, remarks))
 
 
-            # If everything successful, commit the transaction
             self.db.commit()
 
             return ResponseMessage.ok(f"Transaction#{transaction.transaction_id} updated successfully!")
@@ -573,7 +580,6 @@ class TransactionRepository:
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 
-
     def get_transactions_by_id(self, transaction_id: str):
         try:
             sql = '''SELECT t.transaction_id, t.customer_id, t.total_amount, t.discount_amount, t.payment_method, t.payment_change, 
@@ -583,18 +589,18 @@ class TransactionRepository:
                     LIMIT 1'''
                     
             self.cursor.execute(sql, (transaction_id,))
-            
+
             result = self.cursor.fetchone()
             transaction = TransactionModel(transaction_id=result[0], customer_id=result[1], total_amount=result[2], 
                                            total_discount=result[3], payment_method=result[4], payment_amount=result[2], 
                                            payment_change=result[5], payment_remarks=result[6], tax_pct=result[7], 
                                            tax_amount=result[8], created_at=result[9])
-
             return ResponseMessage.ok(
                 message="Transaction fetched successfully!",    
                 data=transaction
             )
             
         except Exception as e:
+            print(f"Error get_transactions_by_id: {str(e)}")
             return ResponseMessage.fail(message=f"Error: {str(e)}")
         

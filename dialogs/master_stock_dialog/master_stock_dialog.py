@@ -203,9 +203,8 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.price_master_stock_input.setValue(int(data.price))
         self.ui.stock_master_stock_input.setValue(int(data.stock))
         self.ui.remarks_master_stock_input.setText(data.remarks)
-        self.ui.last_price_master_stock_input.setText(add_prefix(format_number(data.last_price)))
-        self.ui.average_price_master_stock_input.setText(add_prefix(format_number(data.average_price)))
-
+        self.ui.last_price_master_stock_input.setText(add_prefix(format_number(str(int(data.last_price)))))
+        self.ui.average_price_master_stock_input.setText(add_prefix(format_number(str(int(data.average_price)))))
 
     def set_master_stock_form_by_sku(self, sku: str):
         self.clear_master_stock_form()

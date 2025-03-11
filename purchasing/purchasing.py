@@ -39,10 +39,10 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Connect the add button to add_transaction method
         self.ui.close_purchasing_button.clicked.connect(lambda: self.close())
         self.ui.clear_data_purchasing_button.clicked.connect(self.clear_data_purchasing)
-        self.ui.add_purchasing_button.clicked.connect(self.add_purchasing)
-        self.ui.edit_purchasing_button.clicked.connect(self.edit_purchasing)
-        self.ui.delete_purchasing_button.clicked.connect(self.delete_purchasing)
-        self.ui.submit_puchasing_button.clicked.connect(self.submit_purchasing)
+        self.ui.add_purchasing_button.clicked.connect(self.add_detail_purchasing)
+        self.ui.edit_purchasing_button.clicked.connect(self.edit_detail_purchasing)
+        self.ui.delete_purchasing_button.clicked.connect(self.delete_detail_purchasing)
+        self.ui.submit_purchasing_button.clicked.connect(self.submit_purchasing)
         
         self.ui.find_sku_purchasing_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.master_stock_purchasing_button.clicked.connect(self.show_master_stock_dialog)
@@ -113,27 +113,13 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.purchasing_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
-    def add_purchasing(self):
+    def add_detail_purchasing(self):
         # Stop temporary sorting
         self.purchasing_detail_table.setSortingEnabled(False)
         try:
-            sku: str = self.ui.sku_purchasing_input.text().strip()
-            name: str = self.ui.product_name_purchasing_input.text().strip()
-            price: str = remove_non_digit(self.ui.price_purchasing_input.text().strip())
-            qty: str = remove_non_digit(self.ui.qty_purchasing_input.text().strip())
-            unit: str = self.ui.qty_purchasing_combobox.currentText().strip()
-            unit_value: str = self.cached_qty[f'{sku}_{unit}']
-            discount_rp: int = remove_non_digit(self.ui.discount_rp_purchasing_input.text()) if self.ui.discount_rp_purchasing_input.text().strip() else 0
-            discount_pct: int = remove_non_digit(self.ui.discount_pct_purchasing_input.text()) if self.ui.discount_pct_purchasing_input.text().strip() else 0
-            amount = (int(price) * int(qty)) - int(discount_rp)
+            purchasing_form_data = self.get_purchasing_form_data()
 
-            items = [
-                PurchasingTableItemModel(
-                    sku=sku, product_name=name, price=price,
-                    qty=qty, unit=unit, unit_value=unit_value, discount_rp=discount_rp, 
-                    discount_pct=discount_pct, subtotal=amount
-                )
-            ]
+            items = [ purchasing_form_data ]
 
             # Set purchasing table data
             self.set_purchasing_table_data(items)
@@ -157,7 +143,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.purchasing_detail_table.setSortingEnabled(True)
             
 
-    def edit_purchasing(self):
+    def edit_detail_purchasing(self):
         # Get selected row
         selected_rows = self.purchasing_detail_table.selectedItems()
         if selected_rows:
@@ -166,7 +152,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Disconnect existing connections and connect to update function
             self.ui.add_purchasing_button.setText('Update')
             self.ui.add_purchasing_button.clicked.disconnect()
-            self.ui.add_purchasing_button.clicked.connect(self.update_purchasing)
+            self.ui.add_purchasing_button.clicked.connect(self.update_detail_purchasing)
 
             # Get sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal
             sku = self.purchasing_detail_table.item(self.current_selected_sku, 0).text()
@@ -195,7 +181,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.ui.product_name_purchasing_input.setEnabled(False)
     
 
-    def update_purchasing(self):
+    def update_detail_purchasing(self):
         if self.current_selected_sku is not None:
             try:
                 # Get the updated values
@@ -210,7 +196,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                 # Update the row in the table
                 self.purchasing_detail_table.item(self.current_selected_sku, 2).setText(format_number(qty))
                 self.purchasing_detail_table.item(self.current_selected_sku, 5).setText(add_prefix(format_number(str(price))))
-                self.purchasing_detail_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(discount_pct))))
+                self.purchasing_detail_table.item(self.current_selected_sku, 6).setText(format_number(str(discount_pct)))
                 self.purchasing_detail_table.item(self.current_selected_sku, 7).setText(add_prefix(format_number(str(discount_rp))))
                 self.purchasing_detail_table.item(self.current_selected_sku, 8).setText(add_prefix(format_number(str(subtotal))))
                 
@@ -228,7 +214,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                 # Reset button and connection
                 self.ui.add_purchasing_button.setText('Add')
                 self.ui.add_purchasing_button.clicked.disconnect()
-                self.ui.add_purchasing_button.clicked.connect(self.add_purchasing)
+                self.ui.add_purchasing_button.clicked.connect(self.add_detail_purchasing)
                 
                 # Reset selection
                 self.current_selected_sku = None
@@ -242,7 +228,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                 POSMessageBox.error(self, title='Error', message=f"Failed to update purchasing: {str(e)}")
 
 
-    def delete_purchasing(self):
+    def delete_detail_purchasing(self):
         selected_rows = self.purchasing_detail_table.selectedItems()
         if not selected_rows:
             POSMessageBox.warning(self, title='Warning', message="Please select a purchasing to delete")
@@ -292,9 +278,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         total_amount: int = self.calculate_total_purchasing()
         total_discount: int = self.calculate_total_discount()
 
-        # Calculate total amount after discount
-        total_amount -= total_discount
-
         # Get Purchasing Data
         invoice_number: str = self.ui.invoice_number_purchasing_input.text().strip()
         purhcasing_remarks: str = self.ui.remarks_purchasing_input.toPlainText().strip()
@@ -311,6 +294,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             purchasing_remarks = purhcasing_remarks,
             total_amount = total_amount ,
+            total_discount = total_discount
         )
 
         # Submit purchasing
@@ -321,12 +305,58 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Clear the purchasing table and total
             self.clear_purchasing()
 
-            # Clear purchasing history table
-            self.purchasing_history_table.setRowCount(0)
-
         else:
             POSMessageBox.error(self, title='Error', message=result.message)
     
+
+    def update_purchasing(self):
+        # Get detail purchasing from purchasing table
+        detail_purchasing_data: list[DetailPurchasingModel] = self.get_detail_purchasing()
+        if len(detail_purchasing_data) == 0:
+            POSMessageBox.error(self, title='Error', message="No purchasing to update")
+            return
+
+        # Create purchasing id
+        purchasing_id: str = self.ui.purchasing_id_purchasing_input.text().strip()
+
+        # Calculate total amount and total discount
+        total_amount: int = self.calculate_total_purchasing()
+        total_discount: int = self.calculate_total_discount()
+
+        # Get Purchasing Data
+        invoice_number: str = self.ui.invoice_number_purchasing_input.text().strip()
+        purhcasing_remarks: str = self.ui.remarks_purchasing_input.toPlainText().strip()
+        supplier_id: str = self.ui.supplier_in_purchasing_input.text().strip()
+
+
+        # Create purchasing data
+        purchasing_data: PurchasingModel = PurchasingModel(
+            purchasing_id = purchasing_id,
+            supplier_id = supplier_id,
+            invoice_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            invoice_number = invoice_number,
+            invoice_expired_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            purchasing_remarks = purhcasing_remarks,
+            total_amount = total_amount,
+            total_discount = total_discount
+        )
+
+        # Get added, updated, and deleted detail purchasing
+        added_detail_purchasing, updated_detail_purchasing, deleted_detail_purchasing = self.get_added_updated_deleted_detail_purchasing(purchasing_id, detail_purchasing_data)
+
+        # Update purchasing
+        result = self.purchasing_service.update_purchasing(purchasing_data, added_detail_purchasing, updated_detail_purchasing, deleted_detail_purchasing)
+        if result.success:
+            POSMessageBox.info(self, title='Success', message=result.message)
+            
+            # Clear the purchasing table and total
+            self.clear_purchasing()
+
+        else:
+            POSMessageBox.error(self, title='Error', message=result.message)
+
+
 
     # Setters
     # ===============
@@ -358,7 +388,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                 self.purchasing_history_table.setItem(current_row, col, item)
 
 
-    def set_purchasing_table_data(self, data: list[PurchasingTableItemModel]):
+    def set_purchasing_table_data(self, data: list[DetailPurchasingModel]):
         for item in data:
             purchasing_index_key = f'{item.sku}_{item.unit}'
             if purchasing_index_key in self.cached_purchasing_index:
@@ -432,6 +462,41 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.ui.discount_rp_purchasing_input.setText(add_prefix(format_number(discount_rp)))
 
 
+    def set_purchasing_by_id(self, purchasing_id: str):
+        self.clear_purchasing()
+
+        self.ui.purchasing_id_purchasing_input.setText(purchasing_id)
+
+        purchasing_result = self.purchasing_service.get_purchasing_by_id(purchasing_id)
+        detail_purchasing_result = self.purchasing_service.get_detail_purchasing_by_id(purchasing_id)
+
+        if not purchasing_result.success:
+            POSMessageBox.error(self, title="Error", message=purchasing_result.message)
+            return
+
+        if not detail_purchasing_result.success:
+            POSMessageBox.error(self, title="Error", message=detail_purchasing_result.message)
+            return
+        
+
+        # Set Purchasing Data
+        self.ui.invoice_number_purchasing_input.setText(str(purchasing_result.data.invoice_number))
+        self.ui.supplier_in_purchasing_input.setText(str(purchasing_result.data.supplier_id))
+        self.on_handle_supplier_enter()
+
+        self.ui.total_purchasing_input.setText(add_prefix(format_number(str(purchasing_result.data.total_amount))))
+        self.ui.discount_total_purchasing_input.setText(add_prefix(format_number(str(purchasing_result.data.total_discount))))
+        self.ui.remarks_purchasing_input.setText(str(purchasing_result.data.purchasing_remarks))
+
+        # Set Detail Purchasing Data
+        self.set_purchasing_table_data(detail_purchasing_result.data)
+
+        # Change Submit Button to Update Button
+        self.ui.submit_purchasing_button.setText('Update')
+        self.ui.submit_purchasing_button.clicked.disconnect()
+        self.ui.submit_purchasing_button.clicked.connect(self.update_purchasing)
+
+    
     # Getters
     # ===============
     def get_purchasing_history(self) -> list[PurchasingHistoryTableItemModel]:
@@ -457,6 +522,31 @@ class PurchasingWindow(QtWidgets.QWidget):
         return total_qty
     
 
+    def get_purchasing_form_data(self) -> DetailPurchasingModel:
+        sku: str = self.ui.sku_purchasing_input.text().strip()
+        name: str = self.ui.product_name_purchasing_input.text().strip()
+        price: str = remove_non_digit(self.ui.price_purchasing_input.text().strip())
+        qty: str = remove_non_digit(self.ui.qty_purchasing_input.text().strip())
+        unit: str = self.ui.qty_purchasing_combobox.currentText().strip()
+        unit_value: str = self.cached_qty[f'{sku}_{unit}']
+        discount_rp: int = remove_non_digit(self.ui.discount_rp_purchasing_input.text()) if self.ui.discount_rp_purchasing_input.text().strip() else 0
+        discount_pct: int = remove_non_digit(self.ui.discount_pct_purchasing_input.text()) if self.ui.discount_pct_purchasing_input.text().strip() else 0
+        amount = (int(price) * int(qty)) - int(discount_rp)
+
+        return DetailPurchasingModel(
+            purchasing_id = '',
+            sku = sku,
+            product_name = name,
+            price = int(price),
+            qty = int(qty),
+            unit = unit,
+            unit_value = int(unit_value),
+            discount_rp = int(discount_rp),
+            discount_pct = int(discount_pct),
+            subtotal = int(amount)
+        )
+
+
     def get_detail_purchasing(self) -> list[DetailPurchasingModel]:
         '''
             Returns detail_purchasing
@@ -466,6 +556,7 @@ class PurchasingWindow(QtWidgets.QWidget):
         detail_purchasing: list[DetailPurchasingModel] = []
         for row in range(self.purchasing_detail_table.rowCount()):
             sku = self.purchasing_detail_table.item(row, 0).text()
+            product_name = self.purchasing_detail_table.item(row, 1).text()
             qty = remove_non_digit(self.purchasing_detail_table.item(row, 2).text())
             unit = self.purchasing_detail_table.item(row, 3).text()
             unit_value = remove_non_digit(self.purchasing_detail_table.item(row, 4).text())
@@ -478,6 +569,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                 DetailPurchasingModel(
                     purchasing_id = '',
                     sku = sku,
+                    product_name = product_name,
                     price = price,
                     qty = qty,
                     unit = unit,
@@ -498,6 +590,47 @@ class PurchasingWindow(QtWidgets.QWidget):
 
         return None
 
+
+    def get_added_updated_deleted_detail_purchasing(self, purchasing_id: str, detail_purchasing_data: list[DetailPurchasingModel]):
+        added_detail_purchasing: list[DetailPurchasingModel] = []
+        updated_detail_purchasing: list[DetailPurchasingModel] = []
+        deleted_detail_purchasing: list[DetailPurchasingModel] = []
+
+        if purchasing_id == '':
+            purchasing_id = self.ui.purchasing_id_purchasing_input.text().strip()
+
+        # old_dp_result is the detail purchasing of the old purchasing
+        old_dp_result = self.purchasing_service.get_detail_purchasing_by_id(purchasing_id)
+        if not old_dp_result.success:
+            return (added_detail_purchasing, updated_detail_purchasing, deleted_detail_purchasing)
+
+        # Get Set of Old Detail Purchasing        
+        set_of_old_dp: set[tuple[str, str]] = set()
+        map_of_old_dp: dict[tuple[str, str], DetailPurchasingModel] = {}
+        for dp in old_dp_result.data:
+            set_of_old_dp.add((dp.sku, dp.unit))
+            map_of_old_dp[(dp.sku, dp.unit)] = dp
+
+        # Get Set of New Detail Purchasing and Get Added and Updated Detail Purchasing
+        set_of_new_dp: set[tuple[str, str]] = set()
+        for dp in detail_purchasing_data:
+            dp.purchasing_id = purchasing_id
+            if (dp.sku, dp.unit) in set_of_old_dp: # If the new DP is in the old DP, then it is an updated DP
+                updated_detail_purchasing.append(dp)
+
+            elif (dp.sku, dp.unit) not in set_of_old_dp: # If the new DP not in the old DP, then it is an added DP
+                added_detail_purchasing.append(dp)
+
+            set_of_new_dp.add((dp.sku, dp.unit))
+
+        # Get Deleted Detail Purchasing
+        for old_dp in set_of_old_dp:
+            if old_dp not in set_of_new_dp:
+                # If the old DP not in the new DP, then it is a deleted DP
+                deleted_detail_purchasing.append(map_of_old_dp[old_dp])
+
+        return (added_detail_purchasing, updated_detail_purchasing, deleted_detail_purchasing)
+    
 
     # Signal Handlers
     # ===============
@@ -641,6 +774,7 @@ class PurchasingWindow(QtWidgets.QWidget):
     # ===============
     def clear_purchasing(self):
         # Remove All Items from Purchasing Table
+        self.purchasing_history_table.setRowCount(0)
         self.purchasing_detail_table.setRowCount(0)
         self.ui.discount_total_purchasing_input.setText(add_prefix('0'))
         self.ui.total_purchasing_input.setText(add_prefix('0'))

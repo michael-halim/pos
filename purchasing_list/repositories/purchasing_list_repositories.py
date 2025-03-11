@@ -3,13 +3,15 @@ from datetime import datetime
 
 from purchasing_list.models.purchasing_list_models import PurchasingListModel, DetailPurchasingModel
 
+from generals.permission_manager import PermissionManager
 from response.response_message import ResponseMessage
 
 class PurchasingListRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_purchasing_list(self, start_date: datetime, end_date: datetime, search_text: str = None):
         try:
@@ -90,3 +92,50 @@ class PurchasingListRepository:
             return ResponseMessage.fail(
                 message=f"Failed to fetch purchasing detail {str(e)}",
             )    
+        
+
+    def delete_purchasing_by_id(self, purchasing_id: str):
+        try:
+            self.cursor.execute('BEGIN TRANSACTION')
+
+            # Delete the transaction
+            sql = '''DELETE FROM purchasing_history WHERE purchasing_id = ?'''
+            self.cursor.execute(sql, (purchasing_id,))
+
+            # Get detail transactions
+            sql = '''SELECT sku, unit, qty, unit_value FROM detail_purchasing_history WHERE purchasing_id = ?'''
+            self.cursor.execute(sql, (purchasing_id,))
+            detail_purchasing = self.cursor.fetchall()
+
+            # Delete the detail transactions
+            for dp in detail_purchasing:
+                # Update product stock
+                stock_affected: int = int(dp[2]) * int(dp[3])
+                update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
+                self.cursor.execute(update_sql, (stock_affected, dp[0]))
+
+                # Get updated stock value directly after update
+                get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
+                self.cursor.execute(get_updated_stock_sql, (dp[0],))
+                updated_stock = self.cursor.fetchone()[0]
+
+                # Update Stock Card by Inserting Data to Stock Card Table
+                remarks = f'Correction Stock from Delete Purchasing#{purchasing_id} by {self.permission_manager.get_username()}'
+                stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
+                                                            stock_out, running_balance, remarks) 
+                                    VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
+                self.cursor.execute(stock_card_sql, (dp[0], purchasing_id, stock_affected, None, updated_stock, remarks))
+
+
+            sql = '''DELETE FROM detail_purchasing_history WHERE purchasing_id = ?'''
+            self.cursor.execute(sql, (purchasing_id,))
+
+            # Commit Transactions
+            self.db.commit()
+            return ResponseMessage.ok(message="Purchasing deleted successfully!")
+        
+        except Exception as e:
+            self.db.rollback()
+            return ResponseMessage.fail(
+                message=f"Failed to delete purchasing {str(e)}",
+            )   

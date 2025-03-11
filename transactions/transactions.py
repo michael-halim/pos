@@ -119,7 +119,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.customer_id_transaction_input.returnPressed.connect(self.on_handle_customer_enter)
 
         # Enter in Payment will trigger submit transaction
-        self.ui.payment_transaction_input.returnPressed.connect(self.submit_transaction)
+        self.ui.payment_transaction_input.returnPressed.connect(self.on_handle_payment_enter)
 
         # Set selection behavior to select entire rows
         self.transactions_table.setSelectionBehavior(SELECT_ROWS)
@@ -484,10 +484,6 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         added_detail_transactions, updated_detail_transactions, deleted_detail_transactions = self.get_added_updated_deleted_detail_transactions(transaction_id, detail_transactions_data)
 
-        print(f'added_detail_transactions: {added_detail_transactions}')
-        print(f'updated_detail_transactions: {updated_detail_transactions}')
-        print(f'deleted_detail_transactions: {deleted_detail_transactions}')
-
         # Submit transaction
         result = self.transaction_service.update_transaction(transaction_data, 
                                                              added_detail_transactions, 
@@ -827,7 +823,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         # old_dt_result is the detail transactions of the old transaction
         old_dt_result = self.transaction_service.get_detail_transactions_by_id(transaction_id)
         if not old_dt_result.success:
-            return added_detail_transactions, added_detail_transactions
+            return (added_detail_transactions, updated_detail_transactions, deleted_detail_transactions)
 
         # Get Set of Old Detail Transaction        
         set_of_old_dt: set[tuple[str, str]] = set()
@@ -839,6 +835,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Get Set of New Detail Transaction and Get Added and Updated Detail Transaction
         set_of_new_dt: set[tuple[str, str]] = set()
         for dt in detail_transactions_data:
+            dt.transaction_id = transaction_id
             if (dt.sku, dt.unit) in set_of_old_dt: # If the new DT is in the old DT, then it is an updated DT
                 updated_detail_transactions.append(dt)
 
@@ -847,7 +844,6 @@ class TransactionsWindow(QtWidgets.QWidget):
 
             set_of_new_dt.add((dt.sku, dt.unit))
 
-        print(f'set_of_new_dt: {set_of_new_dt}')
         # Get Deleted Detail Transaction
         for old_dt in set_of_old_dt:
             if old_dt not in set_of_new_dt:
@@ -861,12 +857,13 @@ class TransactionsWindow(QtWidgets.QWidget):
     # Setters
     #==========
     def set_transactions_by_id(self, transaction_id: str):
-        self.transaction_id = transaction_id
+        self.clear_transaction()
+
+        self.ui.transaction_id_transaction_input.setText(transaction_id)
 
         transactions_result = self.transaction_service.get_transactions_by_id(transaction_id)
         detail_transactions_result = self.transaction_service.get_detail_transactions_by_id(transaction_id)
-        print(transactions_result)
-        print(detail_transactions_result)
+
         if not transactions_result.success:
             POSMessageBox.error(self, title="Error", message=transactions_result.message)
             return
@@ -881,7 +878,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.customer_id_transaction_input.setText(transactions_result.data.customer_id)
         self.on_handle_customer_enter()
 
-        self.ui.transaction_id_transaction_input.setText(transaction_id)
+        
         self.ui.total_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.total_amount))))
         self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.payment_change))))
         self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.total_discount))))
@@ -1134,7 +1131,7 @@ class TransactionsWindow(QtWidgets.QWidget):
     def on_handle_sku_enter(self):
         sku = self.ui.sku_transaction_input.text().strip().upper()
         if not sku:
-            self.clear_transaction()
+            self.clear_data_transaction()
             return
 
         # Try to find exact SKU match
@@ -1250,6 +1247,16 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Customer not found - show dialog with filter
             self.customers_dialog.set_filter(customer_id)
             self.customers_dialog.show()
+
+
+    def on_handle_payment_enter(self):
+        if self.ui.submit_transaction_button.text() == 'Update':
+            self.ui.submit_transaction_button.clicked.disconnect()
+            self.ui.submit_transaction_button.clicked.connect(self.update_transaction)
+
+        else:
+            self.ui.submit_transaction_button.clicked.disconnect()
+            self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
 
 
     # Calculate

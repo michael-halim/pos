@@ -3,16 +3,24 @@ from datetime import datetime
 
 from purchasing_list.services.purchasing_list_services import PurchasingListService
 from purchasing_list.models.purchasing_list_models import PurchasingListModel, DetailPurchasingModel
+from purchasing.purchasing import PurchasingWindow
 
+from helper import format_number, add_prefix
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from helper import format_number, add_prefix
 from generals.build import resource_path
+from generals.message_box import POSMessageBox
+
 
 class PurchasingListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+
+        # Init Windows
+        self.purchasing_window = PurchasingWindow()
+
+        # Init Services
         self.purchasing_list_service = PurchasingListService()
 
         # Load the UI file
@@ -25,6 +33,8 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
         # Connect Buttons
         self.ui.find_purchasing_list_button.clicked.connect(self.show_purchasing_data)
+        self.ui.edit_purchasing_button.clicked.connect(self.edit_purchasing)
+        self.ui.delete_purchasing_button.clicked.connect(self.delete_purchasing)
 
         # Init Tables
         self.purchasing_table = self.ui.purchasing_table
@@ -64,6 +74,46 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
         # Show data for both tables
         self.show_purchasing_data()
+
+
+
+
+    def edit_purchasing(self):
+        selected_rows = self.purchasing_table.selectedItems()
+        if not selected_rows:
+            POSMessageBox.warning(self, title="Error", message="Please select a transaction to edit")
+            return
+        
+        row = selected_rows[0].row()
+        purchasing_id = self.purchasing_table.item(row, 1).text()
+
+        self.purchasing_window.set_purchasing_by_id(purchasing_id)
+        self.purchasing_window.showMaximized()
+
+
+    def delete_purchasing(self):
+        selected_rows = self.purchasing_table.selectedItems()
+        if not selected_rows:
+            POSMessageBox.warning(self, title="Error", message="Please select a transaction to delete")
+            return
+        
+        row = selected_rows[0].row()
+        purchasing_id = self.purchasing_table.item(row, 1).text()
+
+        confirm = POSMessageBox.confirm(
+                    self, title='Confirm Deletion', 
+                    message=f'Are you sure you want to delete {purchasing_id} ?')
+
+        if confirm:
+            result = self.purchasing_list_service.delete_purchasing_by_id(purchasing_id)
+            if result.success:
+                POSMessageBox.info(self, title='Success', message=result.message)
+
+                # Just refresh the data directly
+                self.show_purchasing_data()
+
+            else:
+                POSMessageBox.error(self, title='Error', message=result.message)
 
 
     # Setters
@@ -115,17 +165,6 @@ class PurchasingListWindow(QtWidgets.QWidget):
                 self.detail_purchasing_table.setItem(current_row, col, item)
 
 
-
-    # Getters
-    # ===============
-
-    
-    # Signal Handlers
-    # ===============
-
-    # Calculate
-    # ===============
-
     # Shows
     # ===============
     def show_purchasing_data(self):
@@ -173,4 +212,12 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
 
     def filter_detail_purchasing(self):
-        pass
+        search_text = self.ui.filter_detail_purchasing_list_input.text().upper()
+        for row in range(self.detail_purchasing_table.rowCount()):
+            match_found = False
+            for col in range(self.detail_purchasing_table.columnCount()):
+                item = self.detail_purchasing_table.item(row, col)
+                if item and search_text in item.text().upper():
+                    match_found = True
+                    break
+            self.detail_purchasing_table.setRowHidden(row, not match_found)

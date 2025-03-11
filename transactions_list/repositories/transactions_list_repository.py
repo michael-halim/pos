@@ -2,6 +2,7 @@ from connect_db import DatabaseConnection
 from datetime import datetime
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
+from generals.permission_manager import PermissionManager
 
 from response.response_message import ResponseMessage
 
@@ -9,7 +10,9 @@ class TransactionRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-    
+        self.permission_manager = PermissionManager()
+
+
     def get_transactions_list(self, start_date: datetime, end_date: datetime, search_text: str = None):
         try:
             transactions_result = []
@@ -96,7 +99,32 @@ class TransactionRepository:
             sql = '''DELETE FROM transactions WHERE transaction_id = ?'''
             self.cursor.execute(sql, (transaction_id,))
 
+            # Get detail transactions
+            sql = '''SELECT sku, unit, qty, unit_value FROM detail_transactions WHERE transaction_id = ?'''
+            self.cursor.execute(sql, (transaction_id,))
+            detail_transactions = self.cursor.fetchall()
+
+
             # Delete the detail transactions
+            for dt in detail_transactions:
+                # Update product stock
+                stock_affected: int = int(dt[2]) * int(dt[3])
+                update_sql = 'UPDATE products SET stock = stock + ? WHERE sku = ?'
+                self.cursor.execute(update_sql, (stock_affected, dt[0]))
+
+                # Get updated stock value directly after update
+                get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
+                self.cursor.execute(get_updated_stock_sql, (dt[0],))
+                updated_stock = self.cursor.fetchone()[0]
+
+                # Update Stock Card by Inserting Data to Stock Card Table
+                remarks = f'Correction Stock from Delete Transaction#{transaction_id} by {self.permission_manager.get_username()}'
+                stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
+                                                            stock_out, running_balance, remarks) 
+                                    VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
+                self.cursor.execute(stock_card_sql, (dt[0], transaction_id, stock_affected, None, updated_stock, remarks))
+
+
             sql = '''DELETE FROM detail_transactions WHERE transaction_id = ?'''
             self.cursor.execute(sql, (transaction_id,))
 

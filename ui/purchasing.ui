@@ -26,6 +26,69 @@
       <item row="0" column="0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <layout class="QFormLayout" name="formLayout_7">
+            <item row="0" column="0">
+             <widget class="QLabel" name="purchasing_id_purchasing_label">
+              <property name="minimumSize">
+               <size>
+                <width>125</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Purchasing Id : </string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="purchasing_id_purchasing_input">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="clearButtonEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <layout class="QFormLayout" name="formLayout">
@@ -247,7 +310,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
+                <width>150</width>
                 <height>30</height>
                </size>
               </property>
@@ -296,7 +359,7 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
+                <width>150</width>
                 <height>30</height>
                </size>
               </property>
@@ -1262,7 +1325,7 @@
                  </widget>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QPushButton" name="submit_puchasing_button">
+                 <widget class="QPushButton" name="submit_purchasing_button">
                   <property name="font">
                    <font>
                     <pointsize>12</pointsize>

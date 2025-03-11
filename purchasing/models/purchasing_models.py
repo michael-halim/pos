@@ -25,12 +25,14 @@ class PurchasingModel:
     created_at: datetime
     purchasing_remarks: str
     total_amount: int
+    total_discount: int
 
 
 @dataclass
 class DetailPurchasingModel:
     purchasing_id: str
     sku: str
+    product_name: str
     price: int
     qty: int
     unit: str

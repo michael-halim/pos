@@ -210,6 +210,12 @@
               <height>0</height>
              </size>
             </property>
+            <attribute name="horizontalHeaderCascadingSectionResizes">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="verticalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
             <column>
              <property name="text">
               <string>Date</string>
