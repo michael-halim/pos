@@ -65,6 +65,7 @@ class SeedData:
                         ('create_categories', 'Create Categories'), ('read_categories', 'Read Categories'), ('update_categories', 'Update Categories'), ('delete_categories', 'Delete Categories'),
                         ('create_suppliers', 'Create Suppliers'), ('read_suppliers', 'Read Suppliers'), ('update_suppliers', 'Update Suppliers'), ('delete_suppliers', 'Delete Suppliers'),
                         ('create_transactions', 'Create Transactions'), ('read_transactions', 'Read Transactions'), ('update_transactions', 'Update Transactions'), ('delete_transactions', 'Delete Transactions'),
+                        ('create_pending_transactions', 'Create Pending Transactions'), ('read_pending_transactions', 'Read Pending Transactions'), ('apply_pending_transactions', 'Apply Pending Transactions'),
                         ('create_purchasing', 'Create Purchasing'), ('read_purchasing', 'Read Purchasing'), ('update_purchasing', 'Update Purchasing'), ('delete_purchasing', 'Delete Purchasing'),
                         ('create_customers', 'Create Customers'), ('read_customers', 'Read Customers'), ('update_customers', 'Update Customers'), ('delete_customers', 'Delete Customers'),
                         ('create_users', 'Create Users'), ('read_users', 'Read Users'), ('update_users', 'Update Users'), ('delete_users', 'Delete Users'),
@@ -91,6 +92,7 @@ class SeedData:
                         (1, 'create_categories'), (1, 'read_categories'), (1, 'update_categories'), (1, 'delete_categories'),
                         (1, 'create_suppliers'), (1, 'read_suppliers'), (1, 'update_suppliers'), (1, 'delete_suppliers'),
                         (1, 'create_transactions'), (1, 'read_transactions'), (1, 'update_transactions'), (1, 'delete_transactions'),
+                        (1, 'create_pending_transactions'), (1, 'read_pending_transactions'), (1, 'apply_pending_transactions'),
                         (1, 'create_purchasing'), (1, 'read_purchasing'), (1, 'update_purchasing'), (1, 'delete_purchasing'),
                         (1, 'create_customers'), (1, 'read_customers'), (1, 'update_customers'), (1, 'delete_customers'),
                         (1, 'create_users'), (1, 'read_users'), (1, 'update_users'), (1, 'delete_users'),
@@ -135,7 +137,8 @@ class SeedData:
             role_id INT NOT NULL,
             is_active BOOLEAN NOT NULL DEFAULT TRUE,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NULL DEFAULT NULL
+            updated_at DATETIME NULL DEFAULT NULL,
+            updated_by INT NULL DEFAULT NULL
         );'''
 
         self.cursor.execute(sql)
@@ -144,9 +147,9 @@ class SeedData:
         password = salt + password
         password_hash = hashlib.sha512(password.encode()).hexdigest()
 
-        sql_insert = '''INSERT INTO users (username, password_hash, user_salt, role_id, is_active, created_at, updated_at) 
+        sql_insert = '''INSERT INTO users (username, password_hash, user_salt, role_id, is_active, created_at, updated_at, updated_by) 
                         VALUES 
-                        (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL);'''
+                        (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL);'''
 
         self.cursor.execute(sql_insert, ('admin', password_hash, salt, 1, True))     
 
@@ -346,9 +349,9 @@ class SeedData:
 
         sql_insert = '''INSERT INTO suppliers (supplier_name, supplier_address, supplier_city, supplier_phone, supplier_remarks) 
                         VALUES 
-                        ('Supplier One', 'Address One', 'City One', '081234567890', 'Remarks One'),
-                        ('Supplier Two', 'Address Two', 'City Two', '081234567891', 'Remarks Two'),
-                        ('Supplier Three', 'Address Three', 'City Three', '081234567892', 'Remarks Three');'''
+                        ('SUPPLIER ONE', 'ADDRESS ONE', 'CITY ONE', '081234567890', 'Remarks One'),
+                        ('SUPPLIER TWO', 'ADDRESS TWO', 'CITY TWO', '081234567891', 'Remarks Two'),
+                        ('SUPPLIER THREE', 'ADDRESS THREE', 'CITY THREE', '081234567892', 'Remarks Three');'''
         
         self.cursor.execute(sql_insert)
 
@@ -426,9 +429,9 @@ class SeedData:
 
         sql_insert = '''INSERT INTO categories (category_name) 
                             VALUES 
-                            ('Electronics'),
-                            ('Clothing'),
-                            ('Home Appliances');'''
+                            ('ELECTRONICS'),
+                            ('CLOTHING'),
+                            ('HOME APPLIANCES');'''
         
         self.cursor.execute(sql_insert)
         

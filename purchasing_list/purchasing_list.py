@@ -7,25 +7,38 @@ from purchasing.purchasing import PurchasingWindow
 
 from helper import format_number, add_prefix
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 from generals.message_box import POSMessageBox
-
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_PURCHASING, PERM_C_PURCHASING, PERM_U_PURCHASING, PERM_D_PURCHASING,
+) 
+from generals.messages import (
+    ERR, OK, ERR_PERM_R_PURCHASING, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING, ERR_PERM_D_PURCHASING,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 class PurchasingListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_PURCHASING):   
+            return
 
+        # Load the UI file
+        self.ui = uic.loadUi(resource_path('ui/purchasing_list.ui'), self)
+        
         # Init Windows
         self.purchasing_window = PurchasingWindow()
 
         # Init Services
         self.purchasing_list_service = PurchasingListService()
 
-        # Load the UI file
-        self.ui = uic.loadUi(resource_path('ui/purchasing_list.ui'), self)
-
+        # Init Services
+        self.purchasing_list_service = PurchasingListService()
 
         # Connect Filter Purchasing
         self.ui.filter_purchasing_list_input.textChanged.connect(self.show_purchasing_data)
@@ -39,9 +52,6 @@ class PurchasingListWindow(QtWidgets.QWidget):
         # Init Tables
         self.purchasing_table = self.ui.purchasing_table
         self.detail_purchasing_table = self.ui.detail_purchasing_table
-
-        self.purchasing_table.setSortingEnabled(True)
-        self.detail_purchasing_table.setSortingEnabled(True)
 
         # Connect table selection
         self.purchasing_table.itemSelectionChanged.connect(self.on_purchasing_selected)
@@ -76,12 +86,45 @@ class PurchasingListWindow(QtWidgets.QWidget):
         self.show_purchasing_data()
 
 
+    # Overrides
+    # ===============
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
+            self.close()
+            return
+
+        # Refresh the data
+        self.show_purchasing_data() 
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
+            return
+
+        # Refresh the data
+        self.show_purchasing_data()
+
+    def showMaximized(self):
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
+            return
+
+        # Refresh the data
+        self.show_purchasing_data()
 
 
     def edit_purchasing(self):
+        if not self.permission_manager.has_permission(PERM_U_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_U_PURCHASING)
+            return
+
         selected_rows = self.purchasing_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title="Error", message="Please select a transaction to edit")
+            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to edit")
             return
         
         row = selected_rows[0].row()
@@ -92,9 +135,13 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
 
     def delete_purchasing(self):
+        if not self.permission_manager.has_permission(PERM_D_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_D_PURCHASING)
+            return
+
         selected_rows = self.purchasing_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title="Error", message="Please select a transaction to delete")
+            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to delete")
             return
         
         row = selected_rows[0].row()
@@ -107,18 +154,21 @@ class PurchasingListWindow(QtWidgets.QWidget):
         if confirm:
             result = self.purchasing_list_service.delete_purchasing_by_id(purchasing_id)
             if result.success:
-                POSMessageBox.info(self, title='Success', message=result.message)
+                POSMessageBox.info(self, title=OK, message=result.message)
 
                 # Just refresh the data directly
                 self.show_purchasing_data()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     # Setters
     # ===============
     def set_purchasing_table_data(self, data: list[PurchasingListModel]):
+        # Clear the table
+        self.purchasing_table.setRowCount(0)
+
         for purchasing in data:
             current_row = self.purchasing_table.rowCount()
             self.purchasing_table.insertRow(current_row)
@@ -138,6 +188,8 @@ class PurchasingListWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.purchasing_table.setItem(current_row, col, item)
+
+        self.purchasing_table.setSortingEnabled(True)
 
 
     def set_detail_purchasing_table_data(self, data: list[DetailPurchasingModel]):
@@ -163,16 +215,19 @@ class PurchasingListWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.detail_purchasing_table.setItem(current_row, col, item)
-
+        
+        self.detail_purchasing_table.setSortingEnabled(True)
+ 
 
     # Shows
     # ===============
     def show_purchasing_data(self):
+        if not self.permission_manager.has_permission(PERM_R_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
+            return
+
         # Temporarily disable sorting
         self.purchasing_table.setSortingEnabled(False)
-        
-        # Clear the table
-        self.purchasing_table.setRowCount(0)
         
         # Get Dates
         start_date = datetime.strptime(self.ui.start_date_purchasing_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
@@ -193,15 +248,13 @@ class PurchasingListWindow(QtWidgets.QWidget):
         if purchasing_result.success and purchasing_result.data:
             self.set_purchasing_table_data(purchasing_result.data)
         
-        # Enable sorting
-        self.purchasing_table.setSortingEnabled(True)
-
 
     # Event Listeners
     # ===============
     def on_purchasing_selected(self):
         selected_rows = self.purchasing_table.selectedItems()
         if selected_rows:
+            self.detail_purchasing_table.setSortingEnabled(False)
             # Get the first selected row
             row = selected_rows[1].row()
             self.current_selected_purchasing_id = self.purchasing_table.item(row, 1).text()

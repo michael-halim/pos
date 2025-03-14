@@ -398,6 +398,9 @@
             <height>350</height>
            </size>
           </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
           <column>
            <property name="text">
             <string>SKU</string>
@@ -1342,6 +1345,9 @@
             </item>
             <item>
              <widget class="QTableWidget" name="purchasing_history_table">
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
               <column>
                <property name="text">
                 <string>Date</string>

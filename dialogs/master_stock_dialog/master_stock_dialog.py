@@ -32,8 +32,6 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
         # Init Table
         self.purchasing_history_in_master_stock_table = self.ui.purchasing_history_in_master_stock_table
-        self.purchasing_history_in_master_stock_table.setSortingEnabled(True)
-        
 
         # Connect the product_selected signal to handle_product_selected method
         self.suppliers_dialog.supplier_selected.connect(self.handle_supplier_selected)
@@ -211,6 +209,8 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
         master_stock_result = self.master_stock_dialog_service.get_product_by_sku(sku)
         if master_stock_result.success and master_stock_result.data:
+            self.purchasing_history_in_master_stock_table.setSortingEnabled(False)
+
             self.set_master_stock_form_data(master_stock_result.data)
             
             # Get Purchasing History
@@ -249,6 +249,8 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.purchasing_history_in_master_stock_table.setItem(current_row, col, item)
 
+        self.purchasing_history_in_master_stock_table.setSortingEnabled(True)
+
     
     def set_categories_form_data(self, data: CategoriesModel):
         self.ui.category_master_stock_input.setText(str(data.category_id))
@@ -259,11 +261,12 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.supplier_master_stock_input.setText(str(data.supplier_id))
         self.ui.supplier_name_master_stock_input.setText(data.supplier_name)
 
+
     # Getters
     # ===============
     def get_master_stock_form_data(self) -> MasterStockModel:
-        sku = self.ui.sku_master_stock_input.text().strip()
-        product_name = self.ui.product_name_master_stock_input.text().strip()
+        sku = self.ui.sku_master_stock_input.text().strip().upper()
+        product_name = self.ui.product_name_master_stock_input.text().strip().upper()
         barcode = self.ui.barcode_master_stock_input.text().strip()
         category_id = self.ui.category_master_stock_input.text().strip()
         category_name = self.ui.category_name_master_stock_input.text().strip()

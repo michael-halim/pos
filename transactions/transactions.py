@@ -13,15 +13,29 @@ from transactions.models.transactions_models import (
 )
 
 from helper import format_number, add_prefix, remove_non_digit
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, TAX_TABLE_KEY
-from generals.build import resource_path
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    TAX_TABLE_KEY, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS
+) 
+from generals.messages import ( 
+    ERR, OK, WARNING, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 
 class TransactionsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_TRANSACTIONS)
+            self.close()
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/transactions.ui'), self)
@@ -34,11 +48,13 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.pending_transactions_dialog = PendingTransactionsDialogWindow()
         self.customers_dialog = CustomersDialogWindow()
 
-        # Connect the product_selected signal to handle_product_selected method
+        # Handle product selected from dialog
         self.products_dialog.product_selected.connect(self.handle_product_selected)
+
+        # Handle pending transactions from dialog
         self.pending_transactions_dialog.pending_transaction_selected.connect(self.handle_pending_transaction_selected)
 
-        # Connect the customer_selected signal to handle_customer_selected method
+        # Handle customer selected from dialog
         self.customers_dialog.customer_selected.connect(self.handle_customer_selected)
 
         # Connect Filter Transactions
@@ -48,10 +64,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.transactions_table = self.ui.transactions_table
         self.purchase_history_table = self.ui.purchase_history_table
         self.wholesale_transactions_table = self.ui.wholesale_transactions_table
-
-        self.transactions_table.setSortingEnabled(True)
-        self.purchase_history_table.setSortingEnabled(True)
-        self.wholesale_transactions_table.setSortingEnabled(True)
 
         # Connect the add button to add_transaction method
         self.ui.clear_data_transaction_button.clicked.connect(self.clear_data_transaction)
@@ -68,9 +80,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Set date input
         self.ui.date_transaction_input.setDate(datetime.now())
         self.ui.date_transaction_input.setDisplayFormat("dd/MM/yyyy")
-
-        # Add 2 items to payment method combobox
-        self.ui.payment_method_transaction_combobox.addItems(['Cash', 'Transfer'])
 
         # Add selected tracking
         self.current_selected_sku = None
@@ -202,7 +211,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         transaction_form_data: TransactionTableItemModel = self.get_transactions_form_data()
         if transaction_form_data.sku == '' or transaction_form_data.price == '' or transaction_form_data.product_name == '' \
             or transaction_form_data.unit == '' or transaction_form_data.qty == '' or int(transaction_form_data.qty) <= 0:
-            POSMessageBox.error(self, title='Error', message="Please select a product and enter quantity minimum 1")
+            POSMessageBox.error(self, title=ERR, message="Please select a product and enter quantity minimum 1")
             return
 
 
@@ -228,7 +237,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.filter_transactions()
 
         except Exception as e:
-            POSMessageBox.error(self, title='Error', message=f"Failed to add transaction: {str(e)}")
+            POSMessageBox.error(self, title=ERR, message=f"Failed to add transaction: {str(e)}")
 
         finally:
             # Re-enable sorting
@@ -244,7 +253,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         if selected_rows:
             self.current_selected_sku = selected_rows[0].row()
             if self.transactions_table.item(self.current_selected_sku, 0).text() == TAX_TABLE_KEY:
-                POSMessageBox.error(self, title='Error', message="Tax can only be removed or added")
+                POSMessageBox.error(self, title=ERR, message="Tax can only be removed or added")
                 return
 
             # Disconnect existing connections and connect to update function
@@ -319,18 +328,18 @@ class TransactionsWindow(QtWidgets.QWidget):
                 self.clear_transaction_history_data()
                 
             except Exception as e:
-                POSMessageBox.error(self, title='Error', message=f"Failed to update transaction: {str(e)}")
+                POSMessageBox.error(self, title=ERR, message=f"Failed to update transaction: {str(e)}")
 
 
     def delete_detail_transaction(self):
         selected_rows = self.transactions_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title='Warning', message="Please select a transaction to delete")
+            POSMessageBox.warning(self, title=WARNING, message="Please select a transaction to delete")
             return
 
 
         if self.transactions_table.item(selected_rows[0].row(), 0).text() == TAX_TABLE_KEY:
-            POSMessageBox.error(self, title='Error', message="Tax can only be removed or added")
+            POSMessageBox.error(self, title=ERR, message="Tax can only be removed or added")
             return
 
         # Confirm deletion
@@ -379,16 +388,20 @@ class TransactionsWindow(QtWidgets.QWidget):
 
 
     def submit_transaction(self):
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            POSMessageBox.error(self, title=ERR_PERM_C_TRANSACTIONS, message=ERR_PERM_C_TRANSACTIONS)
+            return
+
         # Get payment amount
         payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text())
         if payment_rp == '':
-            POSMessageBox.error(self, title='Error', message="Payment cannot be empty")
+            POSMessageBox.error(self, title=ERR, message="Payment cannot be empty")
             return
         
         # Get detail transactions from transactions table
         detail_transactions_data: list[DetailTransactionModel] = self.get_detail_transactions()
         if len(detail_transactions_data) == 0:
-            POSMessageBox.error(self, title='Error', message="No transactions to submit")
+            POSMessageBox.error(self, title=ERR, message="No transactions to submit")
             return
 
         # Create transaction id
@@ -405,7 +418,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Calculate payment change
         payment_change: int = total_amount - int(payment_rp)
         if payment_change > 0:
-            POSMessageBox.error(self, title='Error', message="Payment cannot be less than total amount")
+            POSMessageBox.error(self, title=ERR, message="Payment cannot be less than total amount")
             return
 
         customer_id: str = self.ui.customer_id_transaction_input.text().strip() if self.ui.customer_id_transaction_input.text().strip() else None
@@ -428,26 +441,30 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Submit transaction
         result = self.transaction_service.submit_transaction(transaction_data, detail_transactions_data)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             
             # Clear the transactions table and total
             self.clear_transaction()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     def update_transaction(self):
+        if not self.permission_manager.has_permission(PERM_U_TRANSACTIONS):
+            POSMessageBox.error(self, title=ERR_PERM_U_TRANSACTIONS, message=ERR_PERM_U_TRANSACTIONS)
+            return
+
         # Get payment amount
         payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text())
         if payment_rp == '':
-            POSMessageBox.error(self, title='Error', message="Payment cannot be empty")
+            POSMessageBox.error(self, title=ERR, message="Payment cannot be empty")
             return
         
         # Get detail transactions from transactions table
         detail_transactions_data: list[DetailTransactionModel] = self.get_detail_transactions()
         if len(detail_transactions_data) == 0:
-            POSMessageBox.error(self, title='Error', message="No transactions to submit")
+            POSMessageBox.error(self, title=ERR, message="No transactions to submit")
             return
 
         # Create transaction id
@@ -462,7 +479,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Calculate payment change
         payment_change: int = total_amount - int(payment_rp)
         if payment_change > 0:
-            POSMessageBox.error(self, title='Error', message="Payment cannot be less than total amount")
+            POSMessageBox.error(self, title=ERR, message="Payment cannot be less than total amount")
             return
 
         customer_id: str = self.ui.customer_id_transaction_input.text().strip() if self.ui.customer_id_transaction_input.text().strip() else None
@@ -490,7 +507,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                                                              updated_detail_transactions, 
                                                              deleted_detail_transactions)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             
             # Clear the transactions table and total
             self.clear_transaction()
@@ -500,7 +517,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
         
 
 
@@ -514,7 +531,7 @@ class TransactionsWindow(QtWidgets.QWidget):
             detail.transaction_id = transaction_id
 
         if len(detail_transactions_data) == 0:
-            POSMessageBox.error(self, title='Error', message="No transactions to submit")
+            POSMessageBox.error(self, title=ERR, message="No transactions to submit")
             return
 
         # Calculate total amount
@@ -863,14 +880,13 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         transactions_result = self.transaction_service.get_transactions_by_id(transaction_id)
         detail_transactions_result = self.transaction_service.get_detail_transactions_by_id(transaction_id)
-
         if not transactions_result.success:
-            POSMessageBox.error(self, title="Error", message=transactions_result.message)
+            POSMessageBox.error(self, title=ERR, message=transactions_result.message)
             return
 
 
         if not detail_transactions_result.success:
-            POSMessageBox.error(self, title="Error", message=detail_transactions_result.message)
+            POSMessageBox.error(self, title=ERR, message=detail_transactions_result.message)
             return
         
 
@@ -941,6 +957,8 @@ class TransactionsWindow(QtWidgets.QWidget):
 
                 # Add transaction index
                 self.cached_transaction_index[transaction_index_key] = current_row
+        
+        self.transactions_table.setSortingEnabled(True)
 
 
     def set_product_unit_details(self, sku: str):
@@ -993,6 +1011,8 @@ class TransactionsWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.wholesale_transactions_table.setItem(current_row, col, item)
 
+        self.wholesale_transactions_table.setSortingEnabled(True)
+
 
     def set_transaction_form_data(self, data: TransactionTableItemModel):
         self.ui.sku_transaction_input.setText(data.sku)
@@ -1028,6 +1048,8 @@ class TransactionsWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.purchase_history_table.setItem(current_row, col, item)
 
+        self.purchase_history_table.setSortingEnabled(True)
+
 
     def set_transaction_history_table_data(self, data: list[TransactionHistoryTableModel]):
         # Clear Purchasing History Table
@@ -1051,12 +1073,14 @@ class TransactionsWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.transaction_history_table.setItem(current_row, col, item)
 
+        self.transaction_history_table.setSortingEnabled(True)  
+
 
     # Event Listeners
     #====================
     def on_qty_transaction_input_changed(self):
         if '-' in self.ui.qty_transaction_input.text():
-            POSMessageBox.error(self, title='Error', message="Quantity cannot be negative")
+            POSMessageBox.error(self, title=ERR, message="Quantity cannot be negative")
             self.ui.qty_transaction_input.clear()
             return
 
@@ -1195,7 +1219,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         if '-' in self.ui.discount_rp_total_transaction_input.text() or \
             '-' in self.ui.discount_rp_per_item_transaction_input.text() or \
                 '-' in self.ui.discount_pct_transaction_input.text():
-            POSMessageBox.error(self, title='Error', message="Discount cannot be negative")
+            POSMessageBox.error(self, title=ERR, message="Discount cannot be negative")
             self.ui.discount_rp_total_transaction_input.clear()
             self.ui.discount_rp_per_item_transaction_input.clear()
             self.ui.discount_pct_transaction_input.clear()

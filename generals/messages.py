@@ -25,6 +25,10 @@ ERR_PERM_C_TRANSACTIONS = 'You don\'t have permission to create transactions'
 ERR_PERM_U_TRANSACTIONS = 'You don\'t have permission to update transactions'
 ERR_PERM_D_TRANSACTIONS = 'You don\'t have permission to delete transactions'
 
+ERR_PERM_C_PENDING_TRANSACTIONS = 'You don\'t have permission to create pending transactions'
+ERR_PERM_R_PENDING_TRANSACTIONS = 'You don\'t have permission to view pending transactions'
+ERR_PERM_A_PENDING_TRANSACTIONS = 'You don\'t have permission to apply pending transactions'
+
 ERR_PERM_R_PURCHASING = 'You don\'t have permission to view purchasing'
 ERR_PERM_C_PURCHASING = 'You don\'t have permission to create purchasing'
 ERR_PERM_U_PURCHASING = 'You don\'t have permission to update purchasing'

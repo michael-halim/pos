@@ -87,6 +87,9 @@
               <height>16777215</height>
              </size>
             </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>150</number>
             </attribute>

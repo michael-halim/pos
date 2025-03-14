@@ -1,16 +1,24 @@
 from connect_db import DatabaseConnection
 from typing import List
-from response.response_message import ResponseMessage
 from stock_opname.models.stock_opname_models import StockOpnameModel
+
+from response.response_message import ResponseMessage
+from generals.constants import PERM_R_STOCK_OPNAME
+from generals.messages import ERR_PERM_R_STOCK_OPNAME
+from generals.permission_manager import PermissionManager
 
 
 class StockOpnameRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_stock_opname(self, search_text: str = None) -> List[StockOpnameModel]:
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            return ResponseMessage.fail(message=ERR_PERM_R_STOCK_OPNAME)
+
         try:
             stock_opname_result = []
             if search_text:

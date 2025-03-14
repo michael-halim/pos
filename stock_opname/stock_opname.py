@@ -5,17 +5,29 @@ from datetime import datetime
 from stock_opname.services.stock_opname_services import StockOpnameService
 from stock_opname.models.stock_opname_models import StockOpnameModel
 
-from helper import format_number, add_prefix, remove_non_digit
+from helper import format_number
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 from exports.export_service import ExportService
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_STOCK_OPNAME, PERM_E_STOCK_OPNAME
+) 
+from generals.messages import (
+    ERR, OK, ERR_PERM_R_STOCK_OPNAME, ERR_PERM_E_STOCK_OPNAME, PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 
 class StockOpnameWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/stock_opname.ui'), self)
@@ -54,23 +66,39 @@ class StockOpnameWindow(QtWidgets.QWidget):
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
+            self.close()
+            return
+        
         self.show_stock_opname_data()
 
 
     def show(self):
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
+            return
+        
         self.show_stock_opname_data()
    
 
     def showMaximized(self):
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
+            return
+        
         self.show_stock_opname_data()
 
 
     # Shows
     # ===============
     def show_stock_opname_data(self):
-
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
+            return
+        
         self.stock_opname_table.setSortingEnabled(False)
 
         search_text = self.ui.filter_products_stock_opname_input.text().strip()
@@ -79,8 +107,6 @@ class StockOpnameWindow(QtWidgets.QWidget):
         stock_opname_result = self.stock_opname_service.get_stock_opname(search_text)
 
         self.set_stock_opname_table_data(stock_opname_result.data)
-
-        self.stock_opname_table.setSortingEnabled(True)
 
     
     # Setters
@@ -112,11 +138,18 @@ class StockOpnameWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.stock_opname_table.setItem(current_row, col, item)    
 
+        self.stock_opname_table.setSortingEnabled(True)
+
 
     # Exports Excel
     # ===============
     def export_excel(self):
         """Export stock opname data to Excel"""
+
+        if not self.permission_manager.has_permission(PERM_E_STOCK_OPNAME):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_E_STOCK_OPNAME)
+            return
+        
         # Get save file location from user
         file_name = f"stock_opname_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -144,25 +177,28 @@ class StockOpnameWindow(QtWidgets.QWidget):
     # ===============
     def on_complete_export_excel(self, export_result):
         if export_result.success:
-            POSMessageBox.info(self, title="Success", message=export_result.message)
+            POSMessageBox.info(self, title=OK, message=export_result.message)
         else:
-            POSMessageBox.error(self, title="Error", message=export_result.message)
+            POSMessageBox.error(self, title=ERR, message=export_result.message)
 
 
     def on_error_export_excel(self, error):
-        POSMessageBox.error(self, title="Error", message=error)
+        POSMessageBox.error(self, title=ERR, message=error)
 
 
     def on_progress_export_excel(self, progress: int):
         print(f"Progress: {progress}")
 
 
-
-
     # Exports PDF
     # ===============
     def export_pdf(self):
         """Export stock opname data to PDF"""
+
+        if not self.permission_manager.has_permission(PERM_E_STOCK_OPNAME):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_E_STOCK_OPNAME)
+            return
+        
         # Get save file location from user
         file_name = f"stock_opname_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -189,14 +225,14 @@ class StockOpnameWindow(QtWidgets.QWidget):
     # ===============
     def on_complete_export_pdf(self, export_result):
         if export_result.success:
-            POSMessageBox.info(self, title="Success", message=export_result.message)
+            POSMessageBox.info(self, title=OK, message=export_result.message)
 
         else:
-            POSMessageBox.error(self, title="Error", message=export_result.message)
+            POSMessageBox.error(self, title=ERR, message=export_result.message)
 
 
     def on_error_export_pdf(self, error):
-        POSMessageBox.error(self, title="Error", message=error)
+        POSMessageBox.error(self, title=ERR, message=error)
 
 
     def on_progress_export_pdf(self, progress: int):

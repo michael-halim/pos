@@ -35,6 +35,10 @@ PERM_R_TRANSACTIONS = 'read_transactions'
 PERM_U_TRANSACTIONS = 'update_transactions'
 PERM_D_TRANSACTIONS = 'delete_transactions'
 
+PERM_C_PENDING_TRANSACTIONS = 'create_pending_transactions'
+PERM_R_PENDING_TRANSACTIONS = 'read_pending_transactions'
+PERM_A_PENDING_TRANSACTIONS = 'apply_pending_transactions'
+
 PERM_C_PURCHASING = 'create_purchasing'
 PERM_R_PURCHASING = 'read_purchasing'
 PERM_U_PURCHASING = 'update_purchasing'

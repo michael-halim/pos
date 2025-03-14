@@ -3,15 +3,25 @@ from connect_db import DatabaseConnection
 from suppliers.models.suppliers_models import SuppliersModel
 
 from response.response_message import ResponseMessage
-
+from generals.permission_manager import PermissionManager
+from generals.constants import (
+    PERM_R_SUPPLIERS, PERM_C_SUPPLIERS, PERM_U_SUPPLIERS, PERM_D_SUPPLIERS
+)
+from generals.messages import (
+    ERR_PERM_R_SUPPLIERS, ERR_PERM_C_SUPPLIERS, ERR_PERM_U_SUPPLIERS, ERR_PERM_D_SUPPLIERS
+)
 
 class SuppliersRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
+        self.permission_manager = PermissionManager()
         
 
     def get_suppliers(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_SUPPLIERS)
+
         try:
             suppliers_result = []
             if search_text:
@@ -42,7 +52,11 @@ class SuppliersRepository:
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 
+
     def get_supplier_by_id(self, supplier_id: int):
+        if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_SUPPLIERS)
+
         try: 
             sql = '''SELECT supplier_id, supplier_name, supplier_address, supplier_phone, 
                             supplier_city, supplier_remarks 
@@ -69,6 +83,9 @@ class SuppliersRepository:
     
 
     def submit_supplier(self, supplier_data: SuppliersModel):
+        if not self.permission_manager.has_permission(PERM_C_SUPPLIERS):
+            return ResponseMessage.fail(message=ERR_PERM_C_SUPPLIERS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -94,6 +111,9 @@ class SuppliersRepository:
         
 
     def update_supplier(self, supplier_data: SuppliersModel):
+        if not self.permission_manager.has_permission(PERM_U_SUPPLIERS):
+            return ResponseMessage.fail(message=ERR_PERM_U_SUPPLIERS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -120,6 +140,9 @@ class SuppliersRepository:
 
 
     def delete_supplier_by_id(self, supplier_id: int):
+        if not self.permission_manager.has_permission(PERM_D_SUPPLIERS):
+            return ResponseMessage.fail(message=ERR_PERM_D_SUPPLIERS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')

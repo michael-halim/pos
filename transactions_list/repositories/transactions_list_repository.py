@@ -5,15 +5,22 @@ from transactions_list.models.transactions_list_models import TransactionListMod
 from generals.permission_manager import PermissionManager
 
 from response.response_message import ResponseMessage
+from generals.permission_manager import PermissionManager
+from generals.constants import PERM_R_TRANSACTIONS, PERM_D_TRANSACTIONS
+from generals.messages import ERR_PERM_R_TRANSACTIONS, ERR_PERM_D_TRANSACTIONS
+
 
 class TransactionRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         self.permission_manager = PermissionManager()
-
+    
 
     def get_transactions_list(self, start_date: datetime, end_date: datetime, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_TRANSACTIONS)
+        
         try:
             transactions_result = []
             if search_text:
@@ -57,6 +64,9 @@ class TransactionRepository:
         
         
     def get_detail_transactions_list(self, transaction_id: str):
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_TRANSACTIONS)
+        
         try:
             sql = '''SELECT dt.sku, p.product_name, dt.price, dt.qty, dt.unit, dt.discount_rp, 
                             dt.discount_rp_per_item, dt.discount_pct, dt.sub_total 
@@ -92,6 +102,9 @@ class TransactionRepository:
 
 
     def delete_transactions_by_id(self, transaction_id: str):
+        if not self.permission_manager.has_permission(PERM_D_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_D_TRANSACTIONS)
+        
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 

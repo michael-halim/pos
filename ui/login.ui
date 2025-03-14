@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>367</width>
+    <width>358</width>
     <height>192</height>
    </rect>
   </property>
@@ -65,6 +65,12 @@
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="username_input">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -95,6 +101,12 @@
             </item>
             <item row="1" column="1">
              <widget class="QLineEdit" name="password_input">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -110,6 +122,12 @@
             </item>
             <item row="2" column="1">
              <widget class="QPushButton" name="submit_login_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>

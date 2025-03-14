@@ -9,16 +9,31 @@ from users.models.users_models import UsersTableItemModel, UsersFormModel
 
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
-
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_USERS, PERM_C_USERS, PERM_U_USERS, PERM_D_USERS,
+) 
+from generals.messages import (
+    ERR, OK, ERR_PERM_R_USERS, ERR_PERM_C_USERS, ERR_PERM_U_USERS, ERR_PERM_D_USERS,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 class UsersWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            return
+
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/users.ui'), self)
+
+        # Setup permissions
+        self.setup_permissions()
 
         # Init Dialog
         self.roles_dialog = RolesDialogWindow()
@@ -28,7 +43,6 @@ class UsersWindow(QtWidgets.QWidget):
         self.users_service = UsersService()
 
         self.users_table = self.ui.users_table
-        self.users_table.setSortingEnabled(True)
 
         # Connect search input to filter function
         self.ui.filter_users_input.textChanged.connect(self.show_users_data)
@@ -75,6 +89,10 @@ class UsersWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_USERS)
+            self.close()
+            return
         # Refresh the data
         self.show_users_data()
 
@@ -82,6 +100,8 @@ class UsersWindow(QtWidgets.QWidget):
     def show(self):
         """Override show to ensure data is refreshed"""
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            return
         # Refresh the data
         self.show_users_data()
 
@@ -89,14 +109,20 @@ class UsersWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            return
         # Refresh the data
         self.show_users_data()
 
 
     def toggle_active_users(self):
+        if not self.permission_manager.has_permission(PERM_U_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_USERS)
+            return
+
         selected_row = self.users_table.selectedItems()
         if not selected_row:
-            POSMessageBox.error(self, title='Error', message="Please select a user to toggle status")
+            POSMessageBox.error(self, title=ERR, message="Please select a user to toggle status")
             return
 
         row = selected_row[0].row()
@@ -105,14 +131,18 @@ class UsersWindow(QtWidgets.QWidget):
 
         user_result = self.users_service.set_user_status(user_id, not is_active)
         if user_result.success:
-            POSMessageBox.info(self, title="Success", message=user_result.message)
+            POSMessageBox.info(self, title=OK, message=user_result.message)
             self.show_users_data()
 
         else:
-            POSMessageBox.error(self, title="Error", message=user_result.message)
+            POSMessageBox.error(self, title=ERR, message=user_result.message)
 
 
     def create_new_users(self):
+        if not self.permission_manager.has_permission(PERM_C_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_USERS)
+            return
+
         self.clear_users_form_data()
         self.set_enabled_users_form_group(True)
         self.ui.change_password_users_button.setEnabled(False)
@@ -121,6 +151,10 @@ class UsersWindow(QtWidgets.QWidget):
 
 
     def edit_users(self):
+        if not self.permission_manager.has_permission(PERM_U_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_USERS)
+            return
+
         # Get the selected row
         selected_user = self.ui.users_table.selectedItems()
 
@@ -151,16 +185,20 @@ class UsersWindow(QtWidgets.QWidget):
                 self.users_table.setSortingEnabled(True)
 
         else:
-            POSMessageBox.error(self, title="Error", message="Please select a user to edit")
+            POSMessageBox.error(self, title=ERR, message="Please select a user to edit")
     
 
     def update_users(self):
+        if not self.permission_manager.has_permission(PERM_U_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_USERS)
+            return
+
         self.users_table.setSortingEnabled(False)
 
         user_data = self.get_users_form_data()
         user_result = self.users_service.update_user(user_data)
         if user_result.success:
-            POSMessageBox.info(self, title="Success", message=user_result.message)
+            POSMessageBox.info(self, title=OK, message=user_result.message)
             
             self.clear_users_form_data()
             self.show_users_data()
@@ -172,15 +210,19 @@ class UsersWindow(QtWidgets.QWidget):
             self.ui.submit_users_button.clicked.connect(self.submit_users)
 
         else:
-            POSMessageBox.error(self, title="Error", message=user_result.message)
+            POSMessageBox.error(self, title=ERR, message=user_result.message)
 
         self.users_table.setSortingEnabled(True)
 
 
     def delete_users(self):
+        if not self.permission_manager.has_permission(PERM_D_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_D_USERS)
+            return
+
         selected_row = self.users_table.selectedItems()
         if not selected_row:
-            POSMessageBox.error(self, title='Error', message="Please select a user to delete")
+            POSMessageBox.error(self, title=ERR, message="Please select a user to delete")
             return
         
         confirm = POSMessageBox.confirm(
@@ -193,30 +235,34 @@ class UsersWindow(QtWidgets.QWidget):
 
             result = self.users_service.delete_user(user_id)
             if result.success:
-                POSMessageBox.info(self, title='Success', message=result.message)
+                POSMessageBox.info(self, title=OK, message=result.message)
 
                 self.set_enabled_users_form_group(False)
                 self.clear_users_form_data()
                 self.show_users_data()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     def submit_users(self):
+        if not self.permission_manager.has_permission(PERM_C_USERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_USERS)
+            return
+
         # Disable Sorting to prevent data from being sorted
         self.users_table.setSortingEnabled(False)
 
         user_data = self.get_users_form_data()
         user_result = self.users_service.submit_user(user_data)
         if user_result.success:
-            POSMessageBox.info(self, title="Success", message=user_result.message)
+            POSMessageBox.info(self, title=OK, message=user_result.message)
             self.clear_users_form_data()
             self.set_enabled_users_form_group(False)
             self.show_users_data()
 
         else:
-            POSMessageBox.error(self, title="Error", message=user_result.message)
+            POSMessageBox.error(self, title=ERR, message=user_result.message)
 
         # Re-enable Sorting
         self.users_table.setSortingEnabled(True)
@@ -260,7 +306,9 @@ class UsersWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.users_table.setItem(current_row, col, item)
-    
+
+        self.users_table.setSortingEnabled(True)
+
     
     def set_enabled_users_form_group(self, is_enabled: bool):
         self.ui.user_id_users_input.setEnabled(is_enabled)
@@ -298,9 +346,6 @@ class UsersWindow(QtWidgets.QWidget):
 
         self.set_users_table_data(users_result.data)
 
-        # Re-enable Sorting
-        self.users_table.setSortingEnabled(True)
-
 
     # Signal Handlers
     # ===============
@@ -316,11 +361,11 @@ class UsersWindow(QtWidgets.QWidget):
         result = self.users_service.change_password(user_id, password_data['old_password'], password_data['new_password'])
         
         if result.success:
-            POSMessageBox.info(self, title="Success", message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             self.show_users_data()
 
         else:
-            POSMessageBox.error(self, title="Error", message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     # Event Listeners
@@ -369,3 +414,20 @@ class UsersWindow(QtWidgets.QWidget):
         self.ui.submit_users_button.setText('Submit')
         self.ui.submit_users_button.clicked.disconnect()
         self.ui.submit_users_button.clicked.connect(self.submit_users)
+
+
+    # Setup Permissions
+    # ===============
+    def setup_permissions(self):
+        self.ui.toggle_active_users_button.setVisible(
+            self.permission_manager.has_permission(PERM_U_USERS)
+        )
+        self.ui.create_new_users_button.setVisible(
+            self.permission_manager.has_permission(PERM_C_USERS)
+        )
+        self.ui.edit_users_button.setVisible(
+            self.permission_manager.has_permission(PERM_U_USERS)
+        )
+        self.ui.delete_users_button.setVisible(
+            self.permission_manager.has_permission(PERM_D_USERS)
+        )

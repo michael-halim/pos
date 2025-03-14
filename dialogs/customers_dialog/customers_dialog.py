@@ -5,8 +5,16 @@ from dialogs.customers_dialog.models.customers_dialog_models import CustomersDia
 
 from helper import format_number, add_prefix
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
+from generals.permission_manager import PermissionManager
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_CUSTOMERS
+) 
+from generals.messages import ERR_PERM_R_CUSTOMERS,PERM_DENIED
+
 
 class CustomersDialogWindow(QtWidgets.QWidget):
     customer_selected = QtCore.pyqtSignal(dict)
@@ -14,12 +22,16 @@ class CustomersDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+
         self.ui = uic.loadUi(resource_path('ui/customers_dialog.ui'), self)
 
         self.customer_dialog_service = CustomersDialogService()
+        
         # Init Table
         self.customers_dialog_table = self.ui.customers_dialog_table
-        self.customers_dialog_table.setSortingEnabled(True)
 
         # Connect search input to filter function
         self.ui.filter_customers_dialog_input.textChanged.connect(self.show_customers_data)
@@ -32,6 +44,7 @@ class CustomersDialogWindow(QtWidgets.QWidget):
         self.customers_dialog_table.setSelectionBehavior(SELECT_ROWS)
         self.customers_dialog_table.setSelectionMode(SINGLE_SELECTION)
 
+        # Set edit triggers to no edit
         self.customers_dialog_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties
@@ -47,6 +60,10 @@ class CustomersDialogWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
+            self.close()
+            return
         # Refresh the data
         self.show_customers_data()
 
@@ -54,6 +71,8 @@ class CustomersDialogWindow(QtWidgets.QWidget):
     def show(self):
         """Override show to ensure data is refreshed"""
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
         # Refresh the data
         self.show_customers_data()
 
@@ -61,6 +80,8 @@ class CustomersDialogWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
         # Refresh the data
         self.show_customers_data()
 
@@ -68,6 +89,13 @@ class CustomersDialogWindow(QtWidgets.QWidget):
     # Shows
     # ===============
     def show_customers_data(self):
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
+            self.close()
+            return
+
+        self.customers_dialog_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_customers_dialog_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
@@ -98,6 +126,8 @@ class CustomersDialogWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.customers_dialog_table.setItem(current_row, col, item)
+
+        self.customers_dialog_table.setSortingEnabled(True)
 
 
     def send_customer_data(self):

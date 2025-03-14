@@ -12,18 +12,34 @@ from purchasing.models.purchasing_models import PurchasingTableItemModel, Detail
 from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, DATE_FORMAT_DDMMYYYY, DATE_EDIT_NO_BUTTONS
 from generals.build import resource_path
+from generals.constants import (
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, 
+    DATE_FORMAT_DDMMYYYY, DATE_EDIT_NO_BUTTONS,
+    PERM_C_PURCHASING, PERM_U_PURCHASING
+)
+from generals.messages import (
+    ERR, OK, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 
 class PurchasingWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
-        self.purchasing_service = PurchasingService()
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_C_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_PURCHASING)
+            self.close()
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/purchasing.ui'), self)
+        
+        # Init Services
+        self.purchasing_service = PurchasingService()
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
@@ -33,8 +49,6 @@ class PurchasingWindow(QtWidgets.QWidget):
 
         # Init Tables
         self.purchasing_detail_table = self.ui.purchasing_detail_table
-
-        self.purchasing_detail_table.setSortingEnabled(True)
 
         # Connect the add button to add_transaction method
         self.ui.close_purchasing_button.clicked.connect(lambda: self.close())
@@ -136,7 +150,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.clear_data_purchasing()
                 
         except Exception as e:
-            POSMessageBox.error(self, title='Error', message=f"Failed to add purchasing: {str(e)}")
+            POSMessageBox.error(self, title=ERR, message=f"Failed to add purchasing: {str(e)}")
 
         finally:
             # Re-enable sorting
@@ -225,7 +239,7 @@ class PurchasingWindow(QtWidgets.QWidget):
                 self.ui.discount_pct_purchasing_input.setEnabled(True)
 
             except Exception as e:
-                POSMessageBox.error(self, title='Error', message=f"Failed to update purchasing: {str(e)}")
+                POSMessageBox.error(self, title=ERR, message=f"Failed to update purchasing: {str(e)}")
 
 
     def delete_detail_purchasing(self):
@@ -263,10 +277,14 @@ class PurchasingWindow(QtWidgets.QWidget):
 
 
     def submit_purchasing(self):
+        if not self.permission_manager.has_permission(PERM_C_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_PURCHASING)
+            return
+
         # Get detail purchasing from purchasing table
         detail_purchasing_data: list[DetailPurchasingModel] = self.get_detail_purchasing()
         if len(detail_purchasing_data) == 0:
-            POSMessageBox.error(self, title='Error', message="No purchasing to submit")
+            POSMessageBox.error(self, title=ERR, message="No purchasing to submit")
             return
 
         # Create purchasing id
@@ -300,20 +318,24 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Submit purchasing
         result = self.purchasing_service.submit_purchasing(purchasing_data, detail_purchasing_data)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             
             # Clear the purchasing table and total
             self.clear_purchasing()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
     
 
     def update_purchasing(self):
+        if not self.permission_manager.has_permission(PERM_U_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_U_PURCHASING)
+            return
+
         # Get detail purchasing from purchasing table
         detail_purchasing_data: list[DetailPurchasingModel] = self.get_detail_purchasing()
         if len(detail_purchasing_data) == 0:
-            POSMessageBox.error(self, title='Error', message="No purchasing to update")
+            POSMessageBox.error(self, title=ERR, message="No purchasing to update")
             return
 
         # Create purchasing id
@@ -348,14 +370,13 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Update purchasing
         result = self.purchasing_service.update_purchasing(purchasing_data, added_detail_purchasing, updated_detail_purchasing, deleted_detail_purchasing)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             
             # Clear the purchasing table and total
             self.clear_purchasing()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
-
+            POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     # Setters
@@ -386,6 +407,8 @@ class PurchasingWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.purchasing_history_table.setItem(current_row, col, item)
+
+        self.purchasing_history_table.setSortingEnabled(True)
 
 
     def set_purchasing_table_data(self, data: list[DetailPurchasingModel]):
@@ -422,6 +445,8 @@ class PurchasingWindow(QtWidgets.QWidget):
 
                 # Add purchasing index
                 self.cached_purchasing_index[purchasing_index_key] = current_row
+
+        self.purchasing_detail_table.setSortingEnabled(True)
 
 
     def set_product_unit_details(self, sku: str):
@@ -471,11 +496,11 @@ class PurchasingWindow(QtWidgets.QWidget):
         detail_purchasing_result = self.purchasing_service.get_detail_purchasing_by_id(purchasing_id)
 
         if not purchasing_result.success:
-            POSMessageBox.error(self, title="Error", message=purchasing_result.message)
+            POSMessageBox.error(self, title=ERR, message=purchasing_result.message)
             return
 
         if not detail_purchasing_result.success:
-            POSMessageBox.error(self, title="Error", message=detail_purchasing_result.message)
+            POSMessageBox.error(self, title=ERR, message=detail_purchasing_result.message)
             return
         
 

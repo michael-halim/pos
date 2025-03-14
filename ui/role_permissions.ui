@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>886</width>
+    <width>890</width>
     <height>717</height>
    </rect>
   </property>
@@ -225,6 +225,9 @@
                    <height>0</height>
                   </size>
                  </property>
+                 <property name="sortingEnabled">
+                  <bool>true</bool>
+                 </property>
                  <column>
                   <property name="text">
                    <string>Id</string>
@@ -382,6 +385,9 @@
                  <width>16777215</width>
                  <height>16777215</height>
                 </size>
+               </property>
+               <property name="sortingEnabled">
+                <bool>true</bool>
                </property>
                <column>
                 <property name="text">

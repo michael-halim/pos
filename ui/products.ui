@@ -70,8 +70,14 @@ QLineEdit:focus {
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QTableWidget" name="products_table">
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>150</number>
+            </attribute>
+            <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+             <bool>false</bool>
             </attribute>
             <column>
              <property name="text">

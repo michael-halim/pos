@@ -1,4 +1,5 @@
 from PyQt6 import QtWidgets, uic
+from PyQt6.QtCore import pyqtSignal
 
 from dialogs.import_products_dialog.services.import_products_dialog_services import ImportProductsDialogService
 
@@ -84,7 +85,6 @@ class ImportProductsDialogWindow(QtWidgets.QWidget):
             self.ui.log_import_products_input.setStyleSheet('color: green;')
             
             self.import_products_service.import_products_to_database(result['valid_products'], self.on_import_complete)
-
             
             
     def on_error(self, error):

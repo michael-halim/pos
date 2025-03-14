@@ -3,8 +3,8 @@ from connect_db import DatabaseConnection
 from products.models.products_models import ProductsModel
 
 from generals.permission_manager import PermissionManager
-from generals.constants import PERM_D_PRODUCTS
-from generals.messages import ERR_PERM_D_PRODUCTS
+from generals.constants import PERM_R_PRODUCTS, PERM_D_PRODUCTS
+from generals.messages import ERR_PERM_R_PRODUCTS, ERR_PERM_D_PRODUCTS
 from response.response_message import ResponseMessage   
 
 class ProductsRepository:
@@ -15,6 +15,9 @@ class ProductsRepository:
 
 
     def get_products(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            return ResponseMessage.fail(message=ERR_PERM_R_PRODUCTS)
+
         try:
             products_result = []
             if search_text:

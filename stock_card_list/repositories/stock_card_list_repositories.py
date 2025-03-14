@@ -1,15 +1,25 @@
 from connect_db import DatabaseConnection
 from datetime import date
-from response.response_message import ResponseMessage
+
 from stock_card_list.models.stock_card_list_models import ProductStockCardListModel, StockCardListModel
+
+from response.response_message import ResponseMessage
+from generals.constants import PERM_R_STOCK_CARD
+from generals.messages import ERR_PERM_R_STOCK_CARD
+from generals.permission_manager import PermissionManager
+
 
 class StockCardListRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_products(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            return ResponseMessage.fail(message=ERR_PERM_R_STOCK_CARD)
+
         try:
             products_result = []
             if search_text:
@@ -38,6 +48,9 @@ class StockCardListRepository:
         
 
     def get_stock_card(self, sku: str, start_date: date, end_date: date):
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            return ResponseMessage.fail(message=ERR_PERM_R_STOCK_CARD)
+
         try:
             stock_card_result = []
             sql = '''SELECT date, time, transaction_id, stock_in, stock_out, running_balance, remarks 

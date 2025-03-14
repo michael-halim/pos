@@ -5,7 +5,15 @@ from dialogs.categories_dialog.services.categories_dialog_services import Catego
 
 from generals.fonts import POSFonts
 from generals.build import resource_path
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION
+from generals.permission_manager import PermissionManager
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_CATEGORIES
+) 
+from generals.messages import ERR_PERM_R_CATEGORIES,PERM_DENIED
+
 
 class CategoriesDialogWindow(QtWidgets.QDialog):
     # Add signal to communicate with main window
@@ -14,11 +22,14 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
     def __init__(self):
         super().__init__()
 
-        # Init Services
-        self.categories_dialog_service = CategoriesDialogService()
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return
 
         self.ui = uic.loadUi(resource_path('ui/categories_dialog.ui'), self)
-
+        
+        # Init Services
+        self.categories_dialog_service = CategoriesDialogService()
         # Init Table
         self.categories_dialog_table = self.ui.categories_dialog_table
         self.categories_dialog_table.setSortingEnabled(True)
@@ -33,6 +44,9 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
         # Set selection behavior to select entire rows
         self.categories_dialog_table.setSelectionBehavior(SELECT_ROWS)
         self.categories_dialog_table.setSelectionMode(SINGLE_SELECTION)
+        
+        # Set edit triggers to no edit
+        self.categories_dialog_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties
         self.categories_dialog_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
@@ -44,6 +58,12 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
     # Shows
     # ===============
     def show_categories_data(self):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
+        self.categories_dialog_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_categories_dialog_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
@@ -51,11 +71,17 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
 
         self.set_categories_table_data(categories_dialog_result.data)
 
+
     # Overrides
     # ===============
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            self.close()
+            return
+
         # Refresh the data
         self.show_categories_data()
 
@@ -63,6 +89,10 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
     def show(self):
         """Override show to ensure data is refreshed"""
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
         # Refresh the data
         self.show_categories_data()
 
@@ -70,6 +100,10 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
         # Refresh the data
         self.show_categories_data()
 
@@ -92,6 +126,8 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.categories_dialog_table.setItem(current_row, col, item)
+
+        self.categories_dialog_table.setSortingEnabled(True)
 
 
     # Signal Handlers

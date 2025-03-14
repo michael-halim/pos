@@ -3,14 +3,22 @@ from connect_db import DatabaseConnection
 from dialogs.roles_dialog.models.roles_dialog_models import RolesModel, PermissionsModel    
 
 from response.response_message import ResponseMessage
+from generals.constants import PERM_R_ROLES
+from generals.messages import ERR_PERM_R_ROLES
+from generals.permission_manager import PermissionManager
+
 
 class RolesDialogRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
+        self.permission_manager = PermissionManager()
 
 
     def get_roles(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            return ResponseMessage.fail(message=ERR_PERM_R_ROLES)
+
         try:
             roles_result = []
             if search_text:
@@ -39,6 +47,9 @@ class RolesDialogRepository:
     
 
     def get_permissions(self):
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            return ResponseMessage.fail(message=ERR_PERM_R_ROLES)
+
         try:
             sql = '''SELECT permission_id, permission_name FROM permissions'''
             permissions_result = self.cursor.execute(sql)
@@ -58,6 +69,9 @@ class RolesDialogRepository:
 
 
     def get_permissions_by_role_id(self, role_id: int):
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            return ResponseMessage.fail(message=ERR_PERM_R_ROLES)
+
         try: 
             sql = '''SELECT rp.permission_id
                     FROM role_permissions rp

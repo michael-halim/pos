@@ -11,19 +11,29 @@ from stock_opname.services.stock_opname_export import (
 ) 
 
 from response.response_message import ResponseMessage
+from generals.constants import PERM_R_STOCK_OPNAME, PERM_E_STOCK_OPNAME
+from generals.messages import ERR_PERM_R_STOCK_OPNAME, ERR_PERM_E_STOCK_OPNAME
+from generals.permission_manager import PermissionManager
 
 class StockOpnameService:
     def __init__(self):
         self.repository = StockOpnameRepository()
         self.thread_manager = ThreadManager()
         self.export_service = ExportService()
+        self.permission_manager = PermissionManager()
 
 
     def get_stock_opname(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
+            return ResponseMessage.fail(message=ERR_PERM_R_STOCK_OPNAME)
+
         return self.repository.get_stock_opname(search_text)
 
 
     def export_pdf(self, stock_opname_data: list[StockOpnameModel], file_path: str, on_complete=None, on_error=None, on_progress=None):
+        if not self.permission_manager.has_permission(PERM_E_STOCK_OPNAME):
+            return ResponseMessage.fail(message=ERR_PERM_E_STOCK_OPNAME)
+
         self.thread_manager.run_in_thread(
             self.export_pdf_task,
             on_complete,
@@ -77,6 +87,9 @@ class StockOpnameService:
     
 
     def export_excel(self, data: list[StockOpnameModel], file_path: str, on_complete=None, on_error=None, on_progress=None):
+        if not self.permission_manager.has_permission(PERM_E_STOCK_OPNAME):
+            return ResponseMessage.fail(message=ERR_PERM_E_STOCK_OPNAME)
+
         self.thread_manager.run_in_thread(
             self.export_excel_task,
             on_complete,

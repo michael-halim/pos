@@ -4,16 +4,25 @@ import hashlib
 import random
 import string
 
-from response.response_message import ResponseMessage
 from users.models.users_models import UsersTableItemModel, UsersFormModel, RolesModel
+
+from response.response_message import ResponseMessage
+from generals.permission_manager import PermissionManager
+from generals.constants import PERM_R_USERS, PERM_C_USERS, PERM_U_USERS, PERM_D_USERS
+from generals.messages import ERR_PERM_R_USERS, ERR_PERM_C_USERS, ERR_PERM_U_USERS, ERR_PERM_D_USERS
+
 
 class UsersRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_users(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_USERS)
+
         try:
             users_result = []
             if search_text:
@@ -46,6 +55,9 @@ class UsersRepository:
 
 
     def get_user_by_id(self, user_id: str):
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_USERS)
+
         try:    
             sql = '''SELECT u.user_id, u.username, u.role_id, r.role_name, u.is_active, u.created_at 
                         FROM users u
@@ -69,6 +81,9 @@ class UsersRepository:
 
 
     def set_user_status(self, user_id: str, status: bool):
+        if not self.permission_manager.has_permission(PERM_U_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_U_USERS)
+
         try:    
             self.cursor.execute('BEGIN TRANSACTION')
 
@@ -80,10 +95,14 @@ class UsersRepository:
             return ResponseMessage.ok(message="User status updated successfully!")
         
         except Exception as e:
+            self.db.rollback()
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 
 
     def submit_user(self, user_data: UsersFormModel):   
+        if not self.permission_manager.has_permission(PERM_C_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_C_USERS)
+
         try:
             self.cursor.execute('BEGIN TRANSACTION')
             
@@ -107,14 +126,20 @@ class UsersRepository:
 
 
     def update_user(self, user_data: UsersFormModel):
+        if not self.permission_manager.has_permission(PERM_U_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_U_USERS)
+
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 
             sql = '''UPDATE users 
-                        SET role_id = ? 
+                        SET role_id = ?,
+                        updated_at = ?,
+                        updated_by = ?
                         WHERE user_id = ?'''
             
-            self.cursor.execute(sql, (user_data.role_id, user_data.user_id))
+            self.cursor.execute(sql, (user_data.role_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
+                                      self.permission_manager.get_user_id(), user_data.user_id))
 
             self.db.commit()
 
@@ -126,6 +151,9 @@ class UsersRepository:
 
 
     def delete_user(self, user_id: int):
+        if not self.permission_manager.has_permission(PERM_D_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_D_USERS)
+
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 
@@ -143,6 +171,9 @@ class UsersRepository:
 
 
     def get_role_by_id(self, role_id: int): 
+        if not self.permission_manager.has_permission(PERM_R_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_USERS)
+
         try:
             sql = '''SELECT role_id, role_name FROM roles WHERE role_id = ?'''
             self.cursor.execute(sql, (role_id,))
@@ -160,6 +191,9 @@ class UsersRepository:
             
             
     def change_password(self, user_id: int, old_password: str, new_password: str):
+        if not self.permission_manager.has_permission(PERM_U_USERS):
+            return ResponseMessage.fail(message=ERR_PERM_U_USERS)
+
         try:
             self.cursor.execute('BEGIN TRANSACTION')
             # Check if old password is correct
@@ -201,5 +235,6 @@ class UsersRepository:
                 return ResponseMessage.fail(message="User not found!")
         
         except Exception as e:
+            self.db.rollback()
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 

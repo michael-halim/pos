@@ -58,5 +58,4 @@ class ImportProductsDialogRepository:
         except Exception as e:
             self.db.rollback()
             error_message = f"Error importing products: {str(e)}"
-            print(error_message)
             return ResponseMessage(False, error_message)

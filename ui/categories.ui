@@ -31,6 +31,18 @@
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QLabel" name="filter_categories_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>300</width>
@@ -86,6 +98,9 @@
              <font>
               <pointsize>12</pointsize>
              </font>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
             </property>
             <attribute name="horizontalHeaderDefaultSectionSize">
              <number>150</number>
@@ -173,6 +188,11 @@
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Category Name : </string>
               </property>
@@ -211,6 +231,11 @@ QLineEdit:focus {
              <widget class="QLabel" name="category_id_label">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Category Id : </string>
@@ -257,6 +282,11 @@ QLineEdit:focus {
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                 </font>
+                </property>
                 <property name="text">
                  <string>Filter Product:</string>
                 </property>
@@ -266,6 +296,12 @@ QLineEdit:focus {
                <widget class="QLineEdit" name="product_filter_input_in_categories">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
                 </property>
                </widget>
               </item>
@@ -281,6 +317,9 @@ QLineEdit:focus {
                 <width>600</width>
                 <height>0</height>
                </size>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
               </property>
               <column>
                <property name="text">

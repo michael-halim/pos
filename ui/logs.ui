@@ -143,6 +143,9 @@
         </item>
         <item>
          <widget class="QTableWidget" name="logs_table">
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
           <column>
            <property name="text">
             <string>Date</string>

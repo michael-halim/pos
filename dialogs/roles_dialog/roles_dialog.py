@@ -4,15 +4,27 @@ from dialogs.roles_dialog.models.roles_dialog_models import RolesModel, Permissi
 from dialogs.roles_dialog.services.roles_dialog_services import RolesDialogService
 
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 from generals.widget import create_checkbox_item
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_ROLES
+) 
+from generals.messages import ERR_PERM_R_ROLES, PERM_DENIED
+from generals.permission_manager import PermissionManager
+
 
 class RolesDialogWindow(QtWidgets.QWidget):
     role_selected = QtCore.pyqtSignal(dict)
     
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/roles_dialog.ui'), self)
@@ -23,8 +35,6 @@ class RolesDialogWindow(QtWidgets.QWidget):
         # Init Table
         self.roles_table = self.ui.roles_table
         self.permissions_table = self.ui.permissions_table
-        self.roles_table.setSortingEnabled(True)
-        self.permissions_table.setSortingEnabled(True)
         
         # Init Button
         self.ui.add_roles_dialog_button.clicked.connect(self.send_role_data)
@@ -64,6 +74,11 @@ class RolesDialogWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_ROLES)
+            self.close()
+            return
+
         # Refresh the data
         self.show_roles_data()
 
@@ -71,6 +86,10 @@ class RolesDialogWindow(QtWidgets.QWidget):
     def show(self):
         """Override show to ensure data is refreshed"""
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_ROLES)
+            return
+
         # Refresh the data
         self.show_roles_data()
 
@@ -78,6 +97,10 @@ class RolesDialogWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_ROLES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_ROLES)
+            return
+
         # Refresh the data
         self.show_roles_data()
 
@@ -101,6 +124,8 @@ class RolesDialogWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.roles_table.setItem(current_row, col, item)
+
+        self.roles_table.setSortingEnabled(True)
 
 
     def set_permissions_table_data(self, data: list[PermissionsModel], allowed_permissions: set[str]):
@@ -139,7 +164,9 @@ class RolesDialogWindow(QtWidgets.QWidget):
 
                 self.permissions_table.setItem(current_row, col + 1, item)
 
-    
+        self.permissions_table.setSortingEnabled(True)
+
+
     # Signal Handlers
     # ===============
     def send_role_data(self):
@@ -168,6 +195,9 @@ class RolesDialogWindow(QtWidgets.QWidget):
     # Shows
     # ===============
     def show_roles_data(self):
+
+        self.roles_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_roles_input.text().strip()
         search_text = search_text.lower() if search_text else None
 

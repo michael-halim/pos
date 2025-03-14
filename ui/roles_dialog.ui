@@ -85,6 +85,9 @@
                    <height>16777215</height>
                   </size>
                  </property>
+                 <property name="sortingEnabled">
+                  <bool>true</bool>
+                 </property>
                  <column>
                   <property name="text">
                    <string>Id</string>
@@ -197,6 +200,9 @@
                    <width>300</width>
                    <height>16777215</height>
                   </size>
+                 </property>
+                 <property name="sortingEnabled">
+                  <bool>true</bool>
                  </property>
                  <column>
                   <property name="text">

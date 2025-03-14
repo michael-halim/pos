@@ -5,12 +5,23 @@ from logs.services.logs_services import LogsService
 from logs.models.logs_models import LogsModel
 
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
+from generals.permission_manager import PermissionManager
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS,
+    PERM_R_LOGS
+)
+from generals.messages import ERR_PERM_R_LOGS, PERM_DENIED
+
 
 class LogsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_LOGS):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/logs.ui'), self)
@@ -26,8 +37,6 @@ class LogsWindow(QtWidgets.QWidget):
 
         # Init Tables
         self.logs_table = self.ui.logs_table
-
-        self.logs_table.setSortingEnabled(True)
 
         # Set date input
         self.ui.start_date_logs_input.setDate(datetime.now())
@@ -56,6 +65,11 @@ class LogsWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_LOGS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_LOGS)
+            self.close()
+            return  
+        
         # Refresh the data
         self.show_logs_data()
 
@@ -63,6 +77,10 @@ class LogsWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_LOGS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_LOGS)
+            return
+        
         # Refresh the data
         self.show_logs_data()
 
@@ -70,9 +88,6 @@ class LogsWindow(QtWidgets.QWidget):
     def show_logs_data(self):
         # Temporarily disable sorting
         self.logs_table.setSortingEnabled(False)
-        
-        # Clear the table
-        self.logs_table.setRowCount(0)
         
         # Get Dates
         start_date = datetime.strptime(self.ui.start_date_logs_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
@@ -92,13 +107,12 @@ class LogsWindow(QtWidgets.QWidget):
         # Set logs_data table data
         self.set_logs_table_data(logs_result.data)
         
-        # Enable sorting
-        self.logs_table.setSortingEnabled(True)
-
 
     # Setters
     # ==============
     def set_logs_table_data(self, data: list[LogsModel]):
+        self.logs_table.setRowCount(0)
+
         for log in data:
             current_row = self.logs_table.rowCount()
             self.logs_table.insertRow(current_row)
@@ -118,3 +132,5 @@ class LogsWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.logs_table.setItem(current_row, col, item)
+
+        self.logs_table.setSortingEnabled(True)

@@ -15,12 +15,14 @@ from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
     PERM_R_PRODUCTS, PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS, PERM_I_PRODUCTS,
+    PERM_R_STOCK_CARD,
 ) 
 from generals.messages import (
-    ERR, ERR_PERM_R_PRODUCTS, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS, ERR_PERM_I_PRODUCTS, PERM_DENIED
+    ERR, OK, ERR_PERM_R_PRODUCTS, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
+    ERR_PERM_I_PRODUCTS, ERR_PERM_R_STOCK_CARD, PERM_DENIED
 )
-
 from generals.permission_manager import PermissionManager
+
 
 class ProductsWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -37,7 +39,7 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui = uic.loadUi(resource_path('ui/products.ui'), self)
         
         # Setup permissions
-        self.setup_permissions()    
+        self.setup_permissions()
 
         # Init Services
         self.products_service = ProductsService()
@@ -131,6 +133,7 @@ class ProductsWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.products_table.setItem(current_row, col, item)
 
+        self.products_table.setSortingEnabled(True)
 
     # Shows
     # ===============
@@ -141,9 +144,10 @@ class ProductsWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        self.products_table.setSortingEnabled(False)
 
         search_text = self.ui.filter_products_input.text().strip()
-        search_text = search_text.lower() if search_text else None
+        search_text = search_text.upper() if search_text else None
 
         products_result = self.products_service.get_products(search_text)
 
@@ -196,11 +200,15 @@ class ProductsWindow(QtWidgets.QWidget):
             # Set data_loaded to False so it will refresh when this window is shown again
             self.data_loaded = False
         else:
-            POSMessageBox.warning(self, title="Error", message="Please select a product to edit")
+            POSMessageBox.warning(self, title=ERR, message="Please select a product to edit")
 
 
     def stock_card_products(self):
         """Show the stock card products dialog"""
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
+            return
+
         selected_rows = self.products_table.selectedItems()
         if selected_rows:
             row = selected_rows[0].row()
@@ -209,7 +217,7 @@ class ProductsWindow(QtWidgets.QWidget):
             self.stock_card_dialog.show()
         
         else:
-            POSMessageBox.warning(self, title="Error", message="Please select a product to view stock card")
+            POSMessageBox.warning(self, title=ERR, message="Please select a product to view stock card")
         
 
     def delete_products(self):
@@ -220,7 +228,7 @@ class ProductsWindow(QtWidgets.QWidget):
 
         selected_rows = self.products_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title="Error", message="Please select a product to delete")
+            POSMessageBox.warning(self, title=ERR, message="Please select a product to delete")
             return
         
         row = selected_rows[0].row()
@@ -233,14 +241,14 @@ class ProductsWindow(QtWidgets.QWidget):
         if confirm:
             result = self.products_service.delete_products_by_sku(sku)
             if result.success:
-                POSMessageBox.info(self, title='Success', message=result.message)
+                POSMessageBox.info(self, title=OK, message=result.message)
 
                 # Just refresh the data directly
                 self.data_loaded = False
                 self.show_products_data()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     # Setup Permissions

@@ -5,13 +5,27 @@ from customers.models.customers_models import CustomersModel
 
 from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
-from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
+from generals.fonts import POSFonts
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_CUSTOMERS, PERM_C_CUSTOMERS, PERM_U_CUSTOMERS, PERM_D_CUSTOMERS,
+) 
+from generals.messages import (
+    ERR, OK, ERR_PERM_R_CUSTOMERS, ERR_PERM_C_CUSTOMERS, ERR_PERM_U_CUSTOMERS, ERR_PERM_D_CUSTOMERS,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
+
 
 class CustomersWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/customers.ui'), self)
@@ -21,7 +35,6 @@ class CustomersWindow(QtWidgets.QWidget):
 
         # Init Table
         self.customers_table = self.ui.customers_table
-        self.customers_table.setSortingEnabled(True)
 
         # Connect search input to filter function
         self.ui.filter_customers_input.textChanged.connect(self.show_customers_data)
@@ -48,15 +61,55 @@ class CustomersWindow(QtWidgets.QWidget):
         self.show_customers_data()
 
 
+
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):    
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
+            self.close()
+            return
+        # Refresh the data
+        self.show_customers_data()
+
+
+    def show(self):
+        """Override show to ensure data is refreshed"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+        # Refresh the data
+        self.show_customers_data()
+
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+        # Refresh the data
+        self.show_customers_data()
+
+
     def add_customer(self):
+        if not self.permission_manager.has_permission(PERM_C_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_CUSTOMERS)
+            return
+
         self.clear_customer()
         self.set_enabled_customer_form(True)
 
 
     def edit_customer(self):
+        if not self.permission_manager.has_permission(PERM_U_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_CUSTOMERS)
+            return
+
         selected_row = self.customers_table.selectedItems()
         if not selected_row:
-            POSMessageBox.error(self, title='Error', message="Please select a customer to edit")
+            POSMessageBox.error(self, title=ERR, message="Please select a customer to edit")
             return
         
         self.set_enabled_customer_form(True)
@@ -72,15 +125,19 @@ class CustomersWindow(QtWidgets.QWidget):
 
 
     def update_customer(self):
+        if not self.permission_manager.has_permission(PERM_U_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_CUSTOMERS)
+            return
+
         customer_form_data = self.get_customer_form_data()
         if customer_form_data.customer_name == '' or customer_form_data.customer_phone == '':
-            POSMessageBox.error(self, title='Error', message='Customer name and phone are required')
+            POSMessageBox.error(self, title=ERR, message='Customer name and phone are required')
             return
         
         result_customer = self.customer_service.update_customer(customer_form_data)
 
         if result_customer.success:
-            POSMessageBox.info(self, title='Success', message=result_customer.message)
+            POSMessageBox.info(self, title=OK, message=result_customer.message)
 
             self.customers_table.setRowCount(0)
             self.set_enabled_customer_form(False)
@@ -88,13 +145,17 @@ class CustomersWindow(QtWidgets.QWidget):
             self.show_customers_data()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result_customer.message)
+            POSMessageBox.error(self, title=ERR, message=result_customer.message)
 
 
     def delete_customer(self):
+        if not self.permission_manager.has_permission(PERM_D_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_D_CUSTOMERS)
+            return
+
         selected_row = self.customers_table.selectedItems()
         if not selected_row:
-            POSMessageBox.error(self, title='Error', message="Please select a customer to delete")
+            POSMessageBox.error(self, title=ERR, message="Please select a customer to delete")
             return
         
         confirm = POSMessageBox.confirm(
@@ -107,7 +168,7 @@ class CustomersWindow(QtWidgets.QWidget):
 
             result = self.customer_service.delete_customer_by_customer_id(customer_id)
             if result.success:
-                POSMessageBox.info(self, title='Success', message=result.message)
+                POSMessageBox.info(self, title=OK, message=result.message)
 
                 self.customers_table.setRowCount(0)
                 self.set_enabled_customer_form(False)
@@ -115,55 +176,42 @@ class CustomersWindow(QtWidgets.QWidget):
                 self.show_customers_data()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
     
     def submit_customer(self):
+        if not self.permission_manager.has_permission(PERM_C_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_CUSTOMERS)
+            return
+
         customer_data = self.get_customer_form_data()
 
         if customer_data.customer_name == '' or customer_data.customer_phone == '':
-            POSMessageBox.error(self, title='Error', message='Customer name and phone are required')
+            POSMessageBox.error(self, title=ERR, message='Customer name and phone are required')
             return
         
         result = self.customer_service.create_customer(customer_data)
 
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
 
             self.show_customers_data()
             self.set_enabled_customer_form(False)
             self.clear_customer()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
         
 
-    # Overrides
-    # ===============
-    def showEvent(self, event):
-        """Override showEvent to refresh data when window is shown"""
-        super().showEvent(event)
-        # Refresh the data
-        self.show_customers_data()
-
-
-    def show(self):
-        """Override show to ensure data is refreshed"""
-        super().show()
-        # Refresh the data
-        self.show_customers_data()
-
-
-    def showMaximized(self):
-        """Override showMaximized to ensure data is refreshed"""
-        super().showMaximized()
-        # Refresh the data
-        self.show_customers_data()
-
-
+    
     # Shows
     # ===============
     def show_customers_data(self):
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+
+        self.customers_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_customers_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
@@ -194,6 +242,8 @@ class CustomersWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.customers_table.setItem(current_row, col, item)
+        
+        self.customers_table.setSortingEnabled(True)
 
 
     def set_customer_form_data(self, data: CustomersModel):

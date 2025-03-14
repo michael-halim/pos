@@ -2,19 +2,31 @@ from PyQt6 import QtWidgets, uic, QtGui
 from PyQt6.QtCore import Qt
 from datetime import datetime, timedelta
 
-from helper import format_number, add_prefix, remove_non_digit
-from generals.message_box import POSMessageBox
-from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from generals.build import resource_path
-
 from stock_card_list.services.stock_card_list_services import StockCardListService
 from stock_card_list.models.stock_card_list_models import ProductStockCardListModel, StockCardListModel
 
+from helper import format_number
+from generals.message_box import POSMessageBox
+from generals.fonts import POSFonts
+from generals.build import resource_path
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS, DATE_FORMAT_DDMMYYYY,
+    PERM_R_STOCK_CARD,
+) 
+from generals.messages import (
+    ERR, ERR_PERM_R_STOCK_CARD,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 class StockCardListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/stock_card_list.ui'), self)
@@ -29,7 +41,6 @@ class StockCardListWindow(QtWidgets.QWidget):
         # Connect Find Stock Card Button
         self.ui.find_stock_card_button.clicked.connect(self.show_stock_card_data)
 
-
         # Connect filter products input
         self.ui.filter_products_stock_card_input.textChanged.connect(self.show_products_data)
 
@@ -40,9 +51,8 @@ class StockCardListWindow(QtWidgets.QWidget):
         self.ui.start_date_stock_card_input.setDate(datetime.now() - timedelta(days=1))
         self.ui.end_date_stock_card_input.setDate(datetime.now())
 
-        self.ui.start_date_stock_card_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_stock_card_input.setDisplayFormat("dd/MM/yyyy")
-
+        self.ui.start_date_stock_card_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_stock_card_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Set selection behavior to select entire rows
         self.products_table.setSelectionBehavior(SELECT_ROWS)
@@ -68,18 +78,31 @@ class StockCardListWindow(QtWidgets.QWidget):
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
+            self.close()
+            return
+
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)
 
 
     def show(self):
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
+            return
+
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)
    
 
     def showMaximized(self):
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
+            return
+
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)
 
@@ -87,6 +110,9 @@ class StockCardListWindow(QtWidgets.QWidget):
     # Shows
     # ===============
     def show_products_data(self):
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
+            return
 
         self.products_table.setSortingEnabled(False)
 
@@ -96,8 +122,6 @@ class StockCardListWindow(QtWidgets.QWidget):
         products_result = self.stock_card_list_service.get_products(search_text)
 
         self.set_products_table_data(products_result.data)
-
-        self.products_table.setSortingEnabled(True)
 
 
     def show_stock_card_data(self):
@@ -110,14 +134,12 @@ class StockCardListWindow(QtWidgets.QWidget):
 
         self.stock_card_table.setSortingEnabled(False)
 
-        start_date = datetime.strptime(self.ui.start_date_stock_card_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_stock_card_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_stock_card_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_stock_card_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         stock_card_result = self.stock_card_list_service.get_stock_card(sku, start_date, end_date)
 
         self.set_stock_card_table_data(stock_card_result.data)
-
-        self.stock_card_table.setSortingEnabled(True)
 
     
     # Setters
@@ -148,6 +170,8 @@ class StockCardListWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.products_table.setItem(current_row, col, item)    
+
+        self.products_table.setSortingEnabled(True)
 
 
     def set_stock_card_table_data(self, data: list[StockCardListModel]):
@@ -206,22 +230,26 @@ class StockCardListWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.stock_card_table.setItem(current_row, col, item)    
 
+        self.stock_card_table.setSortingEnabled(True)
+
 
     # Event Listeners
     # ===============
     def on_product_selected(self):
         selected_rows = self.products_table.selectedItems()
         if selected_rows:
+            self.stock_card_table.setSortingEnabled(False)
+
             # Get the first selected row
             row = selected_rows[0].row()
             selected_sku = self.products_table.item(row, 0).text()
             
-            start_date = datetime.strptime(self.ui.start_date_stock_card_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')   
-            end_date = datetime.strptime(self.ui.end_date_stock_card_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+            start_date = datetime.strptime(self.ui.start_date_stock_card_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')   
+            end_date = datetime.strptime(self.ui.end_date_stock_card_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
             stock_card_results = self.stock_card_list_service.get_stock_card(selected_sku, start_date, end_date)
             if stock_card_results.success:
                 self.set_stock_card_table_data(stock_card_results.data)
 
             else:
-                POSMessageBox.error(self, title="Error", message=stock_card_results.message)
+                POSMessageBox.error(self, title=ERR, message=stock_card_results.message)

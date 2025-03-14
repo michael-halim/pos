@@ -5,13 +5,27 @@ from role_permissions.models.role_permissions_models import RolesModel, Permissi
 
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
 from generals.widget import create_checkbox_item
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_PERMISSIONS, PERM_C_PERMISSIONS, PERM_U_PERMISSIONS, PERM_D_PERMISSIONS,
+) 
+from generals.messages import (
+    ERR, OK, ERR_PERM_R_PERMISSIONS, ERR_PERM_C_PERMISSIONS, ERR_PERM_U_PERMISSIONS, ERR_PERM_D_PERMISSIONS,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
+
 
 class RolePermissionsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/role_permissions.ui'), self)
@@ -22,8 +36,6 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         # Init Table
         self.roles_table = self.ui.roles_table
         self.permissions_table = self.ui.permissions_table
-        self.roles_table.setSortingEnabled(True)
-        self.permissions_table.setSortingEnabled(True)
         
         # Connect search input to filter function
         self.ui.filter_roles_input.textChanged.connect(self.show_roles_data)
@@ -59,6 +71,42 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         self.show_roles_data()
 
 
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
+            self.close()
+            return
+
+        # Refresh the data
+        self.show_roles_data()
+
+
+    def show(self):
+        """Override show to ensure data is refreshed"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
+            return
+
+        # Refresh the data
+        self.show_roles_data()
+
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
+            return
+
+        # Refresh the data
+        self.show_roles_data()
+
+
     def cancel_role_permissions(self):
         self.clear_roles_form_data()
         self.set_enabled_roles_form_group(False)
@@ -71,6 +119,10 @@ class RolePermissionsWindow(QtWidgets.QWidget):
 
 
     def create_new_role_permissions(self):
+        if not self.permission_manager.has_permission(PERM_C_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_PERMISSIONS)
+            return
+
         self.clear_roles_form_data()
         self.set_enabled_roles_form_group(True)
         self.set_enabled_roles_group_buttons(False)
@@ -82,9 +134,13 @@ class RolePermissionsWindow(QtWidgets.QWidget):
 
 
     def edit_role_permissions(self):
+        if not self.permission_manager.has_permission(PERM_U_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_U_PERMISSIONS)
+            return
+
         selected_row = self.roles_table.selectedItems()
         if not selected_row:
-            POSMessageBox.error(self, title='Error', message="Please select a role to edit")
+            POSMessageBox.error(self, title=ERR, message="Please select a role to edit")
             return
         
         self.set_enabled_roles_form_group(True)
@@ -108,12 +164,16 @@ class RolePermissionsWindow(QtWidgets.QWidget):
 
 
     def update_role_permissions(self):
+        if not self.permission_manager.has_permission(PERM_U_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_U_PERMISSIONS)
+            return
+
         roles_form_data: RolesModel = self.get_roles_form_data()
         role_id = self.ui.role_id_role_permissions_input.text().strip()
         roles_form_data.role_id = role_id
 
         if not roles_form_data.role_name:
-            POSMessageBox.error(self, title='Error', message="Role name is required")
+            POSMessageBox.error(self, title=ERR, message="Role name is required")
             return
         
         past_permissions_result = self.role_permissions_service.get_permissions_by_role_id(role_id)
@@ -124,7 +184,7 @@ class RolePermissionsWindow(QtWidgets.QWidget):
 
         result = self.role_permissions_service.update_role_permissions(roles_form_data, added_data, deleted_data)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
 
             self.roles_table.setRowCount(0)
             self.permissions_table.setRowCount(0)
@@ -134,7 +194,7 @@ class RolePermissionsWindow(QtWidgets.QWidget):
             self.show_roles_data()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
 
 
         self.ui.submit_role_permissions_button.setText('Submit')
@@ -143,9 +203,13 @@ class RolePermissionsWindow(QtWidgets.QWidget):
 
 
     def delete_role_permissions(self):
+        if not self.permission_manager.has_permission(PERM_D_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_D_PERMISSIONS)
+            return
+
         selected_row = self.roles_table.selectedItems()
         if not selected_row:
-            POSMessageBox.error(self, title='Error', message="Please select a role to delete")
+            POSMessageBox.error(self, title=ERR, message="Please select a role to delete")
             return
         
         confirm = POSMessageBox.confirm(
@@ -168,20 +232,24 @@ class RolePermissionsWindow(QtWidgets.QWidget):
                 self.show_roles_data()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     def submit_role_permissions(self):
+        if not self.permission_manager.has_permission(PERM_C_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_PERMISSIONS)
+            return
+
         roles_form_data: RolesModel = self.get_roles_form_data()
         if not roles_form_data.role_name:
-            POSMessageBox.error(self, title='Error', message="Role name is required")
+            POSMessageBox.error(self, title=ERR, message="Role name is required")
             return
         
         selected_permissions: set[str] = self.get_selected_permissions_table_data()
 
         result = self.role_permissions_service.submit_role_permissions(roles_form_data, selected_permissions)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             
             self.roles_table.setRowCount(0)
             self.permissions_table.setRowCount(0)
@@ -191,32 +259,10 @@ class RolePermissionsWindow(QtWidgets.QWidget):
             self.show_roles_data()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
     
 
-    # Overrides
-    # ===============
-    def showEvent(self, event):
-        """Override showEvent to refresh data when window is shown"""
-        super().showEvent(event)
-        # Refresh the data
-        self.show_roles_data()
-
-
-    def show(self):
-        """Override show to ensure data is refreshed"""
-        super().show()
-        # Refresh the data
-        self.show_roles_data()
-
-
-    def showMaximized(self):
-        """Override showMaximized to ensure data is refreshed"""
-        super().showMaximized()
-        # Refresh the data
-        self.show_roles_data()
-
-
+    
     # Setters
     # ===============
     def set_roles_table_data(self, data: list[RolesModel]):
@@ -236,6 +282,8 @@ class RolePermissionsWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.roles_table.setItem(current_row, col, item)
+
+        self.roles_table.setSortingEnabled(True)
 
 
     def set_roles_form_data(self, data: RolesModel):
@@ -281,6 +329,8 @@ class RolePermissionsWindow(QtWidgets.QWidget):
                     item.setBackground(QtGui.QColor(0xD1, 0xE7, 0xDD))
 
                 self.permissions_table.setItem(current_row, col + 1, item)
+
+        self.permissions_table.setSortingEnabled(True)
 
 
     def set_enabled_roles_form_group(self, is_enabled: bool):
@@ -343,6 +393,12 @@ class RolePermissionsWindow(QtWidgets.QWidget):
     # Shows
     # ===============
     def show_roles_data(self):
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
+            return
+
+        self.roles_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_roles_input.text().strip()
         search_text = search_text.lower() if search_text else None
 

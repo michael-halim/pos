@@ -2,15 +2,22 @@ from connect_db import DatabaseConnection
 
 from customers.models.customers_models import CustomersModel
 
-from response.response_message import ResponseMessage
+from generals.permission_manager import PermissionManager
+from generals.constants import PERM_R_CUSTOMERS, PERM_C_CUSTOMERS, PERM_U_CUSTOMERS, PERM_D_CUSTOMERS
+from generals.messages import ERR_PERM_R_CUSTOMERS, ERR_PERM_C_CUSTOMERS, ERR_PERM_U_CUSTOMERS, ERR_PERM_D_CUSTOMERS
+from response.response_message import ResponseMessage   
 
 class CustomersRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_customers(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_CUSTOMERS)
+
         try:
             customers_result = []
             if search_text:
@@ -43,6 +50,9 @@ class CustomersRepository:
 
 
     def get_customer_by_id(self, customer_id: int):
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return ResponseMessage.fail(message=ERR_PERM_R_CUSTOMERS)
+
         try: 
             sql = '''SELECT customer_id, customer_name, customer_phone, customer_points, number_of_transactions, transaction_value 
                     FROM customers
@@ -67,6 +77,9 @@ class CustomersRepository:
 
 
     def create_customer(self, customer_data: CustomersModel):
+        if not self.permission_manager.has_permission(PERM_C_CUSTOMERS):
+            return ResponseMessage.fail(message=ERR_PERM_C_CUSTOMERS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -92,6 +105,9 @@ class CustomersRepository:
 
 
     def update_customer(self, customer_data: CustomersModel):
+        if not self.permission_manager.has_permission(PERM_U_CUSTOMERS):
+            return ResponseMessage.fail(message=ERR_PERM_U_CUSTOMERS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -116,6 +132,9 @@ class CustomersRepository:
             
             
     def delete_customer_by_customer_id(self, customer_id: int):
+        if not self.permission_manager.has_permission(PERM_D_CUSTOMERS):
+            return ResponseMessage.fail(message=ERR_PERM_D_CUSTOMERS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')

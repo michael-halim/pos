@@ -6,15 +6,28 @@ from transactions_list.services.transactions_list_services import TransactionLis
 from transactions.transactions import TransactionsWindow
 
 from helper import format_number, add_prefix
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.fonts import POSFonts
 from generals.build import resource_path
 from generals.message_box import POSMessageBox
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_TRANSACTIONS, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS, PERM_D_TRANSACTIONS
+) 
+from generals.messages import (
+    ERR, OK, ERR_PERM_R_TRANSACTIONS, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, ERR_PERM_D_TRANSACTIONS,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 class TransactionsListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            return
+        
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/transactions_list.ui'), self)
 
@@ -37,9 +50,6 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Init Tables
         self.transactions_table = self.ui.transactions_table
         self.detail_transactions_table = self.ui.detail_transactions_table
-
-        self.transactions_table.setSortingEnabled(True)
-        self.detail_transactions_table.setSortingEnabled(True)
 
         # Connect table selection
         self.transactions_table.itemSelectionChanged.connect(self.on_transaction_selected)
@@ -79,6 +89,11 @@ class TransactionsListWindow(QtWidgets.QWidget):
     def show(self):
         """Override show to refresh data when window is shown"""
         super().show()
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
+            self.close()
+            return
+        
         # Refresh the data
         self.show_transactions_data()
 
@@ -86,6 +101,10 @@ class TransactionsListWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
+            return
+        
         # Refresh the data
         self.show_transactions_data()
 
@@ -93,14 +112,22 @@ class TransactionsListWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
+            return
+        
         # Refresh the data
         self.show_transactions_data()
 
     
     def edit_transactions(self):
+        if not self.permission_manager.has_permission(PERM_U_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_TRANSACTIONS)
+            return
+        
         selected_rows = self.transactions_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title="Error", message="Please select a transaction to edit")
+            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to edit")
             return
         
         row = selected_rows[0].row()
@@ -111,9 +138,13 @@ class TransactionsListWindow(QtWidgets.QWidget):
 
 
     def delete_transactions(self):
+        if not self.permission_manager.has_permission(PERM_D_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_D_TRANSACTIONS)
+            return
+        
         selected_rows = self.transactions_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title="Error", message="Please select a transaction to delete")
+            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to delete")
             return
         
         row = selected_rows[0].row()
@@ -126,24 +157,24 @@ class TransactionsListWindow(QtWidgets.QWidget):
         if confirm:
             result = self.transaction_list_service.delete_transactions_by_id(transaction_id)
             if result.success:
-                POSMessageBox.info(self, title='Success', message=result.message)
+                POSMessageBox.info(self, title=OK, message=result.message)
 
                 # Just refresh the data directly
                 self.show_transactions_data()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
-
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     # Shows
     # ==============
     def show_transactions_data(self):
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
+            return
+        
         # Temporarily disable sorting
         self.transactions_table.setSortingEnabled(False)
-        
-        # Clear the table
-        self.transactions_table.setRowCount(0)
         
         # Get Dates
         start_date = datetime.strptime(self.ui.start_date_transactions_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
@@ -163,9 +194,6 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Set transactions_data table data
         self.set_transactions_table_data(transactions_result.data)
         
-        # Enable sorting
-        self.transactions_table.setSortingEnabled(True)
-
 
     def filter_detail_transactions(self):
         search_text = self.ui.filter_detail_transactions_input.text().lower()
@@ -194,6 +222,8 @@ class TransactionsListWindow(QtWidgets.QWidget):
     # Setters
     # ==============
     def set_transactions_table_data(self, data: list[TransactionListModel]):
+        self.transactions_table.setRowCount(0)
+
         for transaction in data:
             current_row = self.transactions_table.rowCount()
             self.transactions_table.insertRow(current_row)
@@ -213,6 +243,8 @@ class TransactionsListWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.transactions_table.setItem(current_row, col, item)
+
+        self.transactions_table.setSortingEnabled(True)
 
 
     def set_detail_transactions_table_data(self, data: list[DetailTransactionListModel]):
@@ -239,12 +271,17 @@ class TransactionsListWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.detail_transactions_table.setItem(current_row, col, item)
 
+        self.detail_transactions_table.setSortingEnabled(True)
+
 
     # Event Listeners
     # ==============
     def on_transaction_selected(self):
         selected_rows = self.transactions_table.selectedItems()
         if selected_rows:
+            # Temporarily disable sorting
+            self.detail_transactions_table.setSortingEnabled(False)
+
             # Get the first selected row
             row = selected_rows[0].row()
             selected_transaction = self.transactions_table.item(row, 1).text()
@@ -254,4 +291,4 @@ class TransactionsListWindow(QtWidgets.QWidget):
                 self.set_detail_transactions_table_data(dt_results.data)
                 
             else:
-                POSMessageBox.error(self, title="Error", message=dt_results.message)
+                POSMessageBox.error(self, title=ERR, message=dt_results.message)

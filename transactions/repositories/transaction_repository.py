@@ -9,8 +9,16 @@ from transactions.models.transactions_models import (
 )
 
 from response.response_message import ResponseMessage
-
+from generals.constants import (
+    PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS, PERM_R_PENDING_TRANSACTIONS,
+    PERM_C_PENDING_TRANSACTIONS, PERM_R_PENDING_TRANSACTIONS
+)
+from generals.messages import (
+    ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, ERR_PERM_R_PENDING_TRANSACTIONS,
+    ERR_PERM_C_PENDING_TRANSACTIONS
+)
 from generals.permission_manager import PermissionManager
+
 
 class TransactionRepository:
     def __init__(self):
@@ -20,6 +28,9 @@ class TransactionRepository:
 
 
     def submit_transaction(self, transaction: TransactionModel, detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_C_TRANSACTIONS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -89,6 +100,10 @@ class TransactionRepository:
                             added_detail_transactions: List[DetailTransactionModel], 
                             updated_detail_transactions: List[DetailTransactionModel],
                             deleted_detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
+        
+        if not self.permission_manager.has_permission(PERM_U_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_U_TRANSACTIONS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -243,7 +258,6 @@ class TransactionRepository:
 
         except Exception as e:
             # If any error occurs, rollback all changes
-            print('error in update transaction ', e)
             self.db.rollback()
             return ResponseMessage.fail(f"Failed to update transaction: {str(e)}")
 
@@ -287,8 +301,10 @@ class TransactionRepository:
         return transaction_id
 
 
-
     def create_pending_transaction(self, pending_transaction: PendingTransactionModel, detail_transactions: List[DetailTransactionModel]):
+        if not self.permission_manager.has_permission(PERM_C_PENDING_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_C_PENDING_TRANSACTIONS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -326,11 +342,13 @@ class TransactionRepository:
         except Exception as e:
             # If any error occurs, rollback all changes
             self.db.rollback()
-
             return ResponseMessage.fail(f"Failed to create pending transaction: {str(e)}")
 
 
     def get_pending_transactions_by_id(self, transaction_id: str):
+        if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_PENDING_TRANSACTIONS)
+
         try:
             sql = '''SELECT pt.transaction_id, pt.customer_id, pt.total_amount, pt.discount_transaction_id, 
                             pt.discount_amount, pt.created_at, pt.payment_remarks
@@ -359,6 +377,9 @@ class TransactionRepository:
 
 
     def get_pending_transactions_details_by_id(self, transaction_id: str):
+        if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_PENDING_TRANSACTIONS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -580,6 +601,7 @@ class TransactionRepository:
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 
+
     def get_transactions_by_id(self, transaction_id: str):
         try:
             sql = '''SELECT t.transaction_id, t.customer_id, t.total_amount, t.discount_amount, t.payment_method, t.payment_change, 
@@ -601,6 +623,5 @@ class TransactionRepository:
             )
             
         except Exception as e:
-            print(f"Error get_transactions_by_id: {str(e)}")
             return ResponseMessage.fail(message=f"Error: {str(e)}")
         

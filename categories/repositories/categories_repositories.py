@@ -2,15 +2,23 @@ from connect_db import DatabaseConnection
 
 from categories.models.categories_models import CategoriesTableModel, ProcuctsTableModel
 
+from generals.permission_manager import PermissionManager
 from response.response_message import ResponseMessage
+from generals.constants import PERM_R_CATEGORIES, PERM_C_CATEGORIES, PERM_U_CATEGORIES, PERM_D_CATEGORIES
+from generals.messages import ERR_PERM_R_CATEGORIES, ERR_PERM_C_CATEGORIES, ERR_PERM_U_CATEGORIES, ERR_PERM_D_CATEGORIES
+
 
 class CategoriesRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_categories(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
         try:
             categories_result = []
             if search_text:
@@ -40,6 +48,9 @@ class CategoriesRepository:
 
 
     def get_category_by_id(self, category_id: int):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
         try: 
             sql = '''SELECT category_id, category_name
                     FROM categories
@@ -59,6 +70,9 @@ class CategoriesRepository:
 
 
     def get_products(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
         try:
             products_result = []
             if search_text:
@@ -92,6 +106,9 @@ class CategoriesRepository:
         
 
     def get_selected_products_by_category_id(self, category_id: int):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
         try: 
             sql = '''SELECT sku
                     FROM product_categories_detail
@@ -113,17 +130,38 @@ class CategoriesRepository:
 
 
     def submit_category(self, data: CategoriesTableModel, products: set[str]):
+        if not self.permission_manager.has_permission(PERM_C_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_C_CATEGORIES)
+        
         try:
+            # Start transaction
+            self.cursor.execute('BEGIN TRANSACTION')
+
             sql = '''INSERT INTO categories (category_name) VALUES (?)'''
+            
             self.cursor.execute(sql, (data.category_name,))
+            
+            category_id = self.cursor.lastrowid
+
+            sql = '''INSERT INTO product_categories_detail (category_id, sku) VALUES (?, ?)'''
+            
+            self.cursor.executemany(sql, [(category_id, product) for product in products])
+
+            # Commit transaction
             self.db.commit()
+
             return ResponseMessage.ok(message="Category submitted successfully!")
         
         except Exception as e:
+            # Rollback transaction
+            self.db.rollback()
             return ResponseMessage.fail(message=f"Error: {str(e)}")
         
     
     def update_category(self, category_form_data: CategoriesTableModel, added_products: set[str], deleted_products: set[str]):
+        if not self.permission_manager.has_permission(PERM_U_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_U_CATEGORIES)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -156,6 +194,9 @@ class CategoriesRepository:
         
 
     def delete_category_by_id(self, category_id: int):
+        if not self.permission_manager.has_permission(PERM_D_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_D_CATEGORIES)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')

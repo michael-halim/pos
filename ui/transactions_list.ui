@@ -136,6 +136,9 @@
           </item>
           <item>
            <widget class="QTableWidget" name="transactions_table">
+            <property name="sortingEnabled">
+             <bool>true</bool>
+            </property>
             <column>
              <property name="text">
               <string>Date</string>
@@ -277,6 +280,9 @@
               <width>800</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="sortingEnabled">
+             <bool>true</bool>
             </property>
             <column>
              <property name="text">
