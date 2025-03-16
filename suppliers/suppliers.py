@@ -284,6 +284,8 @@ class SuppliersWindow(QtWidgets.QWidget):
     def toggle_suppliers_form(self, mode: bool = True):
         self.ui.supplier_address_label.setEnabled(mode)
         self.ui.supplier_address_input.setEnabled(mode)
+        self.ui.supplier_name_label.setEnabled(mode)
+        self.ui.supplier_name_input.setEnabled(mode)
         self.ui.supplier_phone_number_label.setEnabled(mode)
         self.ui.supplier_phone_number_input.setEnabled(mode)
         self.ui.supplier_city_label.setEnabled(mode)

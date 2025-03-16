@@ -76,7 +76,7 @@ class CategoriesRepository:
         try:
             products_result = []
             if search_text:
-                sql = '''SELECT sku, product_name, price, stock, unit, created_at
+                sql = '''SELECT sku, product_name, price, stock, unit
                         FROM products
                         WHERE sku LIKE ? OR product_name LIKE ?'''
                 
@@ -84,15 +84,16 @@ class CategoriesRepository:
                 products_result = self.cursor.execute(sql, (search_text, search_text))
 
             else:
-                sql = '''SELECT sku, product_name, price, stock, unit, created_at
-                        FROM products'''
+                sql = '''SELECT sku, product_name, price, stock, unit
+                        FROM products
+                        LIMIT 100'''
 
                 products_result = self.cursor.execute(sql)
 
 
             products = [
                 ProcuctsTableModel(sku=r[0], product_name=r[1], price=r[2], stock=r[3], 
-                                   unit=r[4], created_at=r[5]) 
+                                   unit=r[4]) 
                 for r in products_result
             ]
 

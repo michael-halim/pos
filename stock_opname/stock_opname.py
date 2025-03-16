@@ -1,7 +1,6 @@
 from PyQt6 import QtWidgets, uic, QtGui
 from datetime import datetime
 
-
 from stock_opname.services.stock_opname_services import StockOpnameService
 from stock_opname.models.stock_opname_models import StockOpnameModel
 
@@ -237,4 +236,3 @@ class StockOpnameWindow(QtWidgets.QWidget):
 
     def on_progress_export_pdf(self, progress: int):
         print(f"Progress: {progress}")
-

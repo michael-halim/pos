@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 @dataclass
 class CategoriesTableModel:
@@ -14,4 +13,3 @@ class ProcuctsTableModel:
     price: float
     stock: int
     unit: str
-    created_at: datetime

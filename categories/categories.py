@@ -303,7 +303,6 @@ class CategoriesWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(str(product.price)))),
                 QtWidgets.QTableWidgetItem(format_number(str(product.stock))),
                 QtWidgets.QTableWidgetItem(product.unit),
-                QtWidgets.QTableWidgetItem(product.created_at),
             ]
 
             for col, item in enumerate(table_items):

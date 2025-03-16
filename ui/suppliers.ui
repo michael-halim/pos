@@ -6,12 +6,42 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1232</width>
-    <height>534</height>
+    <width>1195</width>
+    <height>537</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Suppliers</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    background-color: #ffffff;       /* White background when focused */
+}
+
+QPushButton {
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 3px;
+    margin: 0.25rem;
+	opacity: 0.55;
+
+}</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
@@ -48,7 +78,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Filter Supplier: </string>
+               <string>Filter Supplier : </string>
               </property>
               <property name="alignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -60,7 +90,7 @@
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>0</height>
+                <height>30</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -91,6 +121,69 @@
               <width>16777215</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QTableWidget {
+            background-color: #ffffff;
+            alternate-background-color: #f5f8fa;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            gridline-color: #e1e4e8;
+            selection-background-color: #0366d6;
+            selection-color: #ffffff;
+        }
+        
+        QTableWidget::item {
+            border-bottom: 1px solid #e1e4e8;
+			padding: 6px;
+        }
+        
+        QTableWidget::item:selected {
+            background-color: #0366d6;
+        }
+        
+        QHeaderView::section {
+            background-color: #f1f3f5;
+            color: #24292e;
+            font-weight: bold;
+            border: none;
+            border-bottom: 2px solid #e1e4e8;
+            padding: 3px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        
+        QTableWidget QScrollBar:vertical {
+            border: none;
+            background: #f1f3f5;
+            width: 10px;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:vertical {
+            background: #c0c0c0;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:vertical:hover {
+            background: #a0a0a0;
+        }
+        
+        QTableWidget QScrollBar:horizontal {
+            border: none;
+            background: #f1f3f5;
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:horizontal {
+            background: #c0c0c0;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:horizontal:hover {
+            background: #a0a0a0;
+        }</string>
             </property>
             <property name="sortingEnabled">
              <bool>true</bool>
@@ -197,37 +290,95 @@
             </property>
             <item>
              <widget class="QPushButton" name="delete_supplier_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
+                <weight>62</weight>
+                <bold>true</bold>
                </font>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+QPushButton:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}</string>
+              </property>
               <property name="text">
-               <string>Delete / Hapus</string>
+               <string>Delete</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="edit_supplier_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
+                <weight>62</weight>
+                <bold>true</bold>
                </font>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: #333;
+    background-color: #ffcc80; /* Softer yellow/orange */
+    border-color: #f0c070;
+}
+QPushButton:hover {
+    background-color: #f0c070;
+    border-color: #e0b060;
+}</string>
+              </property>
               <property name="text">
-               <string>Edit / Ubah</string>
+               <string>Edit</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="add_supplier_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
+                <weight>62</weight>
+                <bold>true</bold>
                </font>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}</string>
+              </property>
               <property name="text">
-               <string>Add / Tambah</string>
+               <string>Add</string>
               </property>
              </widget>
             </item>
@@ -243,6 +394,11 @@
              <widget class="QLabel" name="supplier_name_label">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Supplier Name : </string>
@@ -266,20 +422,7 @@
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QLineEdit{
-	border: 1px solid #d1d5db;      /* Light gray border */
-    border-radius: 6px;             /* Rounded corners */
-    outline: none;                  /* Remove default outline */
-    color: #333;                    /* Text color */
-    background-color: #fff;       /* Light gray background */
-    
-}
-
-QLineEdit:focus {
-    border: 1px solid #93c5fd;       /* Blue border on focus */
-    
-    background-color: #ffffff;       /* White background when focused */
-}</string>
+               <string notr="true"/>
               </property>
              </widget>
             </item>
@@ -287,6 +430,11 @@ QLineEdit:focus {
              <widget class="QLabel" name="supplier_address_label">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Supplier Address : </string>
@@ -310,20 +458,7 @@ QLineEdit:focus {
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QLineEdit{
-	border: 1px solid #d1d5db;      /* Light gray border */
-    border-radius: 6px;             /* Rounded corners */
-    outline: none;                  /* Remove default outline */
-    color: #333;                    /* Text color */
-    background-color: #fff;       /* Light gray background */
-    
-}
-
-QLineEdit:focus {
-    border: 1px solid #93c5fd;       /* Blue border on focus */
-    
-    background-color: #ffffff;       /* White background when focused */
-}</string>
+               <string notr="true"/>
               </property>
              </widget>
             </item>
@@ -331,6 +466,11 @@ QLineEdit:focus {
              <widget class="QLabel" name="supplier_city_label">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>City : </string>
@@ -354,20 +494,7 @@ QLineEdit:focus {
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QLineEdit{
-	border: 1px solid #d1d5db;      /* Light gray border */
-    border-radius: 6px;             /* Rounded corners */
-    outline: none;                  /* Remove default outline */
-    color: #333;                    /* Text color */
-    background-color: #fff;       /* Light gray background */
-    
-}
-
-QLineEdit:focus {
-    border: 1px solid #93c5fd;       /* Blue border on focus */
-    
-    background-color: #ffffff;       /* White background when focused */
-}</string>
+               <string notr="true"/>
               </property>
              </widget>
             </item>
@@ -375,6 +502,11 @@ QLineEdit:focus {
              <widget class="QLabel" name="supplier_phone_number_label">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Phone Number : </string>
@@ -398,20 +530,7 @@ QLineEdit:focus {
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QLineEdit{
-	border: 1px solid #d1d5db;      /* Light gray border */
-    border-radius: 6px;             /* Rounded corners */
-    outline: none;                  /* Remove default outline */
-    color: #333;                    /* Text color */
-    background-color: #fff;       /* Light gray background */
-    
-}
-
-QLineEdit:focus {
-    border: 1px solid #93c5fd;       /* Blue border on focus */
-    
-    background-color: #ffffff;       /* White background when focused */
-}</string>
+               <string notr="true"/>
               </property>
              </widget>
             </item>
@@ -420,18 +539,35 @@ QLineEdit:focus {
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Remarks : </string>
               </property>
              </widget>
             </item>
             <item row="6" column="0" colspan="2">
-             <widget class="QTextEdit" name="supplier_remarks_input"/>
+             <widget class="QTextEdit" name="supplier_remarks_input">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+             </widget>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="supplier_id_label">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
               </property>
               <property name="text">
                <string>Supplier Id : </string>
@@ -455,20 +591,7 @@ QLineEdit:focus {
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QLineEdit{
-	border: 1px solid #d1d5db;      /* Light gray border */
-    border-radius: 6px;             /* Rounded corners */
-    outline: none;                  /* Remove default outline */
-    color: #333;                    /* Text color */
-    background-color: #fff;       /* Light gray background */
-    
-}
-
-QLineEdit:focus {
-    border: 1px solid #93c5fd;       /* Blue border on focus */
-    
-    background-color: #ffffff;       /* White background when focused */
-}</string>
+               <string notr="true"/>
               </property>
              </widget>
             </item>
@@ -494,6 +617,35 @@ QLineEdit:focus {
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+                <weight>62</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: #333;
+    background-color: #ffcc80; /* Softer yellow/orange */
+    border-color: #f0c070;
+}
+QPushButton:hover {
+    background-color: #f0c070;
+    border-color: #e0b060;
+}
+QPushButton:disabled {
+    background-color: #ffe0b3;
+    border-color: #ffe0b3;
+    color: #8a7a5c;
+}</string>
+              </property>
               <property name="text">
                <string>Clear Data</string>
               </property>
@@ -503,6 +655,36 @@ QLineEdit:focus {
              <widget class="QPushButton" name="submit_supplier_button">
               <property name="enabled">
                <bool>false</bool>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+                <weight>62</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
               </property>
               <property name="text">
                <string>Submit</string>
@@ -515,6 +697,30 @@ QLineEdit:focus {
            <widget class="QPushButton" name="close_supplier_button">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <weight>62</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+QPushButton:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}</string>
             </property>
             <property name="text">
              <string>Close / Tutup</string>

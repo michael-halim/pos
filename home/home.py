@@ -75,15 +75,11 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.customers_dialog_button.clicked.connect(lambda: self.customers_dialog_window.show())
         self.ui.categories_dialog_button.clicked.connect(lambda: self.categories_dialog_show.show())
         self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
-        self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.show())
+        self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
         self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_window.show())
 
         self.ui.logout_button.clicked.connect(lambda: self.close())
         
-        # TODO: Edit Transaction
-        # TODO: Delete Transaction
-        # TODO: Permission for actions
-
 
     # Property getters for lazy initialization
     @property

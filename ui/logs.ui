@@ -13,6 +13,256 @@
   <property name="windowTitle">
    <string>Logs</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QLineEdit{
+	border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;       /* Light gray background */
+    
+}
+
+QLineEdit:focus {
+    border: 1px solid #93c5fd;       /* Blue border on focus */
+    background-color: #ffffff;       /* White background when focused */
+}
+
+QLineEdit:disabled {
+    border: 1px solid #e5e7eb;      /* Lighter border when disabled */
+    background-color: #f3f4f6;      /* Light gray background when disabled */
+    color: #9ca3af;                 /* Lighter text color when disabled */
+}
+
+/* QComboBox Styling - Improved with clearer state indicators */
+QComboBox {
+    border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    padding: 6px 12px 6px 10px;     /* Add some padding */
+    min-height: 20px;               /* Minimum height */
+    color: #333;                    /* Text color */
+    background-color: #fff;         /* White background */
+    selection-background-color: #93c5fd; /* Light blue selection */
+    font-size: 14px;                /* Consistent font size */
+    min-width: 6em;                 /* Minimum width */
+}
+
+QComboBox:hover:!disabled {
+    border-color: #93c5fd;          /* Light blue border on hover when enabled */
+    background-color: #f0f7ff;      /* Very light blue background on hover */
+}
+
+QComboBox:focus {
+    border: 2px solid #3b82f6;      /* Thicker, darker blue border on focus */
+    background-color: #ffffff;      /* Pure white background when focused */
+}
+
+QComboBox:disabled {
+    border: 1px solid #d9dce0;      /* Very light gray border when disabled */
+    background-color: #f3f4f6;      /* Light gray background when disabled */
+    color: #9ca3af;                 /* Lighter text color when disabled */
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border: none;                   /* Remove border for cleaner look */
+    margin-right: 5px;              /* Add some margin */
+}
+
+/* If you don't have an icon, use this instead: */
+QComboBox::down-arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #666;     /* Arrow color */
+    margin-right: 5px;
+}
+
+QComboBox::down-arrow:disabled {
+    border-top: 5px solid #b0b0b0;  /* Lighter arrow color when disabled */
+}
+
+QComboBox:disabled {
+    color: #9ca3af;                 /* Lighter text when disabled */
+    background-color: #f3f4f6;      /* Light gray background */
+    border-color: #e5e7eb;          /* Lighter border */
+}
+
+/* Add a visual indicator for disabled state */
+QComboBox:disabled {
+    color: #9ca3af;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding-right: 25px;            /* Make room for the lock icon */
+}
+
+/* If you don't have a lock icon, use a pattern instead */
+QComboBox:disabled {
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(200, 200, 200, 0.1) 5px,
+        rgba(200, 200, 200, 0.1) 10px
+    );
+}
+
+QComboBox QAbstractItemView {
+    border: 1px solid #d1d5db;
+    border-radius: 0px 0px 6px 6px;
+    background-color: white;
+    selection-background-color: #3b82f6;  /* Darker blue for better contrast */
+    selection-color: white;               /* White text on selection */
+    outline: none;
+    padding: 5px;
+}
+
+QComboBox QAbstractItemView::item {
+    min-height: 25px;               /* Taller items for better clickability */
+    padding: 5px;                   /* Padding inside items */
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #e5f0ff;      /* Light blue on hover */
+    color: #333;
+}
+
+/* QTextEdit Styling - Similar to QLineEdit */
+QTextEdit {
+    border: 1px solid #d1d5db;      /* Light gray border */
+    border-radius: 6px;             /* Rounded corners */
+    outline: none;                  /* Remove default outline */
+    color: #333;                    /* Text color */
+    background-color: #fff;         /* White background */
+    padding: 6px 10px;              /* Add some padding for better text display */
+    selection-background-color: #93c5fd; /* Light blue selection */
+}
+
+QTextEdit:focus {
+    border: 1px solid #93c5fd;      /* Blue border on focus */
+    background-color: #ffffff;      /* White background when focused */
+}
+
+QTextEdit:disabled {
+    border: 1px solid #e5e7eb;      /* Lighter border when disabled */
+    background-color: #f3f4f6;      /* Light gray background when disabled */
+    color: #9ca3af;                 /* Lighter text color when disabled */
+}
+
+
+/* QDateEdit Styling */
+QDateEdit {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-height: 20px;
+    color: #333;
+    background-color: #fff;
+    font-size: 14px;
+}
+
+QDateEdit:hover:!disabled {
+    border-color: #93c5fd;
+    background-color: #f0f7ff;
+}
+
+QDateEdit:focus {
+    border: 2px solid #3b82f6;
+    background-color: #ffffff;
+}
+
+QDateEdit:disabled {
+    color: #9ca3af;
+    background-color: #f3f4f6;
+    border: 1px dashed #c0c0c0;
+}
+
+QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border: none;
+    margin-right: 5px;
+}
+
+QDateEdit::down-arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #666;
+    margin-right: 5px;
+}
+
+QDateEdit::down-arrow:disabled {
+    border-top: 5px solid #b0b0b0;
+}
+
+/* Calendar popup styling */
+QCalendarWidget {
+    background-color: white;
+    border: 1px solid #d1d5db;
+}
+
+QCalendarWidget QToolButton {
+    color: #333;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QCalendarWidget QToolButton:hover {
+    background-color: #f0f7ff;
+    border: 1px solid #93c5fd;
+}
+
+QCalendarWidget QMenu {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    padding: 5px;
+}
+
+QCalendarWidget QSpinBox {
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 3px;
+    background-color: white;
+}
+
+QCalendarWidget QAbstractItemView:enabled {
+    background-color: white;
+    color: #333;
+    selection-background-color: #3b82f6;
+    selection-color: white;
+}
+
+QCalendarWidget QAbstractItemView:disabled {
+    color: #9ca3af;
+}
+
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: #f1f5f9;
+    border-bottom: 1px solid #d1d5db;
+    padding: 4px;
+}
+
+QPushButton {
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    line-height: 1.5;
+    border-radius: 3px;
+    margin: 0.25rem;
+	opacity: 0.55;
+
+}
+</string>
+  </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0">
     <widget class="QFrame" name="frame">
@@ -31,6 +281,12 @@
            <layout class="QFormLayout" name="formLayout">
             <item row="0" column="0">
              <widget class="QLabel" name="start_date_logs_label">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -43,6 +299,12 @@
             </item>
             <item row="0" column="1">
              <widget class="QDateEdit" name="start_date_logs_input">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -59,6 +321,12 @@
            <layout class="QFormLayout" name="formLayout_2">
             <item row="0" column="0">
              <widget class="QLabel" name="end_date_logs_label">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -71,6 +339,12 @@
             </item>
             <item row="0" column="1">
              <widget class="QDateEdit" name="end_date_logs_input">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
               <property name="font">
                <font>
                 <pointsize>12</pointsize>
@@ -87,7 +361,7 @@
            <widget class="QPushButton" name="find_logs_button">
             <property name="minimumSize">
              <size>
-              <width>0</width>
+              <width>100</width>
               <height>30</height>
              </size>
             </property>
@@ -95,6 +369,23 @@
              <font>
               <pointsize>12</pointsize>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
             </property>
             <property name="text">
              <string>Find</string>
@@ -120,6 +411,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QLabel" name="filter_logs_label">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>12</pointsize>
@@ -132,6 +429,12 @@
           </item>
           <item>
            <widget class="QLineEdit" name="filter_logs_input">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>12</pointsize>
@@ -143,6 +446,75 @@
         </item>
         <item>
          <widget class="QTableWidget" name="logs_table">
+          <property name="styleSheet">
+           <string notr="true">QTableWidget {
+            background-color: #ffffff;
+            alternate-background-color: #f5f8fa;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            gridline-color: #e1e4e8;
+            selection-background-color: #0366d6;
+            selection-color: #ffffff;
+        }
+        
+        QTableWidget::item {
+            border-bottom: 1px solid #e1e4e8;
+			padding: 6px;
+        }
+        
+        QTableWidget::item:selected {
+            background-color: #0366d6;
+			border: none; /* Remove any border on selected items */
+        }
+
+        QTableWidget::item:focus {
+            border: none; /* Remove the focus border */
+            outline: none; /* Remove the focus outline */
+        }
+
+        QHeaderView::section {
+            background-color: #f1f3f5;
+            color: #24292e;
+            font-weight: bold;
+            border: none;
+            border-bottom: 2px solid #e1e4e8;
+            padding: 3px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        
+        QTableWidget QScrollBar:vertical {
+            border: none;
+            background: #f1f3f5;
+            width: 10px;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:vertical {
+            background: #c0c0c0;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:vertical:hover {
+            background: #a0a0a0;
+        }
+        
+        QTableWidget QScrollBar:horizontal {
+            border: none;
+            background: #f1f3f5;
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:horizontal {
+            background: #c0c0c0;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:horizontal:hover {
+            background: #a0a0a0;
+        }</string>
+          </property>
           <property name="sortingEnabled">
            <bool>true</bool>
           </property>

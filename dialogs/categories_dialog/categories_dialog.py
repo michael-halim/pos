@@ -9,7 +9,7 @@ from generals.permission_manager import PermissionManager
 from generals.message_box import POSMessageBox
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
-    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    NO_EDIT_TRIGGERS, RESIZE_MODE_INTERACTIVE,
     PERM_R_CATEGORIES
 ) 
 from generals.messages import ERR_PERM_R_CATEGORIES,PERM_DENIED
@@ -49,8 +49,8 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
         self.categories_dialog_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties
-        self.categories_dialog_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        self.categories_dialog_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.categories_dialog_table.horizontalHeader().setSectionResizeMode(RESIZE_MODE_INTERACTIVE)
+        self.categories_dialog_table.verticalHeader().setSectionResizeMode(RESIZE_MODE_INTERACTIVE)
 
         self.show_categories_data()
 
