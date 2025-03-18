@@ -48,6 +48,8 @@ class PurchasingListWindow(QtWidgets.QWidget):
         self.ui.find_purchasing_list_button.clicked.connect(self.show_purchasing_data)
         self.ui.edit_purchasing_button.clicked.connect(self.edit_purchasing)
         self.ui.delete_purchasing_button.clicked.connect(self.delete_purchasing)
+        self.ui.create_purchasing_button.clicked.connect(lambda: self.purchasing_window.showMaximized())
+        self.ui.close_purchasing_list_button.clicked.connect(lambda: self.close())
 
         # Init Tables
         self.purchasing_table = self.ui.purchasing_table
@@ -168,7 +170,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
     def set_purchasing_table_data(self, data: list[PurchasingListModel]):
         # Clear the table
         self.purchasing_table.setRowCount(0)
-
+        total_purchasing = 0
         for purchasing in data:
             current_row = self.purchasing_table.rowCount()
             self.purchasing_table.insertRow(current_row)
@@ -184,10 +186,14 @@ class PurchasingListWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(purchasing.total_amount))),
                 QtWidgets.QTableWidgetItem(purchasing.remarks),
             ]
-            
+
+            total_purchasing += purchasing.total_amount
+
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.purchasing_table.setItem(current_row, col, item)
+
+        self.ui.total_purchasing_input.setText(add_prefix(format_number(total_purchasing)))
 
         self.purchasing_table.setSortingEnabled(True)
 

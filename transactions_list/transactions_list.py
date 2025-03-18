@@ -43,6 +43,8 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Connect Filter Transactions
         self.ui.filter_transactions_input.textChanged.connect(self.show_transactions_data)
         self.ui.filter_detail_transactions_input.textChanged.connect(self.filter_detail_transactions)
+        self.ui.create_transactions_button.clicked.connect(lambda: self.transactions_window.showMaximized())
+        self.ui.close_transactions_list_button.clicked.connect(lambda: self.close())
 
         # Connect Buttons
         self.ui.find_transactions_list_button.clicked.connect(self.show_transactions_data)
@@ -223,7 +225,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
     # ==============
     def set_transactions_table_data(self, data: list[TransactionListModel]):
         self.transactions_table.setRowCount(0)
-
+        total_transactions = 0
         for transaction in data:
             current_row = self.transactions_table.rowCount()
             self.transactions_table.insertRow(current_row)
@@ -239,11 +241,15 @@ class TransactionsListWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(transaction.payment_method),
                 QtWidgets.QTableWidgetItem(transaction.payment_remarks)
             ]
-            
+
+            total_transactions += transaction.payment_rp
+
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.transactions_table.setItem(current_row, col, item)
 
+        self.ui.total_transactions_input.setText(add_prefix(format_number(total_transactions)))
+        
         self.transactions_table.setSortingEnabled(True)
 
 

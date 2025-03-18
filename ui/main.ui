@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>POS</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/point-of-sale.png</normaloff>../assets/point-of-sale.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */
@@ -602,7 +606,7 @@ QPushButton:hover {
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>7</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="master_data_page">
        <layout class="QHBoxLayout" name="horizontalLayout_3">

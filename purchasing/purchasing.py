@@ -287,6 +287,12 @@ class PurchasingWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title=ERR, message="No purchasing to submit")
             return
 
+        invoice_number: str = self.ui.invoice_number_purchasing_input.text().strip()
+        if invoice_number == '':
+            POSMessageBox.error(self, title=ERR, message="Invoice number is required")
+            self.ui.invoice_number_purchasing_input.setFocus()
+            return
+
         # Create purchasing id
         purchasing_id: str = self.purchasing_service.create_purchasing_id()
         for detail in detail_purchasing_data:
@@ -297,7 +303,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         total_discount: int = self.calculate_total_discount()
 
         # Get Purchasing Data
-        invoice_number: str = self.ui.invoice_number_purchasing_input.text().strip()
         purhcasing_remarks: str = self.ui.remarks_purchasing_input.toPlainText().strip()
         supplier_id: str = self.ui.supplier_in_purchasing_input.text().strip()
 

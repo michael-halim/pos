@@ -34,6 +34,7 @@ class LogsWindow(QtWidgets.QWidget):
 
         # Connect Buttons
         self.ui.find_logs_button.clicked.connect(self.show_logs_data)
+        self.ui.close_logs_button.clicked.connect(lambda: self.close())
 
         # Init Tables
         self.logs_table = self.ui.logs_table
@@ -68,7 +69,7 @@ class LogsWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_R_LOGS):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_LOGS)
             self.close()
-            return  
+            return
         
         # Refresh the data
         self.show_logs_data()

@@ -14,10 +14,10 @@ class PermissionManager:
         return cls._instance
 
     
-    def set_permissions(self, permissions: List[str]):
+    def set_permissions(self, permissions: set[str]):
         """Set user permissions"""
-        self._permissions = set(permissions)
-    
+        self._permissions = permissions
+        
 
     def set_username(self, username: str):
         """Set username"""

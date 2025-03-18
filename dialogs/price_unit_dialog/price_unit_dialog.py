@@ -28,7 +28,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         self.ui.create_new_price_unit_button.clicked.connect(self.create_new_price_unit_form)
         self.ui.clear_data_price_unit_button.clicked.connect(self.clear_price_unit_form)
         self.ui.submit_price_unit_button.clicked.connect(self.submit_price_unit)
-
+        self.ui.close_price_unit_button.clicked.connect(lambda: self.close())
 
         # Set selection behavior to select entire rows
         self.price_unit_table.setSelectionBehavior(SELECT_ROWS)
@@ -243,7 +243,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
     # Getters
     # ===============
     def get_price_unit_form_data(self) -> PriceUnitTableItemModel | None:
-        unit = self.ui.unit_price_unit_input.text().strip()
+        unit = self.ui.unit_price_unit_input.text().strip().upper()
         barcode = self.ui.barcode_price_unit_input.text().strip()
         unit_value = remove_non_digit(self.ui.unit_value_price_unit_input.text().strip())
         price = remove_non_digit(self.ui.price_price_unit_input.text())
@@ -286,7 +286,6 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         self.ui.unit_value_price_unit_input.clear()
         self.ui.price_price_unit_input.clear()
        
-
         # Reset button text and submit button
         self.ui.submit_price_unit_button.setText('Submit')
         self.ui.submit_price_unit_button.disconnect()

@@ -84,11 +84,10 @@ class CustomersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
-            sql = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value) 
-                    VALUES (?, ?, ?, ?, ?)'''
+            sql = '''INSERT INTO customers (customer_name, customer_phone) 
+                    VALUES (?, ?)'''
             
-            self.cursor.execute(sql, (customer_data.customer_name, customer_data.customer_phone, customer_data.customer_points, 
-                                      customer_data.number_of_transactions, customer_data.transaction_value))
+            self.cursor.execute(sql, (customer_data.customer_name, customer_data.customer_phone))
             
             # Commit transaction
             self.db.commit()

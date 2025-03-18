@@ -190,6 +190,10 @@ class CustomersWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title=ERR, message='Customer name and phone are required')
             return
         
+        if not customer_data.customer_phone.isdigit():
+            POSMessageBox.error(self, title=ERR, message='Phone number must be a number')
+            return
+        
         result = self.customer_service.create_customer(customer_data)
 
         if result.success:
@@ -250,22 +254,13 @@ class CustomersWindow(QtWidgets.QWidget):
         self.ui.customer_id_input.setText(data.customer_id)
         self.ui.customer_name_input.setText(data.customer_name)
         self.ui.customer_phone_input.setText(data.customer_phone)
-        self.ui.customer_points_input.setText(format_number(data.customer_points))
-        self.ui.customer_number_of_transactions_input.setText(format_number(data.number_of_transactions))
-        self.ui.customer_value_transactions_input.setText(add_prefix(format_number(data.transaction_value)))
 
 
     def set_enabled_customer_form(self, is_enabled: bool):
         self.ui.customer_name_label.setEnabled(is_enabled)
         self.ui.customer_phone_label.setEnabled(is_enabled)
-        self.ui.customer_points_label.setEnabled(is_enabled)
-        self.ui.customer_number_of_transactions_label.setEnabled(is_enabled)
-        self.ui.customer_value_transactions_label.setEnabled(is_enabled)
         self.ui.customer_name_input.setEnabled(is_enabled)
         self.ui.customer_phone_input.setEnabled(is_enabled)
-        self.ui.customer_points_input.setEnabled(is_enabled)
-        self.ui.customer_number_of_transactions_input.setEnabled(is_enabled)
-        self.ui.customer_value_transactions_input.setEnabled(is_enabled)
         self.ui.clear_customer_button.setEnabled(is_enabled)
         self.ui.submit_customer_button.setEnabled(is_enabled)
 
@@ -274,17 +269,14 @@ class CustomersWindow(QtWidgets.QWidget):
     # ===============
     def get_customer_form_data(self) -> CustomersModel:
         customer_id = self.ui.customer_id_input.text().strip() if self.ui.customer_id_input.text().strip() else ''
-        customer_points = int(remove_non_digit(self.ui.customer_points_input.text().strip())) if self.ui.customer_points_input.text().strip() else 0
-        number_of_transactions = int(remove_non_digit(self.ui.customer_number_of_transactions_input.text().strip())) if self.ui.customer_number_of_transactions_input.text().strip() else 0
-        transaction_value = int(remove_non_digit(self.ui.customer_value_transactions_input.text().strip())) if self.ui.customer_value_transactions_input.text().strip() else 0
 
         return CustomersModel(
             customer_id=customer_id,
-            customer_name=self.ui.customer_name_input.text().strip(),
+            customer_name=self.ui.customer_name_input.text().strip().upper(),
             customer_phone=self.ui.customer_phone_input.text().strip(),
-            customer_points=customer_points,
-            number_of_transactions=number_of_transactions,
-            transaction_value=transaction_value,
+            customer_points=0,
+            number_of_transactions=0,
+            transaction_value=0,
         )
 
     
@@ -313,9 +305,6 @@ class CustomersWindow(QtWidgets.QWidget):
         self.ui.customer_id_input.clear()
         self.ui.customer_name_input.clear()
         self.ui.customer_phone_input.clear()
-        self.ui.customer_points_input.clear()
-        self.ui.customer_number_of_transactions_input.clear()
-        self.ui.customer_value_transactions_input.clear()
 
         self.ui.submit_customer_button.setText('Submit')
         self.ui.submit_customer_button.clicked.disconnect()

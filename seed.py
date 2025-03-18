@@ -170,9 +170,9 @@ class SeedData:
 
         sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value) 
                         VALUES 
-                        ('Customer One', '081234567890', 0, 0, 0),
-                        ('Customer Two', '081234567891', 0, 0, 0),
-                        ('Customer Three', '081234567892', 0, 0, 0);'''
+                        ('CUSTOMER ONE', '081234567890', 0, 0, 0),
+                        ('CUSTOMER TWO', '081234567891', 0, 0, 0),
+                        ('CUSTOMER THREE', '081234567892', 0, 0, 0);'''
         
         self.cursor.execute(sql_insert)
 
@@ -182,7 +182,7 @@ class SeedData:
             purchasing_id VARCHAR(20) NOT NULL,
             supplier_id INT NOT NULL,
             invoice_date DATETIME NOT NULL,
-            invoice_number VARCHAR(20) NOT NULL,
+            invoice_number VARCHAR(20) NOT NULL UNIQUE,
             invoice_expired_date DATETIME NOT NULL,
             total_amount INT(10) NOT NULL,
             total_discount INT(10) NOT NULL,

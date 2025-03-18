@@ -40,7 +40,8 @@ class StockCardListWindow(QtWidgets.QWidget):
 
         # Connect Find Stock Card Button
         self.ui.find_stock_card_button.clicked.connect(self.show_stock_card_data)
-
+        self.ui.close_stock_card_button.clicked.connect(lambda: self.close())
+        
         # Connect filter products input
         self.ui.filter_products_stock_card_input.textChanged.connect(self.show_products_data)
 

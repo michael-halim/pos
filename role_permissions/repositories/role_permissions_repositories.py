@@ -3,14 +3,21 @@ from connect_db import DatabaseConnection
 from role_permissions.models.role_permissions_models import RolesModel, PermissionsModel
 
 from response.response_message import ResponseMessage
+from generals.constants import PERM_U_PERMISSIONS,  PERM_R_PERMISSIONS, PERM_C_PERMISSIONS, PERM_D_PERMISSIONS
+from generals.messages import ERR_PERM_U_PERMISSIONS, ERR_PERM_D_PERMISSIONS, ERR_PERM_R_PERMISSIONS, ERR_PERM_C_PERMISSIONS
+from generals.permission_manager import PermissionManager
 
 class RolePermissionsRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_roles(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_PERMISSIONS)
+        
         try:
             roles_result = []
             if search_text:
@@ -39,6 +46,9 @@ class RolePermissionsRepository:
     
 
     def get_permissions(self):
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_PERMISSIONS)
+        
         try:
             sql = '''SELECT permission_id, permission_name FROM permissions'''
             permissions_result = self.cursor.execute(sql)
@@ -58,6 +68,9 @@ class RolePermissionsRepository:
 
 
     def get_permissions_by_role_id(self, role_id: int):
+        if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_PERMISSIONS)
+        
         try: 
             sql = '''SELECT rp.permission_id
                     FROM role_permissions rp
@@ -79,6 +92,9 @@ class RolePermissionsRepository:
         
 
     def submit_role_permissions(self, roles_form_data: RolesModel, selected_permissions: set[str]):
+        if not self.permission_manager.has_permission(PERM_C_PERMISSIONS):
+            return ResponseMessage.fail(message=ERR_PERM_C_PERMISSIONS)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -94,7 +110,10 @@ class RolePermissionsRepository:
             for permission_id in selected_permissions:
                 sql = '''INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)'''
                 self.cursor.execute(sql, (role_id, permission_id))
-                
+            
+            # Set permissions
+            self.permission_manager.set_permissions(selected_permissions)
+
             # If everything successful, commit the transaction
             self.db.commit()
             
@@ -107,6 +126,9 @@ class RolePermissionsRepository:
 
 
     def update_role_permissions(self, roles_form_data: RolesModel, added_permissions: set[str], deleted_permissions: set[str]):
+        if not self.permission_manager.has_permission(PERM_U_PERMISSIONS):
+            return ResponseMessage.fail(message=ERR_PERM_U_PERMISSIONS)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -127,6 +149,14 @@ class RolePermissionsRepository:
                 sql = '''INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)'''
                 self.cursor.execute(sql, (role_id, permission_id))      
 
+
+            # Set permissions in permission manager
+            sql = 'SELECT rp.permission_id FROM role_permissions rp WHERE rp.role_id = ?'
+
+            permissions_result = self.cursor.execute(sql, (role_id,))
+
+            self.permission_manager.set_permissions(set(r[0] for r in permissions_result))
+            
             # If everything successful, commit the transaction  
             self.db.commit()
 
@@ -139,6 +169,9 @@ class RolePermissionsRepository:
         
         
     def delete_role_permissions_by_role_id(self, role_id: int):
+        if not self.permission_manager.has_permission(PERM_D_PERMISSIONS):
+            return ResponseMessage.fail(message=ERR_PERM_D_PERMISSIONS)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -150,6 +183,13 @@ class RolePermissionsRepository:
             # Delete role
             sql = '''DELETE FROM roles WHERE role_id = ?'''
             self.cursor.execute(sql, (role_id,))
+
+            # Set permissions in permission manager
+            sql = 'SELECT rp.permission_id FROM role_permissions rp WHERE rp.role_id = ?'
+
+            permissions_result = self.cursor.execute(sql, (role_id,))
+
+            self.permission_manager.set_permissions(set(r[0] for r in permissions_result))
 
             # If everything successful, commit the transaction  
             self.db.commit()
