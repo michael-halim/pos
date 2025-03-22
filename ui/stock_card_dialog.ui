@@ -441,7 +441,7 @@ QPushButton:disabled {
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>../assets/research.png</normaloff>../assets/research.png</iconset>
+              <normaloff>../assets/magnifying-glass.png</normaloff>../assets/magnifying-glass.png</iconset>
             </property>
             <property name="iconSize">
              <size>

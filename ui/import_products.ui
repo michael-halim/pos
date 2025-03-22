@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Import Products</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/import-export.png</normaloff>../assets/import-export.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */
@@ -317,7 +321,7 @@ QPushButton {
            <widget class="QPushButton" name="select_file_import_products_button">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>120</width>
               <height>30</height>
              </size>
             </property>
@@ -345,6 +349,16 @@ QPushButton:disabled {
             </property>
             <property name="text">
              <string>Select File</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/open-folder.png</normaloff>../assets/open-folder.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -380,6 +394,16 @@ QPushButton:disabled {
             </property>
             <property name="text">
              <string>Submit</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/submit.png</normaloff>../assets/submit.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -468,6 +492,16 @@ QPushButton:hover {
             </property>
             <property name="text">
              <string>Close</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/close.png</normaloff>../assets/close.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>14</width>
+              <height>14</height>
+             </size>
             </property>
            </widget>
           </item>

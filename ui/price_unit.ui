@@ -380,6 +380,75 @@ QPushButton {
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
              <widget class="QTableWidget" name="price_unit_table">
+              <property name="styleSheet">
+               <string notr="true">QTableWidget {
+            background-color: #ffffff;
+            alternate-background-color: #f5f8fa;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            gridline-color: #e1e4e8;
+            selection-background-color: #0366d6;
+            selection-color: #ffffff;
+        }
+        
+        QTableWidget::item {
+            border-bottom: 1px solid #e1e4e8;
+			padding: 6px;
+        }
+        
+        QTableWidget::item:selected {
+            background-color: #0366d6;
+			border: none; /* Remove any border on selected items */
+        }
+
+        QTableWidget::item:focus {
+            border: none; /* Remove the focus border */
+            outline: none; /* Remove the focus outline */
+        }
+
+        QHeaderView::section {
+            background-color: #f1f3f5;
+            color: #24292e;
+            font-weight: bold;
+            border: none;
+            border-bottom: 2px solid #e1e4e8;
+            padding: 3px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        
+        QTableWidget QScrollBar:vertical {
+            border: none;
+            background: #f1f3f5;
+            width: 10px;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:vertical {
+            background: #c0c0c0;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:vertical:hover {
+            background: #a0a0a0;
+        }
+        
+        QTableWidget QScrollBar:horizontal {
+            border: none;
+            background: #f1f3f5;
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:horizontal {
+            background: #c0c0c0;
+            border-radius: 5px;
+        }
+        
+        QTableWidget QScrollBar::handle:horizontal:hover {
+            background: #a0a0a0;
+        }</string>
+              </property>
               <column>
                <property name="text">
                 <string>Unit</string>
@@ -471,20 +540,17 @@ QPushButton:hover {
                 <property name="text">
                  <string>Delete</string>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/bin.png</normaloff>../assets/bin.png</iconset>
                 </property>
-                <property name="sizeHint" stdset="0">
+                <property name="iconSize">
                  <size>
-                  <width>40</width>
-                  <height>20</height>
+                  <width>18</width>
+                  <height>18</height>
                  </size>
                 </property>
-               </spacer>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="edit_price_unit_button">
@@ -500,23 +566,41 @@ QPushButton:hover {
                  </font>
                 </property>
                 <property name="styleSheet">
-                 <string notr="true">QPushButton{
-    color: #333;
-    background-color: #ffcc80; /* Softer yellow/orange */
-    border-color: #f0c070;
+                 <string notr="true">QPushButton {
+    color: white;
+    background-color: #fcbe11;      /* Bright saffron gold - main color */
+    border: 1px solid #e3ab0f;      /* Slightly darker border */
+
 }
+
 QPushButton:hover {
-    background-color: #f0c070;
-    border-color: #e0b060;
+    background-color: #e3ab0f;      /* 10% darker than main color */
+    border-color: #ca980e;          /* 20% darker than main color */
 }
+
+QPushButton:pressed {
+    background-color: #ca980e;      /* 20% darker than main color */
+    border-color: #b1850c;          /* 30% darker than main color */
+}
+
 QPushButton:disabled {
-    background-color: #ffe0b3;
-    border-color: #ffe0b3;
-    color: #8a7a5c;
+    background-color: #fdcf55;      /* 20% lighter than main color */
+    border-color: #fdcf55;          /* Same as background for cleaner disabled look */
+    color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
 }</string>
                 </property>
                 <property name="text">
                  <string>Edit</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/edit.png</normaloff>../assets/edit.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
                 </property>
                </widget>
               </item>
@@ -552,6 +636,16 @@ QPushButton:disabled {
                 </property>
                 <property name="text">
                  <string>Create New</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/plus.png</normaloff>../assets/plus.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
                 </property>
                </widget>
               </item>
@@ -806,6 +900,16 @@ QPushButton:disabled {
               <property name="text">
                <string>Clear Data</string>
               </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../assets/clear.png</normaloff>../assets/clear.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>18</width>
+                <height>18</height>
+               </size>
+              </property>
              </widget>
             </item>
             <item>
@@ -844,6 +948,16 @@ QPushButton:disabled {
               <property name="text">
                <string>Submit</string>
               </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../assets/submit.png</normaloff>../assets/submit.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>18</width>
+                <height>18</height>
+               </size>
+              </property>
              </widget>
             </item>
            </layout>
@@ -874,6 +988,16 @@ QPushButton:hover {
             </property>
             <property name="text">
              <string>Close</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/close.png</normaloff>../assets/close.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>14</width>
+              <height>14</height>
+             </size>
             </property>
            </widget>
           </item>

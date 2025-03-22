@@ -385,6 +385,16 @@ QPushButton:disabled {
                 <property name="text">
                  <string>Find</string>
                 </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/magnifying-glass.png</normaloff>../assets/magnifying-glass.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
+                </property>
                </widget>
               </item>
              </layout>
@@ -558,6 +568,16 @@ QPushButton:disabled {
                 </property>
                 <property name="text">
                  <string>Find</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/magnifying-glass.png</normaloff>../assets/magnifying-glass.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
                 </property>
                </widget>
               </item>
@@ -957,6 +977,16 @@ QPushButton:disabled {
                 <property name="text">
                  <string>Find</string>
                 </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/magnifying-glass.png</normaloff>../assets/magnifying-glass.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
+                </property>
                </widget>
               </item>
               <item>
@@ -1098,6 +1128,16 @@ QPushButton:disabled {
                 <property name="text">
                  <string>Price / Unit</string>
                 </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/prices.png</normaloff>../assets/prices.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
+                </property>
                </widget>
               </item>
              </layout>
@@ -1130,6 +1170,16 @@ QPushButton:hover {
                 </property>
                 <property name="text">
                  <string>Delete</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/bin.png</normaloff>../assets/bin.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
                 </property>
                </widget>
               </item>
@@ -1179,13 +1229,23 @@ QPushButton:disabled {
                 <property name="text">
                  <string>Submit</string>
                 </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/submit.png</normaloff>../assets/submit.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QPushButton" name="create_new_master_stock_button">
                 <property name="minimumSize">
                  <size>
-                  <width>100</width>
+                  <width>120</width>
                   <height>30</height>
                  </size>
                 </property>
@@ -1213,6 +1273,16 @@ QPushButton:disabled {
                 </property>
                 <property name="text">
                  <string>Create New</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/plus.png</normaloff>../assets/plus.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>18</width>
+                  <height>18</height>
+                 </size>
                 </property>
                </widget>
               </item>
@@ -1242,6 +1312,16 @@ QPushButton:hover {
                 </property>
                 <property name="text">
                  <string>Close</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../assets/close.png</normaloff>../assets/close.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>14</width>
+                  <height>14</height>
+                 </size>
                 </property>
                </widget>
               </item>

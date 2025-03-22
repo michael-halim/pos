@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../assets/verification.png</normaloff>../assets/verification.png</iconset>
+    <normaloff>../assets/secure-access.png</normaloff>../assets/secure-access.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{

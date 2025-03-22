@@ -598,6 +598,16 @@ QPushButton:hover {
          <property name="text">
           <string>Logout</string>
          </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>../assets/logout.png</normaloff>../assets/logout.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>18</width>
+           <height>18</height>
+          </size>
+         </property>
         </widget>
        </item>
       </layout>

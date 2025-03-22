@@ -190,7 +190,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
             ]
             
             for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=16))
+                item.setFont(POSFonts.get_font(size=12))
                 self.price_unit_table.setItem(current_row, col, item)
 
 

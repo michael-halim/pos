@@ -302,6 +302,7 @@ QPushButton {
               </property>
               <property name="font">
                <font>
+                <pointsize>12</pointsize>
                 <weight>62</weight>
                 <bold>true</bold>
                </font>
@@ -342,19 +343,33 @@ QPushButton:hover {
               </property>
               <property name="font">
                <font>
+                <pointsize>12</pointsize>
                 <weight>62</weight>
                 <bold>true</bold>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QPushButton{
-    color: #333;
-    background-color: #ffcc80; /* Softer yellow/orange */
-    border-color: #f0c070;
+               <string notr="true">QPushButton {
+    color: white;
+    background-color: #fcbe11;      /* Bright saffron gold - main color */
+    border: 1px solid #e3ab0f;      /* Slightly darker border */
+
 }
+
 QPushButton:hover {
-    background-color: #f0c070;
-    border-color: #e0b060;
+    background-color: #e3ab0f;      /* 10% darker than main color */
+    border-color: #ca980e;          /* 20% darker than main color */
+}
+
+QPushButton:pressed {
+    background-color: #ca980e;      /* 20% darker than main color */
+    border-color: #b1850c;          /* 30% darker than main color */
+}
+
+QPushButton:disabled {
+    background-color: #fdcf55;      /* 20% lighter than main color */
+    border-color: #fdcf55;          /* Same as background for cleaner disabled look */
+    color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
 }</string>
               </property>
               <property name="text">
@@ -382,6 +397,7 @@ QPushButton:hover {
               </property>
               <property name="font">
                <font>
+                <pointsize>12</pointsize>
                 <weight>62</weight>
                 <bold>true</bold>
                </font>
@@ -650,24 +666,33 @@ QPushButton:hover {
               </property>
               <property name="font">
                <font>
+                <pointsize>12</pointsize>
                 <weight>62</weight>
                 <bold>true</bold>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">QPushButton{
-    color: #333;
-    background-color: #ffcc80; /* Softer yellow/orange */
-    border-color: #f0c070;
+               <string notr="true">QPushButton {
+    color: white;
+    background-color: #fcbe11;      /* Bright saffron gold - main color */
+    border: 1px solid #e3ab0f;      /* Slightly darker border */
+
 }
+
 QPushButton:hover {
-    background-color: #f0c070;
-    border-color: #e0b060;
+    background-color: #e3ab0f;      /* 10% darker than main color */
+    border-color: #ca980e;          /* 20% darker than main color */
 }
+
+QPushButton:pressed {
+    background-color: #ca980e;      /* 20% darker than main color */
+    border-color: #b1850c;          /* 30% darker than main color */
+}
+
 QPushButton:disabled {
-    background-color: #ffe0b3;
-    border-color: #ffe0b3;
-    color: #8a7a5c;
+    background-color: #fdcf55;      /* 20% lighter than main color */
+    border-color: #fdcf55;          /* Same as background for cleaner disabled look */
+    color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
 }</string>
               </property>
               <property name="text">
@@ -698,6 +723,7 @@ QPushButton:disabled {
               </property>
               <property name="font">
                <font>
+                <pointsize>12</pointsize>
                 <weight>62</weight>
                 <bold>true</bold>
                </font>
@@ -749,6 +775,7 @@ QPushButton:disabled {
             </property>
             <property name="font">
              <font>
+              <pointsize>12</pointsize>
               <weight>62</weight>
               <bold>true</bold>
              </font>

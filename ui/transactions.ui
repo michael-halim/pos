@@ -531,7 +531,7 @@ QPushButton:disabled {
                   </property>
                   <property name="icon">
                    <iconset>
-                    <normaloff>../assets/research.png</normaloff>../assets/research.png</iconset>
+                    <normaloff>../assets/magnifying-glass.png</normaloff>../assets/magnifying-glass.png</iconset>
                   </property>
                   <property name="iconSize">
                    <size>
@@ -678,7 +678,7 @@ QPushButton:disabled {
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>../assets/time-management.png</normaloff>../assets/time-management.png</iconset>
+                  <normaloff>../assets/file.png</normaloff>../assets/file.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -723,7 +723,7 @@ QPushButton:disabled {
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>../assets/folder.png</normaloff>../assets/folder.png</iconset>
+                  <normaloff>../assets/open-folder.png</normaloff>../assets/open-folder.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -1228,7 +1228,7 @@ QPushButton:disabled {
                     </property>
                     <property name="icon">
                      <iconset>
-                      <normaloff>../assets/research.png</normaloff>../assets/research.png</iconset>
+                      <normaloff>../assets/magnifying-glass.png</normaloff>../assets/magnifying-glass.png</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -1773,7 +1773,7 @@ QPushButton:disabled {
                     </property>
                     <property name="icon">
                      <iconset>
-                      <normaloff>../assets/plus (2).png</normaloff>../assets/plus (2).png</iconset>
+                      <normaloff>../assets/plus.png</normaloff>../assets/plus.png</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -1841,28 +1841,32 @@ QPushButton:hover {
                     <property name="font">
                      <font>
                       <pointsize>12</pointsize>
+                      <weight>50</weight>
+                      <bold>false</bold>
                      </font>
                     </property>
                     <property name="styleSheet">
                      <string notr="true">QPushButton {
-    color: white;                   /* White text for contrast */
-    background-color: #ea580c;      /* Medium-dark pastel orange with good contrast */
+    color: white;
+    background-color: #fcbe11;      /* Bright saffron gold - main color */
+    border: 1px solid #e3ab0f;      /* Slightly darker border */
+
 }
 
 QPushButton:hover {
-    background-color: #d35400;      /* Darker pastel orange on hover */
-    border-color: #c44d00;          /* Darker border on hover */
+    background-color: #e3ab0f;      /* 10% darker than main color */
+    border-color: #ca980e;          /* 20% darker than main color */
 }
 
 QPushButton:pressed {
-    background-color: #c44d00;      /* Even darker when pressed */
-    border-color: #b34600;          /* Darker border when pressed */
+    background-color: #ca980e;      /* 20% darker than main color */
+    border-color: #b1850c;          /* 30% darker than main color */
 }
 
 QPushButton:disabled {
-    background-color: #f0b27a;      /* Lighter pastel orange when disabled */
-    border-color: #f0b27a;          /* Same color border for disabled */
-    color: rgba(255, 255, 255, 0.7); /* Semi-transparent white text */
+    background-color: #fdcf55;      /* 20% lighter than main color */
+    border-color: #fdcf55;          /* Same as background for cleaner disabled look */
+    color: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
 }</string>
                     </property>
                     <property name="text">
@@ -1891,6 +1895,8 @@ QPushButton:disabled {
                     <property name="font">
                      <font>
                       <pointsize>12</pointsize>
+                      <weight>50</weight>
+                      <bold>false</bold>
                      </font>
                     </property>
                     <property name="styleSheet">

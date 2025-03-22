@@ -468,7 +468,7 @@ QPushButton {
            <widget class="QPushButton" name="close_payment_transaction_dialog_button">
             <property name="minimumSize">
              <size>
-              <width>150</width>
+              <width>160</width>
               <height>60</height>
              </size>
             </property>
@@ -507,7 +507,7 @@ QPushButton:hover {
            <widget class="QPushButton" name="submit_payment_transcations_button">
             <property name="minimumSize">
              <size>
-              <width>150</width>
+              <width>180</width>
               <height>60</height>
              </size>
             </property>

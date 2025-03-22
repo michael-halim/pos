@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Customers Dialog</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/rating.png</normaloff>../assets/rating.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */
@@ -574,6 +578,16 @@ QPushButton:hover {
             <property name="text">
              <string>Close</string>
             </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/close.png</normaloff>../assets/close.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>14</width>
+              <height>14</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -611,6 +625,16 @@ QPushButton:disabled {
             </property>
             <property name="text">
              <string>Add</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/submit.png</normaloff>../assets/submit.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
             </property>
            </widget>
           </item>
