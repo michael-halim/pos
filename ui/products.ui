@@ -298,7 +298,7 @@ QLineEdit:focus {
              <widget class="QPushButton" name="add_products_button">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>120</width>
                 <height>30</height>
                </size>
               </property>
@@ -330,6 +330,12 @@ QPushButton:disabled {
               <property name="icon">
                <iconset>
                 <normaloff>../assets/plus.png</normaloff>../assets/plus.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>14</width>
+                <height>14</height>
+               </size>
               </property>
              </widget>
             </item>
@@ -372,8 +378,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -417,8 +423,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -469,8 +475,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -487,6 +493,9 @@ QPushButton:disabled {
                <font>
                 <pointsize>12</pointsize>
                </font>
+              </property>
+              <property name="contextMenuPolicy">
+               <enum>Qt::NoContextMenu</enum>
               </property>
               <property name="styleSheet">
                <string notr="true">QPushButton {
@@ -508,8 +517,8 @@ QPushButton:hover {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -557,6 +566,12 @@ QPushButton:hover {
               <property name="icon">
                <iconset>
                 <normaloff>../assets/close.png</normaloff>../assets/close.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>12</width>
+                <height>12</height>
+               </size>
               </property>
              </widget>
             </item>

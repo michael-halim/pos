@@ -385,9 +385,9 @@ class SeedData:
         
         sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
                     VALUES 
-                    ('SKU001', 'Product One', 'barcode', 1, 1, 1000, 1500, 'Best seller', 40, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
-                    ('SKU002', 'Product Two', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 10, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
-                    ('SKU003', 'Product Three', 'barcode', 3, 3, 3000, 20, 'New arrival', 15, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
+                    ('SKU001', 'PRODUCT ONE', 'barcode', 1, 1, 1000, 1500, 'Best seller', 40, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
+                    ('SKU002', 'PRODUCT TWO', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 10, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
+                    ('SKU003', 'PRODUCT THREE', 'barcode', 3, 3, 3000, 20, 'New arrival', 15, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
         
         self.cursor.execute(sql_insert)
     

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Purchasing List</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/purchasing.png</normaloff>../assets/purchasing.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */
@@ -259,6 +263,7 @@ QPushButton {
     border-radius: 3px;
     margin: 0.25rem;
 	opacity: 0.55;
+	padding-bottom:2px;
 
 }
 </string>
@@ -402,8 +407,8 @@ QPushButton:disabled {
                   </property>
                   <property name="iconSize">
                    <size>
-                    <width>18</width>
-                    <height>18</height>
+                    <width>14</width>
+                    <height>14</height>
                    </size>
                   </property>
                  </widget>
@@ -671,8 +676,8 @@ QPushButton:hover {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -723,8 +728,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -768,8 +773,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -1068,8 +1073,8 @@ QPushButton:hover {
               </property>
               <property name="iconSize">
                <size>
-                <width>14</width>
-                <height>14</height>
+                <width>12</width>
+                <height>12</height>
                </size>
               </property>
              </widget>

@@ -1,4 +1,6 @@
 from connect_db import DatabaseConnection
+import json
+from datetime import datetime
 
 from categories.models.categories_models import CategoriesTableModel, ProcuctsTableModel
 
@@ -145,8 +147,21 @@ class CategoriesRepository:
             category_id = self.cursor.lastrowid
 
             sql = '''INSERT INTO product_categories_detail (category_id, sku) VALUES (?, ?)'''
-            
             self.cursor.executemany(sql, [(category_id, product) for product in products])
+            
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'category_id': category_id,
+                'category_name': data.category_name,
+                'products': list(products)
+            }
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Category {data.category_name} created', f'Category {data.category_name} created successfully!', 'C', 
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
+            
 
             # Commit transaction
             self.db.commit()
@@ -168,6 +183,18 @@ class CategoriesRepository:
             self.cursor.execute('BEGIN TRANSACTION')
 
             category_id = category_form_data.category_id
+            # Get old category data
+            sql = '''SELECT c.category_id, c.category_name, pc.sku
+                    FROM categories c
+                    LEFT JOIN product_categories_detail pc ON c.category_id = pc.category_id
+                    WHERE c.category_id = ?'''
+            self.cursor.execute(sql, (category_id,))
+            result = self.cursor.fetchall()
+            old_data = {
+                'category_id': result[0][0],
+                'category_name': result[0][1],
+                'products': [r[2] for r in result]
+            }
 
             # Update role
             sql = '''UPDATE categories SET category_name = ? WHERE category_id = ?'''
@@ -182,6 +209,21 @@ class CategoriesRepository:
             for product_id in added_products:
                 sql = '''INSERT INTO product_categories_detail (category_id, sku) VALUES (?, ?)'''
                 self.cursor.execute(sql, (category_id, product_id))      
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'category_id': category_id,
+                'category_name': category_form_data.category_name,
+                'added_products': list(added_products),
+                'deleted_products': list(deleted_products)
+            }
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Category {category_form_data.category_name} updated', f'Category {category_form_data.category_name} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+
 
             # If everything successful, commit the transaction  
             self.db.commit()
@@ -202,6 +244,19 @@ class CategoriesRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get old category data
+            sql = '''SELECT category_id, category_name, pc.sku
+                    FROM categories c
+                    LEFT JOIN product_categories_detail pc ON c.category_id = pc.category_id
+                    WHERE c.category_id = ?'''
+            self.cursor.execute(sql, (category_id,))
+            result = self.cursor.fetchall()
+            old_data = {
+                'category_id': result[0][0],
+                'category_name': result[0][1],
+                'products': [r[2] for r in result]
+            }
+
             # Delete role permissions
             sql = '''DELETE FROM categories WHERE category_id = ?'''
             self.cursor.execute(sql, (category_id,))
@@ -209,6 +264,15 @@ class CategoriesRepository:
             # Delete role
             sql = '''DELETE FROM product_categories_detail WHERE category_id = ?'''
             self.cursor.execute(sql, (category_id,))
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Category {result[0][1]} deleted', f'Category {result[0][1]} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
+
 
             # If everything successful, commit the transaction  
             self.db.commit()

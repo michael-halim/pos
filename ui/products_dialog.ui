@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>700</height>
+    <width>710</width>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -263,6 +263,7 @@ QPushButton {
     border-radius: 3px;
     margin: 0.25rem;
 	opacity: 0.55;
+	padding-bottom: 2px;
 
 }
 </string>
@@ -525,6 +526,12 @@ QPushButton:hover {
              <iconset>
               <normaloff>../assets/close.png</normaloff>../assets/close.png</iconset>
             </property>
+            <property name="iconSize">
+             <size>
+              <width>12</width>
+              <height>12</height>
+             </size>
+            </property>
            </widget>
           </item>
           <item>
@@ -566,8 +573,8 @@ QPushButton:disabled {
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>14</width>
+              <height>14</height>
              </size>
             </property>
            </widget>

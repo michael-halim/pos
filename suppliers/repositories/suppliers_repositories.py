@@ -1,4 +1,6 @@
 from connect_db import DatabaseConnection
+from datetime import datetime
+import json 
 
 from suppliers.models.suppliers_models import SuppliersModel
 
@@ -90,6 +92,24 @@ class SuppliersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get old supplier data
+            sql = '''SELECT supplier_id, supplier_name, supplier_address, supplier_phone, 
+                            supplier_city, supplier_remarks 
+                    FROM suppliers 
+                    WHERE supplier_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (supplier_data.supplier_id,))
+            result = self.cursor.fetchone()
+            old_data = {
+                'supplier_id': result[0],
+                'supplier_name': result[1],
+                'supplier_address': result[2],
+                'supplier_phone': result[3],
+                'supplier_city': result[4],
+                'supplier_remarks': result[5]
+            
+            }
+            
             # Insert master stock
             sql = '''INSERT INTO suppliers (supplier_name, supplier_address, supplier_phone, 
                                             supplier_city, supplier_remarks) 
@@ -99,6 +119,22 @@ class SuppliersRepository:
                                       supplier_data.supplier_phone, supplier_data.supplier_city, 
                                       supplier_data.supplier_remarks))
             
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {    
+                'supplier_id': supplier_data.supplier_id,
+                'supplier_name': supplier_data.supplier_name,
+                'supplier_address': supplier_data.supplier_address,
+                'supplier_phone': supplier_data.supplier_phone,
+                'supplier_city': supplier_data.supplier_city,
+                'supplier_remarks': supplier_data.supplier_remarks
+            }
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Supplier {supplier_data.supplier_name} created', f'Supplier {supplier_data.supplier_name} created successfully!', 'C', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+
             # Commit Transaction
             self.db.commit()
             
@@ -118,6 +154,23 @@ class SuppliersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get old supplier data
+            sql = '''SELECT supplier_id, supplier_name, supplier_address, supplier_phone, 
+                            supplier_city, supplier_remarks 
+                    FROM suppliers 
+                    WHERE supplier_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (supplier_data.supplier_id,))
+            result = self.cursor.fetchone()
+            old_data = {
+                'supplier_id': result[0],
+                'supplier_name': result[1],
+                'supplier_address': result[2],
+                'supplier_phone': result[3],
+                'supplier_city': result[4],
+                'supplier_remarks': result[5]
+            }
+
             # Update master stock
             sql = '''UPDATE suppliers 
                     SET supplier_address = ?, supplier_phone = ?, 
@@ -127,6 +180,23 @@ class SuppliersRepository:
             self.cursor.execute(sql, (supplier_data.supplier_address, supplier_data.supplier_phone, 
                                       supplier_data.supplier_city, supplier_data.supplier_remarks, 
                                       supplier_data.supplier_id))
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'supplier_id': supplier_data.supplier_id,
+                'supplier_name': supplier_data.supplier_name,
+                'supplier_address': supplier_data.supplier_address, 
+                'supplier_phone': supplier_data.supplier_phone,
+                'supplier_city': supplier_data.supplier_city,
+                'supplier_remarks': supplier_data.supplier_remarks
+            }
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Supplier {supplier_data.supplier_name} updated', f'Supplier {supplier_data.supplier_name} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+
 
             # Commit Transaction  
             self.db.commit()
@@ -147,10 +217,34 @@ class SuppliersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get old supplier data
+            sql = '''SELECT supplier_id, supplier_name, supplier_address, supplier_phone, 
+                            supplier_city, supplier_remarks 
+                    FROM suppliers 
+                    WHERE supplier_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (supplier_id,))
+            result = self.cursor.fetchone()
+            old_data = {
+                'supplier_id': result[0],
+                'supplier_name': result[1],
+                'supplier_address': result[2],
+                'supplier_phone': result[3],
+                'supplier_city': result[4],
+                'supplier_remarks': result[5]
+            }
+
             # Delete supplier
             sql = '''DELETE FROM suppliers WHERE supplier_id = ?'''
             self.cursor.execute(sql, (supplier_id,))
 
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Supplier {result[1]} deleted', f'Supplier {result[1]} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
             # Commit Transaction  
             self.db.commit()
 

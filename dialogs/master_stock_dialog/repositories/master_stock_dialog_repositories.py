@@ -1,4 +1,6 @@
 from connect_db import DatabaseConnection
+import json
+from datetime import datetime
 
 from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
 from dialogs.master_stock_dialog.models.master_stock_dialog_models import PurchasingHistoryTableItemModel, MasterStockModel, CategoriesModel
@@ -188,6 +190,30 @@ class MasterStockDialogRepository:
                                       master_stock.cost_price, master_stock.price, master_stock.stock, 
                                       master_stock.remarks, 0, 0))
             
+            # Create Json Object
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            master_stock_data = {
+                'sku': master_stock.sku,
+                'product_name': master_stock.product_name,
+                'barcode': master_stock.barcode,
+                'category_id': master_stock.category_id,
+                'supplier_id': master_stock.supplier_id,
+                'unit': master_stock.unit,
+                'cost_price': master_stock.cost_price,
+                'price': master_stock.price,
+                'stock': master_stock.stock,
+                'remarks': master_stock.remarks,
+                'last_price': 0,
+                'average_price': 0
+            }
+
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Master Stock {master_stock.sku} created', f'Master Stock {master_stock.sku} created successfully!', 'C', 
+                                        None, json.dumps(master_stock_data), today, self.permission_manager.get_user_id()))
+            
             # Commit Transaction
             self.db.commit()
             
@@ -204,6 +230,27 @@ class MasterStockDialogRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get the old master stock data
+            sql = '''SELECT product_name, barcode, category_id, supplier_id, unit, cost_price, price, stock, remarks 
+                        FROM products 
+                        WHERE sku = ?
+                        LIMIT 1'''
+            self.cursor.execute(sql, (master_stock.sku,))
+            result = self.cursor.fetchone()
+
+            old_data = {
+                'product_name': result[0],
+                'barcode': result[1],
+                'category_id': result[2],
+                'supplier_id': result[3],
+                'unit': result[4],
+                'cost_price': result[5],
+                'price': result[6],
+                'stock': result[7],
+                'remarks': result[8]
+            }
+
+
             # Update master stock
             sql = '''UPDATE products 
                     SET product_name = ?, barcode = ?, category_id = ?, supplier_id = ?, 
@@ -213,7 +260,29 @@ class MasterStockDialogRepository:
             self.cursor.execute(sql, (master_stock.product_name, master_stock.barcode, master_stock.category_id, 
                                       master_stock.supplier_id, master_stock.unit, master_stock.cost_price, 
                                       master_stock.price, master_stock.stock, master_stock.remarks, master_stock.sku))
+            
 
+            # Create Json Object
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'product_name': master_stock.product_name,
+                'barcode': master_stock.barcode,
+                'category_id': master_stock.category_id,
+                'supplier_id': master_stock.supplier_id,
+                'unit': master_stock.unit,
+                'cost_price': master_stock.cost_price,
+                'price': master_stock.price,
+                'stock': master_stock.stock,
+                'remarks': master_stock.remarks
+            }
+
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Master Stock {master_stock.sku} updated', f'Master Stock {master_stock.sku} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+            
             # Commit Transaction  
             self.db.commit()
 
@@ -229,10 +298,40 @@ class MasterStockDialogRepository:
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
+            
+            # Get the old master stock data
+            sql = '''SELECT product_name, barcode, category_id, supplier_id, unit, cost_price, price, stock, remarks 
+                        FROM products 
+                        WHERE sku = ?
+                        LIMIT 1'''
+            self.cursor.execute(sql, (sku,))
+            result = self.cursor.fetchone()
+
+            old_data = {
+                'product_name': result[0],
+                'barcode': result[1],
+                'category_id': result[2],
+                'supplier_id': result[3],
+                'unit': result[4],
+                'cost_price': result[5],
+                'price': result[6],
+                'stock': result[7],
+                'remarks': result[8]
+            }
 
             # Delete master stock
             sql = '''DELETE FROM products WHERE sku = ?'''
             self.cursor.execute(sql, (sku,))
+
+            # Create Json Object
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Master Stock {sku} deleted', f'Master Stock {sku} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
 
             # Commit Transaction  
             self.db.commit()

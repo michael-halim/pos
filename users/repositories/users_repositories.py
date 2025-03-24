@@ -3,6 +3,7 @@ from datetime import datetime
 import hashlib
 import random
 import string
+import json
 
 from users.models.users_models import UsersTableItemModel, UsersFormModel, RolesModel
 
@@ -109,12 +110,27 @@ class UsersRepository:
             # Hash the password
             salt = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
             new_password = salt + user_data.password
-
             hashed_password = hashlib.sha512(new_password.encode()).hexdigest()
+
+            # Insert User
             today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             sql = '''INSERT INTO users (username, password_hash, user_salt, role_id, created_at) VALUES (?, ?, ?, ?, ?)'''
 
             self.cursor.execute(sql, (user_data.username, hashed_password, salt, user_data.role_id, today))
+
+            # Make Json Object
+            new_data = {
+                'username': user_data.username,
+                'role_id': user_data.role_id,
+                'role_name': user_data.role_name
+            }
+
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'User {user_data.username} created', f'User {user_data.username} created successfully!', 'C', 
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
 
             self.db.commit()
 
@@ -132,15 +148,45 @@ class UsersRepository:
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Get the old role id and role name
+            sql = '''SELECT u.role_id, r.role_name 
+                    FROM users u 
+                    JOIN roles r ON u.role_id = r.role_id 
+                    WHERE u.user_id = ?'''
+            
+            self.cursor.execute(sql, (user_data.user_id,))
+            result = self.cursor.fetchone()
+            old_role_id = result[0]
+            old_role_name = result[1]
+            old_data = {
+                'role_id': old_role_id,
+                'role_name': old_role_name
+            }
+
+            new_data = {
+                'role_id': user_data.role_id,
+                'role_name': user_data.role_name
+            }
+
+            # Update User
             sql = '''UPDATE users 
                         SET role_id = ?,
                         updated_at = ?,
                         updated_by = ?
                         WHERE user_id = ?'''
             
-            self.cursor.execute(sql, (user_data.role_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 
-                                      self.permission_manager.get_user_id(), user_data.user_id))
+            self.cursor.execute(sql, (user_data.role_id, today, self.permission_manager.get_user_id(), user_data.user_id))
 
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'User {user_data.username} role updated from', 
+                                        f'User {user_data.username} role updated from {old_role_name} to {user_data.role_name}', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+            
             self.db.commit()
 
             return ResponseMessage.ok(message="User updated successfully!")
@@ -157,9 +203,37 @@ class UsersRepository:
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 
-            sql = 'DELETE FROM users WHERE user_id = ?'
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Get the user data
+            sql = '''SELECT username, role_id, is_active, created_at, updated_at, updated_by 
+                        FROM users 
+                        WHERE user_id = ? 
+                        LIMIT 1'''
             
             self.cursor.execute(sql, (user_id,))
+            result = self.cursor.fetchone()
+
+            # Make Json Object
+            user_data = {
+                'username': result[0],
+                'role_id': result[1],
+                'is_active': result[2],
+                'created_at': result[3],
+                'updated_at': result[4], 
+                'updated_by': result[5]
+            }
+
+            # Delete User
+            sql = 'DELETE FROM users WHERE user_id = ?'
+            self.cursor.execute(sql, (user_id,))
+
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'User {result[0]} deleted', f'User {result[0]} deleted successfully!', 'D', 
+                                        json.dumps(user_data), None, today, self.permission_manager.get_user_id()))
 
             self.db.commit()
 
@@ -222,10 +296,18 @@ class UsersRepository:
                 # Hash the new password
                 hashed_password = hashlib.sha512(new_password.encode()).hexdigest()
 
+                today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
                 # Update the password
-                sql = 'UPDATE users SET user_salt = ?, password_hash = ? WHERE user_id = ?'
+                sql = '''UPDATE users SET user_salt = ?, password_hash = ?, updated_at = ?, updated_by = ? WHERE user_id = ?'''
+                self.cursor.execute(sql, (new_salt, hashed_password, today, self.permission_manager.get_user_id(), user_id))
                 
-                self.cursor.execute(sql, (new_salt, hashed_password, user_id))
+                # Insert Log
+                sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                    new_data, created_at, created_by) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)'''
+                self.cursor.execute(sql, (f'User {user_id} password changed', f'User {user_id} password changed successfully!', 'U', 
+                                            None, None, today, self.permission_manager.get_user_id()))
 
                 self.db.commit()
 

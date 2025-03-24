@@ -1,6 +1,7 @@
 from connect_db import DatabaseConnection
 from datetime import datetime, timedelta
 from typing import List
+import json
 
 from transactions.models.transactions_models import (
     ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel,
@@ -55,7 +56,7 @@ class TransactionRepository:
                     (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
                 
-
+            detail_data = []
             for detail in detail_transactions:  
                 sku = detail.sku
                 qty = detail.qty
@@ -66,6 +67,19 @@ class TransactionRepository:
                 self.cursor.execute(sql, (detail.transaction_id, sku, unit, unit_value, 
                                           qty, detail.price, detail.discount_rp, detail.discount_rp_per_item, 
                                           detail.discount_pct, detail.subtotal))
+                
+                detail_data.append({
+                    'transaction_id': detail.transaction_id,
+                    'sku': sku,
+                    'unit': unit,
+                    'unit_value': unit_value,
+                    'qty': qty, 
+                    'price': detail.price,
+                    'discount_rp': detail.discount_rp,
+                    'discount_rp_per_item': detail.discount_rp_per_item,
+                    'discount_pct': detail.discount_pct,
+                    'subtotal': detail.subtotal
+                })
                 
                 # Update product stock
                 update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
@@ -84,6 +98,27 @@ class TransactionRepository:
                 
                 self.cursor.execute(stock_card_sql, (sku, transaction_id, None, stock_affected, updated_stock, ''))
                 
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            new_data = {
+                'transaction_id': transaction_id,
+                'customer_id': transaction.customer_id,
+                'total_amount': transaction.total_amount,
+                'payment_method': transaction.payment_method,
+                'payment_rp': transaction.payment_amount,
+                'payment_change': transaction.payment_change,
+                'discount_amount': transaction.total_discount,
+                'tax_pct': transaction.tax_pct,
+                'tax_amount': transaction.tax_amount,
+                'payment_remarks': transaction.payment_remarks,
+                'detail_transactions': detail_data
+            }
+            
+            self.cursor.execute(sql, (f'Transaction#{transaction_id} submitted', f'Transaction#{transaction_id} submitted successfully!', 'C', 
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -109,7 +144,51 @@ class TransactionRepository:
             self.cursor.execute('BEGIN TRANSACTION')
 
             # Get current timestamp
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Get old transaction data
+            sql = '''SELECT transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
+                            discount_amount, tax_pct, tax_amount, payment_remarks 
+                    FROM transactions 
+                    WHERE transaction_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (transaction.transaction_id,))
+            result = self.cursor.fetchone()
+
+            sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, subtotal 
+                    FROM detail_transactions 
+                    WHERE transaction_id = ?'''
+            self.cursor.execute(sql, (transaction.transaction_id,))
+            detail_result = self.cursor.fetchall()
+
+            old_data_detail_transactions = []
+            for detail in detail_result:
+                old_data_detail_transactions.append({
+                    'sku': detail[0],
+                    'unit': detail[1],
+                    'unit_value': detail[2],
+                    'qty': detail[3],
+                    'price': detail[4],
+                    'discount_rp': detail[5],
+                    'discount_rp_per_item': detail[6],
+                    'discount_pct': detail[7],
+                    'subtotal': detail[8]
+                })
+
+            old_data = {
+                'transaction_id': result[0],
+                'customer_id': result[1],
+                'total_amount': result[2],
+                'payment_method': result[3],
+                'payment_rp': result[4],
+                'payment_change': result[5],
+                'discount_amount': result[6],
+                'tax_pct': result[7],
+                'tax_amount': result[8],
+                'payment_remarks': result[9],
+                'detail_transactions': old_data_detail_transactions
+            }
+
 
             # Update main transaction
             sql = '''UPDATE transactions 
@@ -119,9 +198,23 @@ class TransactionRepository:
                     WHERE transaction_id = ?'''
 
             self.cursor.execute(sql, (transaction.customer_id, transaction.total_amount, transaction.payment_method, transaction.payment_amount, transaction.payment_change, 
-                                      transaction.total_discount, transaction.tax_pct, transaction.tax_amount, transaction.payment_remarks, current_time, 
+                                      transaction.total_discount, transaction.tax_pct, transaction.tax_amount, transaction.payment_remarks, today, 
                                       self.permission_manager.get_user_id(), transaction.transaction_id))
 
+            new_data = {
+                'transaction_id': transaction.transaction_id,
+                'customer_id': transaction.customer_id,
+                'total_amount': transaction.total_amount,
+                'payment_method': transaction.payment_method,
+                'payment_rp': transaction.payment_amount,
+                'payment_change': transaction.payment_change,
+                'discount_amount': transaction.total_discount,
+                'tax_pct': transaction.tax_pct,
+                'tax_amount': transaction.tax_amount,
+                'payment_remarks': transaction.payment_remarks,
+            }
+
+            updated_data = []
 
             # Update updated detail transactions
             for updated_detail in updated_detail_transactions:
@@ -185,11 +278,24 @@ class TransactionRepository:
                         SET qty = ?, price = ?, discount_rp = ?, discount_rp_per_item = ?, discount_pct = ?, sub_total = ?
                          WHERE transaction_id = ? AND sku = ? AND unit = ?'''
                 
+                updated_data.append({
+                    'qty': updated_detail.qty,
+                    'price': updated_detail.price,
+                    'discount_rp': updated_detail.discount_rp,
+                    'discount_rp_per_item': updated_detail.discount_rp_per_item,
+                    'discount_pct': updated_detail.discount_pct,
+                    'subtotal': updated_detail.subtotal,
+                    'transaction_id': updated_detail.transaction_id,
+                    'sku': updated_detail.sku,
+                    'unit': updated_detail.unit,
+                })
+
                 self.cursor.execute(sql, (updated_detail.qty, updated_detail.price, updated_detail.discount_rp, 
                                         updated_detail.discount_rp_per_item, updated_detail.discount_pct, updated_detail.subtotal, 
                                         updated_detail.transaction_id, updated_detail.sku, updated_detail.unit))
 
 
+            deleted_data = []
             # Delete detail transactions
             for deleted_detail in deleted_detail_transactions:
                 sql = '''DELETE FROM detail_transactions WHERE transaction_id = ? AND sku = ? and unit = ?'''
@@ -215,10 +321,21 @@ class TransactionRepository:
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
+                
+
+                deleted_data.append({
+                    'sku': deleted_detail.sku,
+                    'transaction_id': transaction.transaction_id,
+                    'stock_in': stock_affected,
+                    'stock_out': None,
+                    'running_balance': updated_stock,
+                    'remarks': remarks
+                })
 
                 self.cursor.execute(stock_card_sql, (deleted_detail.sku, transaction.transaction_id, stock_affected, None, updated_stock, remarks))
 
 
+            added_data = []
             # Insert added detail transactions
             for added_detail in added_detail_transactions:
                 sql = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, 
@@ -249,8 +366,29 @@ class TransactionRepository:
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
 
+                added_data.append({
+                    'sku': added_detail.sku,
+                    'transaction_id': transaction.transaction_id,
+                    'stock_in': None,
+                    'stock_out': stock_affected,
+                    'running_balance': updated_stock,
+                    'remarks': remarks
+                })
+
                 self.cursor.execute(stock_card_sql, (added_detail.sku, transaction.transaction_id, None, stock_affected, updated_stock, remarks))
 
+
+            # Insert Log
+            new_data['updated_detail_transactions'] = updated_data
+            new_data['deleted_detail_transactions'] = deleted_data
+            new_data['added_detail_transactions'] = added_data
+
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            
+            self.cursor.execute(sql, (f'Transaction#{transaction.transaction_id} updated', f'Transaction#{transaction.transaction_id} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
 
             self.db.commit()
 
@@ -326,13 +464,45 @@ class TransactionRepository:
                     (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
                 
-
+            detail_pending_data = []
             for detail in detail_transactions:
                 # Insert detail transaction
                 self.cursor.execute(sql, (detail.transaction_id,  detail.sku, detail.unit, 
                                           detail.unit_value, detail.qty, detail.price, detail.discount_rp, 
                                           detail.discount_rp_per_item, detail.discount_pct, detail.subtotal))
                 
+                detail_pending_data.append({
+                    'transaction_id': detail.transaction_id,
+                    'sku': detail.sku,
+                    'unit': detail.unit,
+                    'unit_value': detail.unit_value,
+                    'qty': detail.qty,
+                    'price': detail.price,
+                    'discount_rp': detail.discount_rp,
+                    'discount_rp_per_item': detail.discount_rp_per_item,
+                    'discount_pct': detail.discount_pct,
+                    'subtotal': detail.subtotal
+                })
+
+
+            new_data = {
+                'transaction_id': pending_transaction.transaction_id,
+                'customer_id': pending_transaction.customer_id,
+                'total_amount': pending_transaction.total_amount,
+                'discount_transaction_id': pending_transaction.discount_transaction_id,
+                'discount_amount': pending_transaction.discount_amount,
+                'payment_remarks': pending_transaction.payment_remarks,
+                'detail_transactions': detail_pending_data
+            }
+
+            # Insert Log
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            
+            self.cursor.execute(sql, (f'Transaction#{pending_transaction.transaction_id} pending', f'Transaction#{pending_transaction.transaction_id} pending successfully!', 'C', 
+                                        None, json.dumps(new_data), current_time, self.permission_manager.get_user_id()))
+            
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -384,6 +554,28 @@ class TransactionRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get pending transactions
+            sql = '''SELECT pt.transaction_id, pt.customer_id, pt.total_amount, pt.discount_transaction_id, 
+                            pt.discount_amount, pt.created_at, pt.payment_remarks
+                    FROM pending_transactions pt
+                    WHERE pt.transaction_id = ?
+                    LIMIT 1'''
+            
+            self.cursor.execute(sql, (transaction_id,))
+
+            pending_transaction = self.cursor.fetchone()
+
+            old_data = {
+                'transaction_id': pending_transaction[0],
+                'customer_id': pending_transaction[1],
+                'total_amount': pending_transaction[2],
+                'discount_transaction_id': pending_transaction[3],
+                'discount_amount': pending_transaction[4],
+                'created_at': pending_transaction[5],
+                'payment_remarks': pending_transaction[6]
+            }
+
+            # Get pending detail transactions
             sql = '''SELECT p.sku, p.product_name, pdt.price, pdt.qty, pdt.unit, pdt.unit_value, pdt.discount_pct, 
                             pdt.discount_rp_per_item, pdt.discount_rp, pdt.sub_total
                     FROM pending_detail_transactions pdt
@@ -407,6 +599,7 @@ class TransactionRepository:
             self.db.commit()
 
             pending_detail_transactions = []
+            pending_detail_data = []
             for r in results:
                 pending_detail_transactions.append(
                     TransactionTableItemModel(
@@ -417,6 +610,31 @@ class TransactionRepository:
                         discount_rp=r[8], subtotal=r[9]
                     )
                 )
+
+                pending_detail_data.append({
+                    'sku': r[0],
+                    'product_name': r[1],
+                    'price': r[2],
+                    'qty': r[3],
+                    'unit': r[4],
+                    'unit_value': r[5],
+                    'discount_pct': r[6],
+                    'discount_rp_per_item': r[7],
+                    'discount_rp': r[8],
+                    'subtotal': r[9]
+                })
+
+            old_data['detail_transactions'] = pending_detail_data
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''' 
+            
+            self.cursor.execute(sql, (f'Transaction#{pending_transaction[0]} pending deleted', f'Transaction#{pending_transaction[0]} pending deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
+
 
             return ResponseMessage.ok(
                 message="Transaction pending successfully!",

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1118</width>
+    <width>1070</width>
     <height>406</height>
    </rect>
   </property>
@@ -263,6 +263,7 @@ QPushButton {
     border-radius: 3px;
     margin: 0.25rem;
 	opacity: 0.55;
+	padding-bottom: 2px;
 
 }
 </string>
@@ -473,7 +474,7 @@ QPushButton {
                  </property>
                  <property name="minimumSize">
                   <size>
-                   <width>0</width>
+                   <width>50</width>
                    <height>30</height>
                   </size>
                  </property>
@@ -535,8 +536,8 @@ QPushButton:disabled {
                  </property>
                  <property name="iconSize">
                   <size>
-                   <width>18</width>
-                   <height>18</height>
+                   <width>14</width>
+                   <height>14</height>
                   </size>
                  </property>
                 </widget>
@@ -569,7 +570,7 @@ QPushButton:disabled {
                  </property>
                  <property name="minimumSize">
                   <size>
-                   <width>0</width>
+                   <width>120</width>
                    <height>30</height>
                   </size>
                  </property>
@@ -656,8 +657,8 @@ QPushButton:disabled {
                </property>
                <property name="iconSize">
                 <size>
-                 <width>18</width>
-                 <height>18</height>
+                 <width>14</width>
+                 <height>14</height>
                 </size>
                </property>
               </widget>
@@ -765,8 +766,8 @@ QPushButton:disabled {
                </property>
                <property name="iconSize">
                 <size>
-                 <width>18</width>
-                 <height>18</height>
+                 <width>16</width>
+                 <height>16</height>
                 </size>
                </property>
               </widget>
@@ -838,7 +839,7 @@ QPushButton:disabled {
                 <widget class="QTableWidget" name="users_table">
                  <property name="minimumSize">
                   <size>
-                   <width>550</width>
+                   <width>400</width>
                    <height>0</height>
                   </size>
                  </property>
@@ -1037,8 +1038,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>16</width>
+                <height>16</height>
                </size>
               </property>
              </widget>
@@ -1074,7 +1075,7 @@ QPushButton:disabled {
 }</string>
               </property>
               <property name="text">
-               <string>Create New</string>
+               <string>Create</string>
               </property>
               <property name="icon">
                <iconset>
@@ -1082,8 +1083,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -1134,8 +1135,8 @@ QPushButton:disabled {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -1173,8 +1174,8 @@ QPushButton:hover {
               </property>
               <property name="iconSize">
                <size>
-                <width>18</width>
-                <height>18</height>
+                <width>14</width>
+                <height>14</height>
                </size>
               </property>
              </widget>
@@ -1212,8 +1213,8 @@ QPushButton:hover {
               </property>
               <property name="iconSize">
                <size>
-                <width>14</width>
-                <height>14</height>
+                <width>12</width>
+                <height>12</height>
                </size>
               </property>
              </widget>

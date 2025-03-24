@@ -104,9 +104,9 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(supplier.supplier_city),
                 QtWidgets.QTableWidgetItem(supplier.supplier_remarks),
             ]
-            
+                
             for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=16))
+                item.setFont(POSFonts.get_font(size=12))
                 self.suppliers_table.setItem(current_row, col, item)
 
 
