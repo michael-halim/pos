@@ -1,5 +1,6 @@
 from connect_db import DatabaseConnection
 from datetime import datetime
+import json
 
 from purchasing_list.models.purchasing_list_models import PurchasingListModel, DetailPurchasingModel
 
@@ -98,6 +99,52 @@ class PurchasingListRepository:
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 
+
+            # Get old purchasing data
+            sql = '''SELECT supplier_id, invoice_date, invoice_number, invoice_expired_date, 
+                                                total_amount, total_discount, purchasing_remarks 
+                                        FROM purchasing_history 
+                                        WHERE purchasing_id = ?
+                                        LIMIT 1'''
+            self.cursor.execute(sql, (purchasing_id,))
+            purchasing_result = self.cursor.fetchone()
+
+            old_data = {
+                'purchasing_id': purchasing_id,
+                'supplier_id': purchasing_result[0],
+                'invoice_date': purchasing_result[1],
+                'invoice_number': purchasing_result[2],
+                'invoice_expired_date': purchasing_result[3],
+                'total_amount': purchasing_result[4],
+                'total_discount': purchasing_result[5],
+                'purchasing_remarks': purchasing_result[6]
+            }
+
+            # Get old detail purchasing data
+            sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal 
+                    FROM detail_purchasing_history 
+                    WHERE purchasing_id = ?'''
+            
+            self.cursor.execute(sql, (purchasing_id,))
+
+            detail_purchasing_results = self.cursor.fetchall()
+
+            old_detail_purchasing_data = []
+            for detail in detail_purchasing_results:
+                old_detail_purchasing_data.append({
+                    'sku': detail[0],
+                    'unit': detail[1],
+                    'unit_value': detail[2],
+                    'qty': detail[3],
+                    'price': detail[4],
+                    'discount_rp': detail[5],
+                    'discount_pct': detail[6],
+                    'subtotal': detail[7]
+                })
+
+            old_data['detail_purchasing'] = old_detail_purchasing_data
+
+
             # Delete the transaction
             sql = '''DELETE FROM purchasing_history WHERE purchasing_id = ?'''
             self.cursor.execute(sql, (purchasing_id,))
@@ -129,6 +176,17 @@ class PurchasingListRepository:
 
             sql = '''DELETE FROM detail_purchasing_history WHERE purchasing_id = ?'''
             self.cursor.execute(sql, (purchasing_id,))
+
+
+            # Insert Log    
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''' 
+            
+            self.cursor.execute(sql, (f'Purchasing#{purchasing_id} deleted', f'Purchasing#{purchasing_id} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
+            
 
             # Commit Transactions
             self.db.commit()

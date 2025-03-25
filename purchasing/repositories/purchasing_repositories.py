@@ -1,6 +1,7 @@
 from typing import List
 from datetime import datetime, timedelta
 from connect_db import DatabaseConnection
+import json
 
 from purchasing.models.purchasing_models import (
     ProductModel, 
@@ -90,7 +91,7 @@ class PurchasingRepository:
             self.cursor.execute('BEGIN TRANSACTION')
 
             # Get current timestamp
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
             # Insert main purchasing first
             sql = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, 
@@ -100,7 +101,7 @@ class PurchasingRepository:
             
             purchasing_id = purchasing.purchasing_id
             self.cursor.execute(sql, (purchasing_id, purchasing.supplier_id, purchasing.invoice_date, purchasing.invoice_number, 
-                                      purchasing.invoice_expired_date, purchasing.total_amount, purchasing.total_discount, current_time, 
+                                      purchasing.invoice_expired_date, purchasing.total_amount, purchasing.total_discount, today, 
                                       self.permission_manager.get_user_id(), purchasing.purchasing_remarks))
             
 
@@ -109,6 +110,7 @@ class PurchasingRepository:
                                                                 discount_rp, discount_pct, subtotal) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'''
 
+            detail_purchasing_data = []
             for detail in detail_purchasing:  
                 sku = detail.sku
                 qty = detail.qty
@@ -138,6 +140,16 @@ class PurchasingRepository:
                 self.cursor.execute(get_updated_stock_sql, (sku,))
                 updated_stock = self.cursor.fetchone()[0]
 
+                detail_purchasing_data.append({
+                       'sku': sku,
+                       'unit': unit,
+                       'unit_value': unit_value,
+                       'qty': qty,
+                       'price': detail.price,
+                       'discount_rp': detail.discount_rp,
+                       'discount_pct': detail.discount_pct,
+                       'subtotal': detail.subtotal
+                })
 
                 # Update Stock Card
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
@@ -145,6 +157,28 @@ class PurchasingRepository:
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
                 
                 self.cursor.execute(stock_card_sql, (sku, purchasing_id, stock_affected, None, updated_stock, ''))
+
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            
+            new_data = {
+                'purchasing_id': purchasing_id,
+                'supplier_id': purchasing.supplier_id,
+                'invoice_date': purchasing.invoice_date,
+                'invoice_number': purchasing.invoice_number,
+                'invoice_expired_date': purchasing.invoice_expired_date,
+                'total_amount': purchasing.total_amount,
+                'total_discount': purchasing.total_discount,
+                'purchasing_remarks': purchasing.purchasing_remarks,
+                'detail_purchasing': detail_purchasing_data
+            }
+            
+            self.cursor.execute(sql, (f'Purchasing#{purchasing_id} submitted', f'Purchasing#{purchasing_id} submitted successfully!', 'C', 
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
 
 
             # If everything successful, commit the transaction
@@ -168,7 +202,52 @@ class PurchasingRepository:
             self.cursor.execute('BEGIN TRANSACTION')
 
             # Get current timestamp
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Get old purchasing data
+            sql = '''SELECT supplier_id, invoice_date, invoice_number, invoice_expired_date, 
+                                                total_amount, total_discount, purchasing_remarks 
+                                        FROM purchasing_history 
+                                        WHERE purchasing_id = ?
+                                        LIMIT 1'''
+            self.cursor.execute(sql, (purchasing.purchasing_id,))
+            purchasing_result = self.cursor.fetchone()
+
+            old_data = {
+                'purchasing_id': purchasing.purchasing_id,
+                'supplier_id': purchasing_result[0],
+                'invoice_date': purchasing_result[1],
+                'invoice_number': purchasing_result[2],
+                'invoice_expired_date': purchasing_result[3],
+                'total_amount': purchasing_result[4],
+                'total_discount': purchasing_result[5],
+                'purchasing_remarks': purchasing_result[6]
+            }
+
+            # Get old detail purchasing data
+            sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal 
+                    FROM detail_purchasing_history 
+                    WHERE purchasing_id = ?'''
+            
+            self.cursor.execute(sql, (purchasing.purchasing_id,))
+
+            detail_purchasing_results = self.cursor.fetchall()
+
+            old_detail_purchasing_data = []
+            for detail in detail_purchasing_results:
+                old_detail_purchasing_data.append({
+                    'sku': detail[0],
+                    'unit': detail[1],
+                    'unit_value': detail[2],
+                    'qty': detail[3],
+                    'price': detail[4],
+                    'discount_rp': detail[5],
+                    'discount_pct': detail[6],
+                    'subtotal': detail[7]
+                })
+
+            old_data['detail_purchasing'] = old_detail_purchasing_data
+
 
             # Update main transaction
             sql = '''UPDATE purchasing_history 
@@ -176,12 +255,12 @@ class PurchasingRepository:
                         updated_at = ?, updated_by = ?, purchasing_remarks = ?
                     WHERE purchasing_id = ?'''
 
-            print(f'purchasing_id in repository: {purchasing.purchasing_id}')
             self.cursor.execute(sql, (purchasing.supplier_id, purchasing.invoice_date, purchasing.invoice_number, purchasing.invoice_expired_date, purchasing.total_amount, 
-                                      current_time, self.permission_manager.get_user_id(), purchasing.purchasing_remarks, purchasing.purchasing_id))
+                                      today, self.permission_manager.get_user_id(), purchasing.purchasing_remarks, purchasing.purchasing_id))
 
 
             # Update updated detail purchasing
+            updated_detail_purchasing_data = []
             for updated_detail in updated_detail_purchasing:
                 # Get Old Stock
                 get_old_stock_sql = 'SELECT qty FROM detail_purchasing_history WHERE sku = ? and unit = ? and purchasing_id = ?'
@@ -261,9 +340,21 @@ class PurchasingRepository:
                 self.cursor.execute(sql, (updated_detail.qty, updated_detail.price, updated_detail.discount_rp, 
                                         updated_detail.discount_pct, updated_detail.subtotal, 
                                         purchasing.purchasing_id, updated_detail.sku, updated_detail.unit))
+                
+                updated_detail_purchasing_data.append({
+                    'sku': updated_detail.sku,
+                    'unit': updated_detail.unit,
+                    'unit_value': updated_detail.unit_value,
+                    'qty': updated_detail.qty,
+                    'price': updated_detail.price,
+                    'discount_rp': updated_detail.discount_rp,
+                    'discount_pct': updated_detail.discount_pct,
+                    'subtotal': updated_detail.subtotal
+                })
 
 
             # Delete detail purchasing
+            deleted_detail_purchasing_data = []
             for deleted_detail in deleted_detail_purchasing:
                 sql = '''DELETE FROM detail_purchasing_history WHERE purchasing_id = ? AND sku = ? and unit = ?'''
                 self.cursor.execute(sql, (purchasing.purchasing_id, deleted_detail.sku, deleted_detail.unit))
@@ -295,11 +386,20 @@ class PurchasingRepository:
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
-
+                
                 self.cursor.execute(stock_card_sql, (deleted_detail.sku, purchasing.purchasing_id, None, stock_affected, updated_stock, remarks))
+
+                deleted_detail_purchasing_data.append({
+                    'sku': deleted_detail.sku,
+                    'unit': deleted_detail.unit,
+                    'unit_value': deleted_detail.unit_value,
+                    'qty': deleted_detail.qty,
+                    'subtotal': deleted_detail.subtotal
+                })
 
 
             # Insert added detail purchasing
+            added_detail_purchasing_data = []
             for added_detail in added_detail_purchasing:
                 sql = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, unit_value, qty, 
                                                             price, discount_rp, discount_pct, subtotal) 
@@ -335,10 +435,43 @@ class PurchasingRepository:
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
-
+                
                 self.cursor.execute(stock_card_sql, (added_detail.sku, purchasing.purchasing_id, stock_affected, None, updated_stock, remarks))
 
+                added_detail_purchasing_data.append({
+                    'sku': added_detail.sku,
+                    'unit': added_detail.unit,
+                    'unit_value': added_detail.unit_value,
+                    'qty': added_detail.qty,
+                    'price': added_detail.price,
+                    'discount_rp': added_detail.discount_rp,
+                    'discount_pct': added_detail.discount_pct,
+                    'subtotal': added_detail.subtotal
+                })
 
+            new_data = {
+                'purchasing_id': purchasing.purchasing_id,
+                'supplier_id': purchasing.supplier_id,
+                'invoice_date': purchasing.invoice_date,
+                'invoice_number': purchasing.invoice_number,
+                'invoice_expired_date': purchasing.invoice_expired_date,
+                'total_amount': purchasing.total_amount,
+                'total_discount': purchasing.total_discount,
+                'purchasing_remarks': purchasing.purchasing_remarks,
+                'updated_detail_purchasing': updated_detail_purchasing_data,
+                'added_detail_purchasing': added_detail_purchasing_data,
+                'deleted_detail_purchasing': deleted_detail_purchasing_data
+            }
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''' 
+            
+            self.cursor.execute(sql, (f'Purchasing#{purchasing.purchasing_id} updated', f'Purchasing#{purchasing.purchasing_id} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+            
             self.db.commit()
 
             return ResponseMessage.ok(f"Purchasing#{purchasing.purchasing_id} updated successfully!")

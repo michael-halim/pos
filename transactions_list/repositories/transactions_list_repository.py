@@ -1,5 +1,6 @@
 from connect_db import DatabaseConnection
 from datetime import datetime
+import json
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from generals.permission_manager import PermissionManager
@@ -107,6 +108,51 @@ class TransactionRepository:
         
         try:
             self.cursor.execute('BEGIN TRANSACTION')
+            
+            # Get old transaction data
+            sql = '''SELECT transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
+                            discount_amount, tax_pct, tax_amount, payment_remarks 
+                    FROM transactions 
+                    WHERE transaction_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (transaction_id,))
+            result = self.cursor.fetchone()
+
+            # Get old detail transactions data
+            sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, subtotal 
+                    FROM detail_transactions 
+                    WHERE transaction_id = ?'''
+            self.cursor.execute(sql, (transaction_id,))
+            detail_result = self.cursor.fetchall()
+
+            old_data_detail_transactions = []
+            for detail in detail_result:
+                old_data_detail_transactions.append({
+                    'sku': detail[0],
+                    'unit': detail[1],
+                    'unit_value': detail[2],
+                    'qty': detail[3],
+                    'price': detail[4],
+                    'discount_rp': detail[5],
+                    'discount_rp_per_item': detail[6],
+                    'discount_pct': detail[7],
+                    'subtotal': detail[8]
+                })
+
+            old_data = {
+                'transaction_id': result[0],
+                'customer_id': result[1],
+                'total_amount': result[2],
+                'payment_method': result[3],
+                'payment_rp': result[4],
+                'payment_change': result[5],
+                'discount_amount': result[6],
+                'tax_pct': result[7],
+                'tax_amount': result[8],
+                'payment_remarks': result[9],
+                'detail_transactions': old_data_detail_transactions
+            }
+
 
             # Delete the transaction
             sql = '''DELETE FROM transactions WHERE transaction_id = ?'''
@@ -141,6 +187,16 @@ class TransactionRepository:
             sql = '''DELETE FROM detail_transactions WHERE transaction_id = ?'''
             self.cursor.execute(sql, (transaction_id,))
 
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+           
+            self.cursor.execute(sql, (f'Transaction#{transaction_id} deleted', f'Transaction#{transaction_id} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
+            
             # Commit the transaction
             self.db.commit()
             return ResponseMessage.ok(message="Transaction deleted successfully!")
