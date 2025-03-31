@@ -138,11 +138,13 @@ class TransactionRepository:
                     'discount_pct': detail[7],
                     'subtotal': detail[8]
                 })
-
+            
+            customer_id = result[1]
+            old_total_amount = result[2]
             old_data = {
                 'transaction_id': result[0],
                 'customer_id': result[1],
-                'total_amount': result[2],
+                'total_amount': old_total_amount,
                 'payment_method': result[3],
                 'payment_rp': result[4],
                 'payment_change': result[5],
@@ -152,6 +154,20 @@ class TransactionRepository:
                 'payment_remarks': result[9],
                 'detail_transactions': old_data_detail_transactions
             }
+
+            # Update Customer Transaction Value and Number of Transactions
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            if customer_id is not None and customer_id != '':
+                sql = '''UPDATE customers 
+                        SET number_of_transactions = number_of_transactions - 1,
+                            transaction_value = transaction_value - ?,
+                            updated_at = ?,
+                            updated_by = ?
+                        WHERE customer_id = ?'''
+                
+                self.cursor.execute(sql, (old_total_amount, today, 
+                                          self.permission_manager.get_user_id(), customer_id))
 
 
             # Delete the transaction
@@ -189,7 +205,6 @@ class TransactionRepository:
 
 
             # Insert Log
-            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
                                         new_data, created_at, created_by) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)'''
@@ -200,6 +215,7 @@ class TransactionRepository:
             # Commit the transaction
             self.db.commit()
             return ResponseMessage.ok(message="Transaction deleted successfully!")
+        
         
         except Exception as e:
             self.db.rollback()

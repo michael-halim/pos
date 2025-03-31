@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrintPreviewDialog
-from PyQt6.QtGui import QPainter, QFont, QTextDocument
-from PyQt6.QtCore import QRectF, Qt, QDateTime
+from PyQt6.QtGui import QPainter, QFont, QTextDocument, QPageLayout
+from PyQt6.QtCore import QRectF, Qt, QDateTime, QMarginsF, QSizeF
 from PyQt6.QtGui import QPageSize
 
 from datetime import datetime
@@ -410,6 +410,7 @@ class TransactionsWindow(QtWidgets.QWidget):
 
 
     def submit_transaction(self, payment_amount: int, payment_change: int):
+        
         if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
             POSMessageBox.error(self, title=ERR_PERM_C_TRANSACTIONS, message=ERR_PERM_C_TRANSACTIONS)
             return
@@ -450,6 +451,9 @@ class TransactionsWindow(QtWidgets.QWidget):
         if result.success:
             POSMessageBox.info(self, title=OK, message=result.message)
             
+            # Print Transactions to POS Machine
+            self.print_transactions()
+
             # Clear the transactions table and total
             self.clear_transaction()
 
@@ -766,6 +770,28 @@ class TransactionsWindow(QtWidgets.QWidget):
             
         return detail_transactions
 
+    
+    def get_detail_transactions_table(self) -> list[TransactionTableItemModel]:
+        detail_transactions_table: list[TransactionTableItemModel] = []
+        for row in range(self.transactions_table.rowCount()):
+            if self.transactions_table.item(row, 0).text() == TAX_TABLE_KEY:
+                continue
+
+            detail_transactions_table.append(TransactionTableItemModel(
+                sku = self.transactions_table.item(row, 0).text(),
+                product_name = self.transactions_table.item(row, 1).text(),
+                price = self.transactions_table.item(row, 2).text(),
+                qty = self.transactions_table.item(row, 3).text(),
+                unit = self.transactions_table.item(row, 4).text(),
+                unit_value = self.transactions_table.item(row, 5).text(),
+                discount_pct = self.transactions_table.item(row, 6).text(),
+                discount_rp_per_item = self.transactions_table.item(row, 7).text(),
+                discount_rp = self.transactions_table.item(row, 8).text(),
+                subtotal = self.transactions_table.item(row, 9).text(),
+            ))
+
+        return detail_transactions_table
+    
 
     def get_transactions_form_data(self) -> TransactionTableItemModel:
         price: int = remove_non_digit(self.ui.price_transaction_input.text()) if self.ui.price_transaction_input.text().strip() else 0
@@ -1382,132 +1408,188 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.clear_transaction_history_data()
     
 
-    # # Direct printing without preview
-    # # ===============
-    # def print_transactions(self):
-    #     """Print the current transactions data directly without preview"""
-    #     # Create printer
-    #     printer = QPrinter(QPrinter.PrinterMode.HighResolution)
-    #     printer.setPageOrientation(QtGui.QPageLayout.Orientation.Portrait)
-    #     printer.setPageSize(QPageSize(QPageSize.PageSizeId.A6))
+    # Direct printing without preview
+    # ===============
+    def print_transactions(self):
+        """Print the current transactions data directly without preview"""
+        printer = QPrinter(QPrinter.PrinterMode.ScreenResolution)
         
-    #     # Show print preview dialog
-    #     preview_dialog = QPrintPreviewDialog(printer, self)
-    #     detail_transactions = self.get_detail_transactions()
-    #     preview_dialog.paintRequested.connect(lambda printer: self.print_preview_html(printer=printer, detail_transactions=detail_transactions))
-    #     preview_dialog.exec()
+        # Set custom page size for 48mm thermal printer width
+        printer.setPageLayout(QPageLayout(QPageSize(QSizeF(48, 100), QPageSize.Unit.Millimeter), QPageLayout.Orientation.Portrait, QMarginsF(2, 5, 2, 0)))        # custom_size = QPageSize(QSizeF(48, 200), QPageSize.Unit.Millimeter)
+        
+        detail_transactions = self.get_detail_transactions_table()
+        customer_result = self.transaction_service.get_customer_by_id(self.ui.customer_id_transaction_input.text().strip())
+        customer_name = None
+        if customer_result.success and customer_result.data:
+            customer_name = customer_result.data
 
-    #     # Show print dialog to select printer and options
-    #     print_dialog = QPrintDialog(printer, self)
-    #     if print_dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
-    #         POSMessageBox.info(self, title="Print", message="Document sent to printer")
+        # self.print_preview_html(printer=printer, detail_transactions=detail_transactions, customer_name=customer_name)
+
+        # For Debug Print Preview
+        preview_dialog = QPrintPreviewDialog(printer, self)
+        preview_dialog.paintRequested.connect(
+            lambda p: self.print_preview_html(printer=p, detail_transactions=detail_transactions, customer_name=customer_name)
+        )
+        preview_dialog.exec()
+
+        # Show print dialog to select printer and options
+        print_dialog = QPrintDialog(printer, self)
+        if print_dialog.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            POSMessageBox.info(self, title="Print", message="Document sent to printer")
 
 
-    # # New HTML-based print preview function
-    # def print_preview_html(self, printer, detail_transactions: list[DetailTransactionModel]):
-    #     """Generate HTML content optimized for standard 80mm receipt printer"""
-    #     # Get current date
-    #     current_date = QDateTime.currentDateTime().toString("dd/MM/yyyy")
+    # New HTML-based print preview function
+    def print_preview_html(self, printer, detail_transactions: list[TransactionTableItemModel], customer_name: str | None):
+        """Generate HTML content optimized for 48mm thermal receipt printer"""
+        current_datetime = QDateTime.currentDateTime()
+        current_date = current_datetime.toString("dd-MMM-yyyy")
         
-    #     # Calculate total
-    #     total = self.calculate_total_transactions()
+        painter = QPainter()
+        painter.begin(printer)
         
-    #     # Get tax amount if any
-    #     tax_amount = remove_non_digit(self.ui.tax_rp_transaction_input.text()) if self.ui.tax_rp_transaction_input.text() else 0
+        # Setup fonts
+        title_font = QFont("Courier New", 12, QFont.Weight.Bold)
+        normal_font = QFont("Courier New", 7)
+        bold_font = QFont("Courier New", 7, QFont.Weight.Bold)
         
-    #     # Create HTML content with inline styles - optimized for 80mm receipt printer
-    #     html = f"""
-    #     <html>
-    #     <body>
-    #     <div style="font-family: 'Courier New', monospace; width: 280px; margin: 0 auto; padding: 5px;">
-    #         <div style="font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 5px;">TOKO</div>
+        # Get metrics for positioning
+        rect = printer.pageRect(QPrinter.Unit.DevicePixel)
+        width = int(rect.width())  # Convert to int
+        
+        # Start position
+        y_pos = 10
+        left_margin = 2
+        
+        # Draw header - use QRect instead of separate parameters
+        painter.setFont(title_font)
+        header_rect = QtCore.QRect(0, y_pos, width, 20)
+        painter.drawText(header_rect, Qt.AlignmentFlag.AlignHCenter, "ELVES")
+        y_pos += 30  # Increased space after title
+
+        # Draw address with word wrapping
+        painter.setFont(normal_font)
+        address_text = "Jl. Dr. Ratulangi, Kota Palopo, Sulawesi Selatan"
+        address_rect = QtCore.QRect(left_margin, y_pos, width - (left_margin * 2), 60)  # Increased height to 60
+        painter.drawText(address_rect, Qt.AlignmentFlag.AlignHCenter | Qt.TextFlag.TextWordWrap, address_text)
+
+        # Calculate text height to properly advance y_pos
+        text_rect = painter.boundingRect(address_rect, Qt.AlignmentFlag.AlignHCenter | Qt.TextFlag.TextWordWrap, address_text)
+        y_pos += text_rect.height() + 10  # Advance by actual text height plus padding
+
+
+        painter.setFont(bold_font)
+        painter.drawLine(left_margin, y_pos, width - left_margin, y_pos)
+        y_pos += 15
+
+        # Draw Cashier and Transactions Date
+        painter.setFont(normal_font)
+
+        cashier_text = f"Cashier: {self.permission_manager.get_username()}"
+        painter.drawText(left_margin, y_pos, cashier_text)
+
+        transactions_date_text = f"Date: {current_date}"
+        transactions_date_width = painter.fontMetrics().horizontalAdvance(transactions_date_text)
+        painter.drawText(width - transactions_date_width - left_margin, y_pos, transactions_date_text)
+        y_pos += 15
+        
+        # Draw Customer Name if any
+        if customer_name:
+            customer_text = f"Customer: {customer_name}"
+            painter.setFont(normal_font)
+            painter.drawText(left_margin, y_pos, customer_text)
+            y_pos += 15
+
+        # Draw table header
+        painter.setFont(bold_font)
+        col_1_width = int(width * 0.5)  # Convert to int
+        col_2_width = int(width * 0.3)  # Convert to int
+        col_3_width = int(width * 0.2)  # Convert to int
+        
+        y_pos += 5
+        painter.drawLine(left_margin, y_pos, width - left_margin, y_pos)
+        
+        y_pos += 15
+        
+        # Draw items
+        painter.setFont(normal_font)
+        
+        # Use actual detail_transactions data
+        for dt in detail_transactions:
+            # Skip tax items
+            if dt.sku == TAX_TABLE_KEY:
+                continue
+                
+            # Get item data
+            name = dt.product_name
+            start_length, total_length = 0, len(name)
+
+            # If name length > 26, then enter new line
+            if total_length > 26:
+                while total_length > 26:
+                    min_length = min(total_length, start_length + 25)
+                    painter.drawText(left_margin, y_pos, name[start_length:min_length])
+                y_pos += 15
+                start_length += min_length
+                total_length -= min_length
+            else:
+                painter.drawText(left_margin, y_pos, name)
             
-    #         <div style="text-align: center; margin-bottom: 10px; font-size: 14px;">{current_date}</div>
             
-    #         <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-    #             <tr>
-    #                 <th style="text-align: center; padding: 3px; font-size: 12px; border: 1px solid #000; width: 5%;">#</th>
-    #                 <th style="text-align: left; padding: 3px; font-size: 12px; border: 1px solid #000; width: 40%;">Nama Produk</th>
-    #                 <th style="text-align: center; padding: 3px; font-size: 12px; border: 1px solid #000; width: 10%;">QTY</th>
-    #                 <th style="text-align: center; padding: 3px; font-size: 12px; border: 1px solid #000; width: 15%;">Satuan</th>
-    #                 <th style="text-align: right; padding: 3px; font-size: 12px; border: 1px solid #000; width: 30%;">Subtotal</th>
-    #             </tr>
-    #     """
-        
-    #     # Add items from transactions table
-    #     for i, dt in enumerate(detail_transactions, 1):
-    #         if dt.sku == "TAX_TABLE_KEY":
-    #             continue
+            y_pos += 15
             
-    #         html += f"""
-    #         <tr>
-    #             <td style="text-align: center; padding: 3px; font-size: 12px; border: 1px solid #000;">{i}</td>
-    #             <td style="text-align: left; padding: 3px; font-size: 12px; border: 1px solid #000;">{dt.sku}</td>
-    #             <td style="text-align: center; padding: 3px; font-size: 12px; border: 1px solid #000;">{dt.qty}</td>
-    #             <td style="text-align: center; padding: 3px; font-size: 12px; border: 1px solid #000;">{dt.unit}</td>
-    #             <td style="text-align: right; padding: 3px; font-size: 12px; border: 1px solid #000;">Rp. {format_number(dt.subtotal)}</td>
-    #         </tr>
-    #         """
-        
-    #     # Add empty rows to match the template (if needed)
-    #     for _ in range(max(0, 5 - len(detail_transactions))):
-    #         html += """
-    #         <tr>
-    #             <td style="border: 1px solid #000;">&nbsp;</td>
-    #             <td style="border: 1px solid #000;">&nbsp;</td>
-    #             <td style="border: 1px solid #000;">&nbsp;</td>
-    #             <td style="border: 1px solid #000;">&nbsp;</td>
-    #             <td style="border: 1px solid #000;">&nbsp;</td>
-    #         </tr>
-    #         """
-        
-    #     # Add tax row if applicable
-    #     if int(tax_amount) > 0:
-    #         html += f"""
-    #         <tr>
-    #             <td style="border: 1px solid #000;"></td>
-    #             <td style="text-align: left; padding: 3px; font-size: 12px; border: 1px solid #000;">Tax</td>
-    #             <td style="border: 1px solid #000;"></td>
-    #             <td style="border: 1px solid #000;"></td>
-    #             <td style="text-align: right; padding: 3px; font-size: 12px; border: 1px solid #000;">Rp. {format_number(str(tax_amount))}</td>
-    #         </tr>
-    #         """
-        
-    #     # Add total row
-    #     html += f"""
-    #         <tr>
-    #             <td style="border: 1px solid #000;"></td>
-    #             <td style="text-align: left; padding: 3px; font-size: 14px; font-weight: bold; border: 1px solid #000;">Total</td>
-    #             <td style="border: 1px solid #000;"></td>
-    #             <td style="border: 1px solid #000;"></td>
-    #             <td style="text-align: right; padding: 3px; font-size: 14px; font-weight: bold; border: 1px solid #000;">Rp. {format_number(str(total))}</td>
-    #         </tr>
-    #         </table>
-    #         <div style="text-align: center; font-size: 12px; margin-top: 10px;">Terima Kasih</div>
-    #         </div>
-    #     </body>
-    #     </html>
-    #     """
-        
-    #     # Create a text document and set the HTML content
-    #     document = QTextDocument()
-    #     document.setHtml(html)
-        
-    #     # Set up the printer for receipt printing
-    #     printer.setFullPage(True)
-        
-    #     # Set up the painter with scaling
-    #     painter = QPainter(printer)
-        
-    #     # Calculate the scaling factor to fit the content to the receipt width
-    #     xscale = printer.pageRect(QPrinter.Unit.DevicePixel).width() / document.idealWidth()
-    #     yscale = xscale  # Keep the same scale for y to maintain proportions
-        
-    #     # Apply the scaling
-    #     painter.scale(xscale, yscale)
-        
-    #     # Print the document with the painter
-    #     document.drawContents(painter)
-    #     painter.end()
+            # Draw Unit x Price
+            unit_price = f"{dt.qty} {dt.unit} x {format_number(dt.price)}"
+            painter.drawText(left_margin, y_pos, unit_price)
 
-    #     document.print(printer)
+            # Draw Subtotal
+            total = format_number(dt.subtotal)
+            total_width = painter.fontMetrics().horizontalAdvance(total)
+            painter.drawText(width - total_width - left_margin, y_pos, total)
+            
+            y_pos += 15
+        
+        # Draw separator
+        y_pos += 5
+        painter.setFont(bold_font)
+        painter.drawLine(left_margin, y_pos, width - left_margin, y_pos)
+        y_pos += 15
+        
+        # Draw tax and total
+        tax_amount = remove_non_digit(self.ui.tax_rp_transaction_input.text()) if self.ui.tax_rp_transaction_input.text() else 0
+        total_amount: int = self.calculate_total_transactions()
+        
+        tax_text = "Tax:"
+        tax_value = add_prefix(format_number(str(tax_amount)))
+        total_text = "Total:"
+        total_value = add_prefix(format_number(str(total_amount)))
+        change_text = "Change:"
+        change_value = add_prefix(format_number(str(total_amount - total_amount)))
+        
+
+        # Align labels to right
+        painter.setFont(bold_font)
+        painter.drawText(left_margin, y_pos, tax_text)
+        
+        # Align values to right
+        tax_width = painter.fontMetrics().horizontalAdvance(tax_value)
+        painter.setFont(normal_font)
+        painter.drawText(width - tax_width - left_margin, y_pos, tax_value)
+        
+        y_pos += 15
+        
+        painter.setFont(bold_font)
+        painter.drawText(left_margin, y_pos, total_text)
+        
+        total_val_width = painter.fontMetrics().horizontalAdvance(total_value)
+        painter.drawText(width - total_val_width - left_margin, y_pos, total_value)
+        
+        y_pos += 15
+        painter.setFont(bold_font)
+        painter.drawText(left_margin, y_pos, change_text)
+        
+        change_val_width = painter.fontMetrics().horizontalAdvance(change_value)
+        painter.drawText(width - change_val_width - left_margin, y_pos, change_value)
+        
+        y_pos += 25
+        
+        painter.end()

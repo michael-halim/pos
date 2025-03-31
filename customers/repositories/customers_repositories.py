@@ -1,4 +1,6 @@
 from connect_db import DatabaseConnection
+from datetime import datetime
+import json
 
 from customers.models.customers_models import CustomersModel
 
@@ -89,6 +91,20 @@ class CustomersRepository:
             
             self.cursor.execute(sql, (customer_data.customer_name, customer_data.customer_phone))
             
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'customer_name': customer_data.customer_name,
+                'customer_phone': customer_data.customer_phone,
+            }
+
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''' 
+            
+            self.cursor.execute(sql, (f'Customer {customer_data.customer_name} created', f'Customer {customer_data.customer_name} created successfully!', 'C', 
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
+            
             # Commit transaction
             self.db.commit()
 
@@ -111,14 +127,40 @@ class CustomersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get old data
+            sql = '''SELECT customer_name, customer_phone 
+                    FROM customers 
+                    WHERE customer_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (customer_data.customer_id,))
+            result = self.cursor.fetchone()
+
+            old_data = {
+                'customer_name': result[0],
+                'customer_phone': result[1]
+            }
+
             sql = '''UPDATE customers 
-                    SET customer_name = ?, customer_phone = ?, customer_points = ?, 
-                        number_of_transactions = ?, transaction_value = ? 
+                    SET customer_name = ?, customer_phone = ?
                     WHERE customer_id = ?'''
             
-            self.cursor.execute(sql, (customer_data.customer_name, customer_data.customer_phone, customer_data.customer_points, 
-                                      customer_data.number_of_transactions, customer_data.transaction_value, customer_data.customer_id))
+            self.cursor.execute(sql, (customer_data.customer_name, customer_data.customer_phone, customer_data.customer_id))
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'customer_name': customer_data.customer_name,
+                'customer_phone': customer_data.customer_phone
+            }
             
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''' 
+            
+            self.cursor.execute(sql, (f'Customer {customer_data.customer_name} updated', f'Customer {customer_data.customer_name} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+
+
             # Commit transaction
             self.db.commit()
 
@@ -138,9 +180,32 @@ class CustomersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
+            # Get old data
+            sql = '''SELECT customer_name, customer_phone 
+                    FROM customers 
+                    WHERE customer_id = ?
+                    LIMIT 1'''
+            self.cursor.execute(sql, (customer_id,))
+            result = self.cursor.fetchone()
+
+            old_data = {
+                'customer_name': result[0],
+                'customer_phone': result[1]
+            }
+
+            # Delete customer
             sql = '''DELETE FROM customers WHERE customer_id = ?'''
             self.cursor.execute(sql, (customer_id,))
 
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)''' 
+            
+            self.cursor.execute(sql, (f'Customer {result[0]} deleted', f'Customer {result[0]} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
+            
             # Commit transaction
             self.db.commit()
 

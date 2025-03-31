@@ -37,7 +37,7 @@ class TransactionRepository:
             self.cursor.execute('BEGIN TRANSACTION')
 
             # Get current timestamp
-            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Insert main transaction first
             sql = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
@@ -48,7 +48,7 @@ class TransactionRepository:
 
             self.cursor.execute(sql, (transaction_id, transaction.customer_id, transaction.total_amount, transaction.payment_method, 
                                       transaction.payment_amount, transaction.payment_change, transaction.total_discount, 
-                                      transaction.tax_pct, transaction.tax_amount, current_time, self.permission_manager.get_user_id(), transaction.payment_remarks))
+                                      transaction.tax_pct, transaction.tax_amount, today, self.permission_manager.get_user_id(), transaction.payment_remarks))
             
 
             # Insert all detail transactions
@@ -97,9 +97,27 @@ class TransactionRepository:
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
                 
                 self.cursor.execute(stock_card_sql, (sku, transaction_id, None, stock_affected, updated_stock, ''))
-                
+            
+
+            # Insert Customer Points
+            if transaction.customer_id is not None and transaction.customer_id != '':
+                sql = '''SELECT COUNT(*) FROM customers WHERE customer_id = ?'''
+                self.cursor.execute(sql, (transaction.customer_id,))
+                result = self.cursor.fetchone()[0]
+
+                # If customer exists, update number of transactions and transaction value
+                if result > 0:
+                    sql = '''UPDATE customers 
+                            SET number_of_transactions = number_of_transactions + 1, 
+                                transaction_value = transaction_value + ?,
+                                updated_at = ?,
+                                updated_by = ?
+                            WHERE customer_id = ?'''
+                    
+                    self.cursor.execute(sql, (transaction.total_amount, today, self.permission_manager.get_user_id(), transaction.customer_id))
+
+
             # Insert Log
-            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
                                         new_data, created_at, created_by) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)'''
@@ -153,7 +171,7 @@ class TransactionRepository:
                     WHERE transaction_id = ?
                     LIMIT 1'''
             self.cursor.execute(sql, (transaction.transaction_id,))
-            result = self.cursor.fetchone()
+            transactions_result = self.cursor.fetchone()
 
             sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, subtotal 
                     FROM detail_transactions 
@@ -175,20 +193,37 @@ class TransactionRepository:
                     'subtotal': detail[8]
                 })
 
+            old_total_amount = transactions_result[2]
             old_data = {
-                'transaction_id': result[0],
-                'customer_id': result[1],
-                'total_amount': result[2],
-                'payment_method': result[3],
-                'payment_rp': result[4],
-                'payment_change': result[5],
-                'discount_amount': result[6],
-                'tax_pct': result[7],
-                'tax_amount': result[8],
-                'payment_remarks': result[9],
+                'transaction_id': transactions_result[0],
+                'customer_id': transactions_result[1],
+                'total_amount': old_total_amount,
+                'payment_method': transactions_result[3],
+                'payment_rp': transactions_result[4],
+                'payment_change': transactions_result[5],
+                'discount_amount': transactions_result[6],
+                'tax_pct': transactions_result[7],
+                'tax_amount': transactions_result[8],
+                'payment_remarks': transactions_result[9],
                 'detail_transactions': old_data_detail_transactions
             }
 
+            # Update Customer
+            if transaction.customer_id is not None and transaction.customer_id != '':
+                sql = '''SELECT COUNT(*) FROM customers WHERE customer_id = ?'''
+                self.cursor.execute(sql, (transaction.customer_id,))
+                result = self.cursor.fetchone()[0]
+
+                # If customer exists, update number of transactions and transaction value
+                if result > 0:
+                    sql = '''UPDATE customers 
+                            SET transaction_value = transaction_value - ? + ?,
+                                updated_at = ?,
+                                updated_by = ?
+                            WHERE customer_id = ?'''
+                    
+                    self.cursor.execute(sql, (old_total_amount, transaction.total_amount, today, self.permission_manager.get_user_id(), transaction.customer_id)) 
+                
 
             # Update main transaction
             sql = '''UPDATE transactions 
