@@ -6,12 +6,14 @@ from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierMode
 from dialogs.master_stock_dialog.models.master_stock_dialog_models import PurchasingHistoryTableItemModel, MasterStockModel, CategoriesModel
 
 from response.response_message import ResponseMessage
+from generals.permission_manager import PermissionManager
 
 class MasterStockDialogRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
-        
+        self.permission_manager = PermissionManager()
+
     
     def get_suppliers(self, search_text: str = ''):
         try:

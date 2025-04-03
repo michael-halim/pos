@@ -55,7 +55,7 @@ class TransactionRepository:
             sql = '''INSERT INTO detail_transactions 
                     (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
-                
+            
             detail_data = []
             for detail in detail_transactions:  
                 sku = detail.sku
@@ -100,9 +100,10 @@ class TransactionRepository:
             
 
             # Insert Customer Points
-            if transaction.customer_id is not None and transaction.customer_id != '':
+            customer_id = transaction.customer_id
+            if customer_id is not None and customer_id != '':
                 sql = '''SELECT COUNT(*) FROM customers WHERE customer_id = ?'''
-                self.cursor.execute(sql, (transaction.customer_id,))
+                self.cursor.execute(sql, (customer_id,))
                 result = self.cursor.fetchone()[0]
 
                 # If customer exists, update number of transactions and transaction value
@@ -114,7 +115,7 @@ class TransactionRepository:
                                 updated_by = ?
                             WHERE customer_id = ?'''
                     
-                    self.cursor.execute(sql, (transaction.total_amount, today, self.permission_manager.get_user_id(), transaction.customer_id))
+                    self.cursor.execute(sql, (transaction.total_amount, today, self.permission_manager.get_user_id(), customer_id, ))
 
 
             # Insert Log

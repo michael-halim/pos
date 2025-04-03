@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
+from transactions.models.transactions_models import TransactionModel, TransactionTableItemModel
 from generals.permission_manager import PermissionManager
 
 from response.response_message import ResponseMessage
@@ -62,8 +63,103 @@ class TransactionRepository:
             return ResponseMessage.fail(
                 message=f"Failed to fetch transaction list {str(e)}",
             )
+
+
+    def get_transaction_by_id(self, transaction_id: str):
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_TRANSACTIONS)
         
+        try:
+            sql = '''SELECT customer_id, transaction_id, total_amount, discount_amount, payment_method, 
+                            payment_rp, payment_change, payment_remarks, tax_pct, tax_amount, created_at 
+                    FROM transactions 
+                    WHERE transaction_id = ? 
+                    LIMIT 1'''
+
+            self.cursor.execute(sql, (transaction_id,))
+            result = self.cursor.fetchone()
+
+            transaction_data = TransactionModel(
+                customer_id=result[0], transaction_id=result[1],
+                total_amount=result[2], total_discount=result[3],
+                payment_method=result[4], payment_amount=result[5],
+                payment_change=result[6], payment_remarks=result[7],
+                tax_pct=result[8], tax_amount=result[9],
+                created_at=result[10]
+            )
+
+            return ResponseMessage.ok(
+                message="Transaction fetched successfully!",
+                data=transaction_data
+            )
+
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Failed to fetch transaction {str(e)}")
+
+    
+    def get_customer_by_id(self, customer_id: str):
+        try:
+            sql = '''SELECT customer_name
+                            FROM customers 
+                     WHERE customer_id = ? 
+                     LIMIT 1'''
+            
+            self.cursor.execute(sql, (customer_id,))
+            result = self.cursor.fetchone()
+            
+            if result:
+                return ResponseMessage.ok(
+                    message="Customer fetched successfully!",
+                    data=result[0]
+                )
+            
+            return ResponseMessage.ok(
+                message="Customer not found!",
+                data=None
+            )
+            
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+    
+
+    def get_transactions_table_data(self, transaction_id: str):
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            return ResponseMessage.fail(message=ERR_PERM_R_TRANSACTIONS)
         
+        try:
+            sql = '''SELECT dt.sku, p.product_name, dt.price, dt.qty, dt.unit, dt.unit_value, dt.discount_pct, 
+                            dt.discount_rp_per_item, dt.discount_rp, dt.sub_total 
+                        FROM detail_transactions dt
+                        JOIN products p ON dt.sku = p.sku
+                        WHERE dt.transaction_id = ?'''
+            
+            detail_transactions_result = self.cursor.execute(sql, (transaction_id,))
+            
+            # If everything successful, commit the transaction
+            self.db.commit()
+
+            detail_transactions_list = []
+            detail_transactions_list = [
+                    TransactionTableItemModel(sku=row[0], product_name=row[1], price=row[2], 
+                            qty=row[3], unit=row[4], unit_value=row[5], discount_pct=row[6], 
+                            discount_rp_per_item=row[7], discount_rp=row[8], subtotal=row[9]
+                    )
+                for row in detail_transactions_result
+            ]
+
+            return ResponseMessage.ok(
+                message="Transaction detail fetched successfully!",
+                data=detail_transactions_list
+            )
+        
+        except Exception as e:
+            # If any error occurs, rollback all changes
+            self.db.rollback()
+            return ResponseMessage.fail(
+                message=f"Failed to fetch transaction detail {str(e)}",
+            )
+    
+
     def get_detail_transactions_list(self, transaction_id: str):
         if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
             return ResponseMessage.fail(message=ERR_PERM_R_TRANSACTIONS)

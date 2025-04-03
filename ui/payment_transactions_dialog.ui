@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Payment Transactions</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/pos.png</normaloff>../assets/pos.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */

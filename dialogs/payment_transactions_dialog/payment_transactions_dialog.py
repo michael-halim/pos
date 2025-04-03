@@ -39,6 +39,8 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title='Error', message="Payment cannot be less than total amount")
             return
         
+        
+        self.ui.payment_transaction_input.clear()
         self.transactions_submitted.emit({'payment_amount': payment_rp, 'payment_change': payment_change})
         self.close()
 

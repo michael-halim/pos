@@ -64,7 +64,7 @@ class SeedData:
                         ('create_products', 'Create Products'), ('read_products', 'Read Products'), ('update_products', 'Update Products'), ('delete_products', 'Delete Products'), ('import_products', 'Import Products'),
                         ('create_categories', 'Create Categories'), ('read_categories', 'Read Categories'), ('update_categories', 'Update Categories'), ('delete_categories', 'Delete Categories'),
                         ('create_suppliers', 'Create Suppliers'), ('read_suppliers', 'Read Suppliers'), ('update_suppliers', 'Update Suppliers'), ('delete_suppliers', 'Delete Suppliers'),
-                        ('create_transactions', 'Create Transactions'), ('read_transactions', 'Read Transactions'), ('update_transactions', 'Update Transactions'), ('delete_transactions', 'Delete Transactions'),
+                        ('create_transactions', 'Create Transactions'), ('read_transactions', 'Read Transactions'), ('update_transactions', 'Update Transactions'), ('delete_transactions', 'Delete Transactions'), ('print_transactions', 'Print Transactions'),
                         ('create_pending_transactions', 'Create Pending Transactions'), ('read_pending_transactions', 'Read Pending Transactions'), ('apply_pending_transactions', 'Apply Pending Transactions'),
                         ('create_purchasing', 'Create Purchasing'), ('read_purchasing', 'Read Purchasing'), ('update_purchasing', 'Update Purchasing'), ('delete_purchasing', 'Delete Purchasing'),
                         ('create_customers', 'Create Customers'), ('read_customers', 'Read Customers'), ('update_customers', 'Update Customers'), ('delete_customers', 'Delete Customers'),
@@ -91,7 +91,7 @@ class SeedData:
                         (1, 'create_products'), (1, 'read_products'), (1, 'update_products'), (1, 'delete_products'), (1, 'import_products'),
                         (1, 'create_categories'), (1, 'read_categories'), (1, 'update_categories'), (1, 'delete_categories'),
                         (1, 'create_suppliers'), (1, 'read_suppliers'), (1, 'update_suppliers'), (1, 'delete_suppliers'),
-                        (1, 'create_transactions'), (1, 'read_transactions'), (1, 'update_transactions'), (1, 'delete_transactions'),
+                        (1, 'create_transactions'), (1, 'read_transactions'), (1, 'update_transactions'), (1, 'delete_transactions'), (1, 'print_transactions'),
                         (1, 'create_pending_transactions'), (1, 'read_pending_transactions'), (1, 'apply_pending_transactions'),
                         (1, 'create_purchasing'), (1, 'read_purchasing'), (1, 'update_purchasing'), (1, 'delete_purchasing'),
                         (1, 'create_customers'), (1, 'read_customers'), (1, 'update_customers'), (1, 'delete_customers'),
@@ -163,16 +163,17 @@ class SeedData:
             number_of_transactions INT(10) NOT NULL DEFAULT 0,
             transaction_value INT(10) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NULL DEFAULT NULL
+            updated_at DATETIME NULL DEFAULT NULL,
+            updated_by INT NULL DEFAULT NULL
         );'''
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value) 
+        sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value, created_at, updated_at, updated_by) 
                         VALUES 
-                        ('CUSTOMER ONE', '081234567890', 0, 0, 0),
-                        ('CUSTOMER TWO', '081234567891', 0, 0, 0),
-                        ('CUSTOMER THREE', '081234567892', 0, 0, 0);'''
+                        ('CUSTOMER ONE', '081234567890', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL),
+                        ('CUSTOMER TWO', '081234567891', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL),
+                        ('CUSTOMER THREE', '081234567892', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL);'''
         
         self.cursor.execute(sql_insert)
 

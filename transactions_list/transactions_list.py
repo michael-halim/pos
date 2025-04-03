@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
-from transactions.transactions import TransactionsWindow
+from transactions.transactions import TransactionsWindow, TransactionTableItemModel
+from printers.printer_service import PrinterService
 
 from helper import format_number, add_prefix
 from generals.fonts import POSFonts
@@ -44,6 +45,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.ui.filter_transactions_input.textChanged.connect(self.show_transactions_data)
         self.ui.filter_detail_transactions_input.textChanged.connect(self.filter_detail_transactions)
         self.ui.create_transactions_button.clicked.connect(lambda: self.transactions_window.showMaximized())
+        self.ui.print_transactions_button.clicked.connect(self.print_transactions)
         self.ui.close_transactions_list_button.clicked.connect(lambda: self.close())
 
         # Connect Buttons
@@ -166,6 +168,42 @@ class TransactionsListWindow(QtWidgets.QWidget):
 
             else:
                 POSMessageBox.error(self, title=ERR, message=result.message)
+
+
+    def print_transactions(self):
+        selected_rows = self.transactions_table.selectedItems()
+        if not selected_rows:
+            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to print")
+            return
+
+
+        row = selected_rows[0].row()
+        transaction_id = self.transactions_table.item(row, 1).text()
+
+
+        # Get transaction data
+        transaction_result = self.transaction_list_service.get_transaction_by_id(transaction_id)
+        if not transaction_result.success:
+            POSMessageBox.error(self, title=ERR, message=transaction_result.message)
+            return
+
+
+        # Get detail transactions data
+        detail_transactions_result = self.transaction_list_service.get_transactions_table_data(transaction_id)
+        if not detail_transactions_result.success:
+            POSMessageBox.error(self, title=ERR, message=detail_transactions_result.message)
+            return
+
+
+        # Get customer data
+        customer_result = self.transaction_list_service.get_customer_by_id(transaction_result.data.customer_id)
+        if not customer_result.success:
+            POSMessageBox.error(self, title=ERR, message=customer_result.message)
+            return
+
+        # Print the transaction
+        printer_service = PrinterService()
+        printer_service.print_receipt(transaction_result.data, detail_transactions_result.data, customer_result.data)
 
 
     # Shows
