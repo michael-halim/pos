@@ -19,7 +19,9 @@ from users.users import UsersWindow
 from stock_card_list.stock_card_list import StockCardListWindow
 from stock_opname.stock_opname import StockOpnameWindow
 
+from backup_restore_database.backup_database import BackupRestoreDatabase
 from generals.build import resource_path
+
 
 class HomeWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -49,6 +51,7 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._users_dialog_window = None
         self._stock_card_list_window = None
         self._stock_opname_window = None
+        self._backup_restore_database = None
         
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -77,10 +80,12 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
         self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_window.show())
+        self.ui.backup_database_button.clicked.connect(lambda: self.backup_restore_database.export_database())  
+        self.ui.restore_database_button.clicked.connect(lambda: self.backup_restore_database.import_database())
 
         self.ui.logout_button.clicked.connect(lambda: self.close())
-        
 
+    
     # Property getters for lazy initialization
     @property
     def products_dialog(self):
@@ -192,6 +197,13 @@ class HomeWindow(QtWidgets.QMainWindow):
         if self._stock_opname_window is None:
             self._stock_opname_window = StockOpnameWindow()
         return self._stock_opname_window
+
+
+    @property
+    def backup_restore_database(self):
+        if self._backup_restore_database is None:
+            self._backup_restore_database = BackupRestoreDatabase()
+        return self._backup_restore_database
 
 
     def get_user_permissions(self) -> set:
