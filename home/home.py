@@ -37,17 +37,14 @@ class HomeWindow(QtWidgets.QMainWindow):
         # Initialize dialog attributes to None - they'll be created only when needed
         self._products_dialog = None
         self._categories_dialog = None
-        self._categories_dialog_show = None
         self._suppliers_dialog = None
         self._transactions_dialog = None
         self._transactions_list_dialog = None
         self._purchasing_dialog = None
         self._purchasing_list_dialog = None
-        self._roles_dialog = None
         self._role_permissions_dialog = None
         self._customers_dialog = None
         self._logs_dialog = None
-        self._customers_dialog_window = None
         self._users_dialog_window = None
         self._stock_card_list_window = None
         self._stock_opname_window = None
@@ -59,8 +56,6 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.transaction_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.transaction_page))
         self.ui.report_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.report_page))
         self.ui.log_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.log_page))
-        self.ui.import_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.import_page))
-        self.ui.export_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.export_page))
         self.ui.backup_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.backup_page))
         
         # Connect Button to Dialog in Master Data Menu - using property getters
@@ -71,12 +66,9 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
-        self.ui.roles_button.clicked.connect(lambda: self.roles_dialog.show())
         self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
         self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
         self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
-        self.ui.customers_dialog_button.clicked.connect(lambda: self.customers_dialog_window.show())
-        self.ui.categories_dialog_button.clicked.connect(lambda: self.categories_dialog_show.show())
         self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
         self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_window.show())
@@ -99,13 +91,6 @@ class HomeWindow(QtWidgets.QMainWindow):
         if self._categories_dialog is None:
             self._categories_dialog = CategoriesWindow()
         return self._categories_dialog
-    
-
-    @property
-    def categories_dialog_show(self):
-        if self._categories_dialog_show is None:
-            self._categories_dialog_show = CategoriesDialogWindow()
-        return self._categories_dialog_show
     
 
     @property
@@ -144,13 +129,6 @@ class HomeWindow(QtWidgets.QMainWindow):
     
 
     @property
-    def roles_dialog(self):
-        if self._roles_dialog is None:
-            self._roles_dialog = RolesDialogWindow()
-        return self._roles_dialog
-    
-
-    @property
     def role_permissions_dialog(self):
         if self._role_permissions_dialog is None:
             self._role_permissions_dialog = RolePermissionsWindow()
@@ -170,13 +148,6 @@ class HomeWindow(QtWidgets.QMainWindow):
             self._logs_dialog = LogsWindow()
         return self._logs_dialog
     
-
-    @property
-    def customers_dialog_window(self):
-        if self._customers_dialog_window is None:
-            self._customers_dialog_window = CustomersDialogWindow()
-        return self._customers_dialog_window
-
 
     @property
     def users_dialog_window(self):
