@@ -1,6 +1,7 @@
 from PyQt6 import QtWidgets, uic
 
 from home.home import HomeWindow
+from transactions.transactions import TransactionsWindow
 from login.services.login_services import LoginService
 
 from generals.message_box import POSMessageBox
@@ -29,8 +30,13 @@ class LoginWindow(QtWidgets.QWidget):
         password = self.ui.password_input.text()
 
         response = self.login_service.login(username, password)
+        
+        if username == 'kasir' and response.success:
+            self.transactions_window = TransactionsWindow()
+            self.transactions_window.showMaximized()
+            self.close()
 
-        if response.success:
+        elif response.success:
             self.home_window = HomeWindow()
             self.home_window.showMaximized()
             self.close()

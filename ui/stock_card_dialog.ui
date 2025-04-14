@@ -20,7 +20,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../assets/in-stock.png</normaloff>../assets/in-stock.png</iconset>
+    <normaloff>../assets/inventory.png</normaloff>../assets/inventory.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{

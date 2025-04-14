@@ -64,4 +64,23 @@ class LoginRepository:
         
         except Exception as e:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
+        
+
+    def get_role_id(self, user_id: int):
+        try:
+            sql = '''SELECT role_id
+                    FROM users
+                    WHERE user_id = ?
+                    LIMIT 1'''
+            user_result = self.cursor.execute(sql, (user_id,))
+
+            user = user_result.fetchone()
+
+            if user:
+                return ResponseMessage.ok(message="User found!", data=user[0])  
+            
+            return ResponseMessage.fail(message="User not found!")
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
 

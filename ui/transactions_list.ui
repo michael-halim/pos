@@ -418,7 +418,7 @@ QPushButton:disabled {
               <item>
                <layout class="QFormLayout" name="formLayout_3">
                 <item row="0" column="0">
-                 <widget class="QLabel" name="transactions_list_date_start_label_2">
+                 <widget class="QLabel" name="filter_transactions_list_label">
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
@@ -629,6 +629,9 @@ QPushButton:disabled {
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="total_transactions_input">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -639,6 +642,9 @@ QPushButton:disabled {
                <font>
                 <pointsize>12</pointsize>
                </font>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

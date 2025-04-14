@@ -150,22 +150,23 @@ class RolePermissionsRepository:
             return ResponseMessage.fail(message=ERR_PERM_U_PERMISSIONS)
         
         try:
+            print('1')
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
             role_id = roles_form_data.role_id
-
+            print('2')
             # Get permissions name
-            added_and_deleted_permissions = added_permissions + deleted_permissions
-
+            added_and_deleted_permissions: set[str] = added_permissions | deleted_permissions
+            print('added_and_deleted_permissions: ', added_and_deleted_permissions)
             # Create the correct number of placeholders for the IN clause
             placeholders = ','.join('?' * len(added_and_deleted_permissions))
 
             sql = f'''SELECT permission_id, permission_name FROM permissions WHERE permission_id IN ({placeholders})'''
-            self.cursor.execute(sql, added_and_deleted_permissions)
-           
+            self.cursor.execute(sql, tuple(added_and_deleted_permissions))
+            print('3')
             permissions_result = self.cursor.fetchall()
-
+            print('4')  
             permissions_map = {}
             old_permissions_name = []
             old_permissions_id = []
@@ -173,7 +174,7 @@ class RolePermissionsRepository:
                 permissions_map[r[0]] = r[1]
                 old_permissions_id.append(r[0])
                 old_permissions_name.append(r[1])
-            
+            print('5')
             # Get Old Role Data
             sql = '''SELECT role_name, role_description
                     FROM roles 
@@ -181,7 +182,7 @@ class RolePermissionsRepository:
                     LIMIT 1'''
             self.cursor.execute(sql, (role_id,))
             roles_result = self.cursor.fetchone()
-
+            print('6')
             old_data = {
                 'role_id': role_id,
                 'role_name': roles_result[0],
@@ -189,12 +190,12 @@ class RolePermissionsRepository:
                 'old_permissions_id': old_permissions_id,
                 'old_permissions_name': old_permissions_name
             }
-
+            print('7')
 
             # Update role
             sql = '''UPDATE roles SET role_name = ?, role_description = ? WHERE role_id = ?'''
             self.cursor.execute(sql, (roles_form_data.role_name, roles_form_data.role_description, role_id))
-
+            print('8')  
 
             # Delete role permissions
             deleted_permissions_id = []
@@ -202,7 +203,7 @@ class RolePermissionsRepository:
                 sql = '''DELETE FROM role_permissions WHERE role_id = ? AND permission_id = ?'''
                 self.cursor.execute(sql, (role_id, permission_id))
                 deleted_permissions_id.append(permission_id)
-
+            print('9')
 
             # Insert new role permissions
             added_permissions_id = []
@@ -210,13 +211,15 @@ class RolePermissionsRepository:
                 sql = '''INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)'''
                 self.cursor.execute(sql, (role_id, permission_id))      
                 added_permissions_id.append(permission_id)
-
+            print('10')
 
             # Set permissions in permission manager
             sql = 'SELECT rp.permission_id FROM role_permissions rp WHERE rp.role_id = ?'
             permissions_result = self.cursor.execute(sql, (role_id,))
-
-            self.permission_manager.set_permissions(set(r[0] for r in permissions_result))
+            print('11')
+            
+            if self.permission_manager.get_role_id() == role_id:
+                self.permission_manager.set_permissions(set(r[0] for r in permissions_result))
             
             # Insert Log
             today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -229,19 +232,18 @@ class RolePermissionsRepository:
                 'added_permissions_id': added_permissions_id,
                 'added_permissions_name': [permissions_map[x] for x in added_permissions_id]
             }
-
+            print('12')
             sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
                                         new_data, created_at, created_by) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)''' 
-            
-
+            print('13')
             self.cursor.execute(sql, (f'Role#{role_id}: {roles_form_data.role_name} updated', f'Role#{role_id}: {roles_form_data.role_name} updated successfully!', 'U', 
                                         json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
-            
+            print('14')
 
             # If everything successful, commit the transaction  
             self.db.commit()
-
+            print('15')
             return ResponseMessage.ok(message="Role updated successfully!")
 
         except Exception as e:

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Stock Opname</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/features.png</normaloff>../assets/features.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */

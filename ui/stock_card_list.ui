@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Stock Card List</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/inventory.png</normaloff>../assets/inventory.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */

@@ -28,6 +28,10 @@ class PermissionManager:
         """Set user id"""
         self._user_id = user_id
 
+    def set_role_id(self, role_id: int):
+        """Set role id"""
+        self._role_id = role_id
+
 
     def has_permission(self, permission: str) -> bool:
         """Check if user has specific permission"""
@@ -47,6 +51,11 @@ class PermissionManager:
     def get_user_id(self) -> int:
         """Get user id"""
         return self._user_id
+
+
+    def get_role_id(self) -> int:
+        """Get role id"""
+        return self._role_id
 
 
     def clear_permissions(self):

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1346</width>
-    <height>878</height>
+    <height>877</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -268,31 +268,33 @@ QPushButton {
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QWidget" name="widget" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QPushButton" name="master_data_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_11">
+      <item>
+       <widget class="QWidget" name="widget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPushButton" name="master_data_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
     color: #fff;
     background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
     border-color: rgba(13, 110, 253, 0.7);
@@ -307,27 +309,27 @@ QPushButton:disabled {
     border-color: #a8c1ff;
     color: #e6eeff;
 }</string>
-         </property>
-         <property name="text">
-          <string>Master Data</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="transaction_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
+           </property>
+           <property name="text">
+            <string>Master Data</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="transaction_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
     color: #fff;
     background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
     border-color: rgba(13, 110, 253, 0.7);
@@ -342,27 +344,27 @@ QPushButton:disabled {
     border-color: #a8c1ff;
     color: #e6eeff;
 }</string>
-         </property>
-         <property name="text">
-          <string>Transaction</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="report_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
+           </property>
+           <property name="text">
+            <string>Transaction</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="report_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
     color: #fff;
     background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
     border-color: rgba(13, 110, 253, 0.7);
@@ -377,27 +379,27 @@ QPushButton:disabled {
     border-color: #a8c1ff;
     color: #e6eeff;
 }</string>
-         </property>
-         <property name="text">
-          <string>Report</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="settings_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
+           </property>
+           <property name="text">
+            <string>Report</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="settings_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
     color: #fff;
     background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
     border-color: rgba(13, 110, 253, 0.7);
@@ -412,27 +414,27 @@ QPushButton:disabled {
     border-color: #a8c1ff;
     color: #e6eeff;
 }</string>
-         </property>
-         <property name="text">
-          <string>Settings</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="log_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
+           </property>
+           <property name="text">
+            <string>Settings</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="log_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
     color: #fff;
     background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
     border-color: rgba(13, 110, 253, 0.7);
@@ -447,27 +449,27 @@ QPushButton:disabled {
     border-color: #a8c1ff;
     color: #e6eeff;
 }</string>
-         </property>
-         <property name="text">
-          <string>Log</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="import_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
+           </property>
+           <property name="text">
+            <string>Log</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="backup_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton{
     color: #fff;
     background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
     border-color: rgba(13, 110, 253, 0.7);
@@ -482,110 +484,40 @@ QPushButton:disabled {
     border-color: #a8c1ff;
     color: #e6eeff;
 }</string>
-         </property>
-         <property name="text">
-          <string>Import</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="export_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
-    color: #fff;
-    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
-    border-color: rgba(13, 110, 253, 0.7);
-}
-QPushButton:hover {
-    background-color: rgba(11, 94, 215, 0.9);
-    border-color: rgba(10, 88, 202, 0.9);
-    opacity: 0.95;
-}
-QPushButton:disabled {
-    background-color: #a8c1ff;
-    border-color: #a8c1ff;
-    color: #e6eeff;
-}</string>
-         </property>
-         <property name="text">
-          <string>Export</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="backup_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton{
-    color: #fff;
-    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
-    border-color: rgba(13, 110, 253, 0.7);
-}
-QPushButton:hover {
-    background-color: rgba(11, 94, 215, 0.9);
-    border-color: rgba(10, 88, 202, 0.9);
-    opacity: 0.95;
-}
-QPushButton:disabled {
-    background-color: #a8c1ff;
-    border-color: #a8c1ff;
-    color: #e6eeff;
-}</string>
-         </property>
-         <property name="text">
-          <string>Backup</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>448</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="logout_button">
-         <property name="minimumSize">
-          <size>
-           <width>120</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
+           </property>
+           <property name="text">
+            <string>Backup</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>448</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="logout_button">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
     color: #fff;
     background-color: #dc3545;
     border-color: #dc3545;
@@ -594,663 +526,1181 @@ QPushButton:hover {
     background-color: #bb2d3b;
     border-color: #b02a37;
 }</string>
-         </property>
-         <property name="text">
-          <string>Logout</string>
-         </property>
-         <property name="icon">
-          <iconset>
-           <normaloff>../assets/logout.png</normaloff>../assets/logout.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>14</width>
-           <height>14</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QStackedWidget" name="stackedWidget">
-      <property name="currentIndex">
-       <number>1</number>
-      </property>
-      <widget class="QWidget" name="master_data_page">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QWidget" name="widget_2" native="true">
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QWidget" name="widget_4" native="true">
-             <property name="styleSheet">
-              <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-             </property>
-             <widget class="QLabel" name="label_2">
-              <property name="geometry">
-               <rect>
-                <x>500</x>
-                <y>330</y>
-                <width>291</width>
-                <height>81</height>
-               </rect>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
-              </property>
-              <property name="text">
-               <string>MASTER DATA</string>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="products_button">
-              <property name="geometry">
-               <rect>
-                <x>50</x>
-                <y>50</y>
-                <width>191</width>
-                <height>61</height>
-               </rect>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Products</string>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="categories_button">
-              <property name="geometry">
-               <rect>
-                <x>280</x>
-                <y>50</y>
-                <width>191</width>
-                <height>61</height>
-               </rect>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Categories</string>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="suppliers_button">
-              <property name="geometry">
-               <rect>
-                <x>530</x>
-                <y>50</y>
-                <width>191</width>
-                <height>61</height>
-               </rect>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Suppliers</string>
-              </property>
-             </widget>
-             <widget class="QPushButton" name="categories_dialog_button">
-              <property name="geometry">
-               <rect>
-                <x>290</x>
-                <y>170</y>
-                <width>251</width>
-                <height>71</height>
-               </rect>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Categories Dialog</string>
-              </property>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="transaction_page">
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <item>
-         <widget class="QWidget" name="widget_5" native="true">
-          <property name="styleSheet">
-           <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-          </property>
-          <widget class="QLabel" name="label_3">
-           <property name="geometry">
-            <rect>
-             <x>260</x>
-             <y>190</y>
-             <width>291</width>
-             <height>81</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
            </property>
            <property name="text">
-            <string>Transaction</string>
+            <string>Logout</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>C:/Users/micha/.designer/assets/logout.png</normaloff>C:/Users/micha/.designer/assets/logout.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>14</width>
+             <height>14</height>
+            </size>
            </property>
           </widget>
-          <widget class="QPushButton" name="transactions_button">
-           <property name="geometry">
-            <rect>
-             <x>60</x>
-             <y>90</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Transactions</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="transactions_list_button">
-           <property name="geometry">
-            <rect>
-             <x>290</x>
-             <y>90</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Transactions List</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="purchasing_button">
-           <property name="geometry">
-            <rect>
-             <x>530</x>
-             <y>90</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Purchasing</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="purchasing_list_button">
-           <property name="geometry">
-            <rect>
-             <x>760</x>
-             <y>90</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Purchasing List</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="roles_button">
-           <property name="geometry">
-            <rect>
-             <x>50</x>
-             <y>280</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Roles</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="role_permissions_button">
-           <property name="geometry">
-            <rect>
-             <x>300</x>
-             <y>280</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Role Permissions</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="customers_button">
-           <property name="geometry">
-            <rect>
-             <x>540</x>
-             <y>280</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Customers</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="logs_button">
-           <property name="geometry">
-            <rect>
-             <x>770</x>
-             <y>280</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Logs</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="customers_dialog_button">
-           <property name="geometry">
-            <rect>
-             <x>50</x>
-             <y>380</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Customers Dialog</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="users_dialog_button">
-           <property name="geometry">
-            <rect>
-             <x>300</x>
-             <y>380</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Users</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="stock_card_list_button">
-           <property name="geometry">
-            <rect>
-             <x>540</x>
-             <y>380</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Stock Card</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="stock_opname_button">
-           <property name="geometry">
-            <rect>
-             <x>770</x>
-             <y>380</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Stock Opname</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="backup_database_button">
-           <property name="geometry">
-            <rect>
-             <x>50</x>
-             <y>480</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Backup</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="restore_database_button">
-           <property name="geometry">
-            <rect>
-             <x>300</x>
-             <y>480</y>
-             <width>191</width>
-             <height>61</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton{
-	color: white;
-	font-size:24px;
-}</string>
-           </property>
-           <property name="text">
-            <string>Restore</string>
-           </property>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="settings_page">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QWidget" name="widget_3" native="true">
-          <property name="styleSheet">
-           <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-          </property>
-          <widget class="QLabel" name="label">
-           <property name="geometry">
-            <rect>
-             <x>260</x>
-             <y>190</y>
-             <width>291</width>
-             <height>81</height>
-            </rect>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
-           </property>
-           <property name="text">
-            <string>SETTINGS</string>
-           </property>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="report_page">
-       <widget class="QWidget" name="widget_6" native="true">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1166</width>
-          <height>801</height>
-         </rect>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>3</number>
         </property>
-        <property name="styleSheet">
-         <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-        </property>
-        <widget class="QLabel" name="label_4">
-         <property name="geometry">
-          <rect>
-           <x>260</x>
-           <y>190</y>
-           <width>291</width>
-           <height>81</height>
-          </rect>
-         </property>
+        <widget class="QWidget" name="master_data_page">
          <property name="styleSheet">
-          <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
+          <string notr="true"/>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_11">
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_2" native="true">
+            <layout class="QGridLayout" name="gridLayout_12">
+             <item row="0" column="0">
+              <widget class="QWidget" name="widget_4" native="true">
+               <property name="styleSheet">
+                <string notr="true">QWidget{
+	background-color:white;
 }</string>
-         </property>
-         <property name="text">
-          <string>REPORT PAGE</string>
-         </property>
+               </property>
+               <layout class="QGridLayout" name="gridLayout_8">
+                <item row="0" column="0">
+                 <layout class="QVBoxLayout" name="verticalLayout">
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout">
+                    <item>
+                     <widget class="QPushButton" name="products_button">
+                      <property name="minimumSize">
+                       <size>
+                        <width>500</width>
+                        <height>200</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>30</pointsize>
+                       </font>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>PointingHandCursor</cursorShape>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::DefaultContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Products</string>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../assets/boxes-white.png</normaloff>../assets/boxes-white.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>35</width>
+                        <height>35</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="categories_button">
+                      <property name="minimumSize">
+                       <size>
+                        <width>500</width>
+                        <height>200</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>30</pointsize>
+                       </font>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>PointingHandCursor</cursorShape>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Categories</string>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../assets/categorization-white.png</normaloff>../assets/categorization-white.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>35</width>
+                        <height>35</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <layout class="QHBoxLayout" name="horizontalLayout_6">
+                    <item>
+                     <widget class="QPushButton" name="suppliers_button">
+                      <property name="minimumSize">
+                       <size>
+                        <width>500</width>
+                        <height>200</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>30</pointsize>
+                       </font>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>PointingHandCursor</cursorShape>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Suppliers</string>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../assets/supplier-white.png</normaloff>../assets/supplier-white.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>35</width>
+                        <height>35</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="customers_button">
+                      <property name="minimumSize">
+                       <size>
+                        <width>500</width>
+                        <height>200</height>
+                       </size>
+                      </property>
+                      <property name="font">
+                       <font>
+                        <pointsize>30</pointsize>
+                       </font>
+                      </property>
+                      <property name="cursor">
+                       <cursorShape>PointingHandCursor</cursorShape>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Customers</string>
+                      </property>
+                      <property name="icon">
+                       <iconset>
+                        <normaloff>../assets/rating-white.png</normaloff>../assets/rating-white.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>35</width>
+                        <height>35</height>
+                       </size>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_5">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="transaction_page">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QWidget" name="widget_5" native="true">
+            <property name="styleSheet">
+             <string notr="true">QWidget{
+	background-color:white;
+}</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_7">
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <item>
+                  <widget class="QPushButton" name="transactions_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Transactions</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/pos-white.png</normaloff>../assets/pos-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="transactions_list_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Transactions List</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/transaction-history-white.png</normaloff>../assets/transaction-history-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <item>
+                  <widget class="QPushButton" name="purchasing_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Purchasing</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/purchase-white.png</normaloff>../assets/purchase-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="purchasing_list_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Purchasing List</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/purchasing-white.png</normaloff>../assets/purchasing-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                 <item>
+                  <widget class="QPushButton" name="stock_opname_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Stock Opname</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/features-white.png</normaloff>../assets/features-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>40</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="stock_card_list_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Stock Card</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/inventory-white.png</normaloff>../assets/inventory-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>40</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_6">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="settings_page">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QWidget" name="widget_3" native="true">
+            <property name="styleSheet">
+             <string notr="true">QWidget{
+	background-color:white;
+}</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_6">
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QPushButton" name="users_dialog_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Users</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/group-white.png</normaloff>../assets/group-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="role_permissions_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Role Permissions</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="report_page">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_6" native="true">
+            <property name="styleSheet">
+             <string notr="true">QWidget{
+	background-color:white;
+}</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_12">
+                 <item>
+                  <widget class="QPushButton" name="sales_per_item_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Sales per Item</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/item-white.png</normaloff>../assets/item-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>40</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="cashier_sales_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Cashier Sales</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/analytics-white.png</normaloff>../assets/analytics-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_13">
+                 <item>
+                  <widget class="QPushButton" name="back_office_sales_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Back Office Sales</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/admin-panel-white.png</normaloff>../assets/admin-panel-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="stock_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Stock</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_14">
+                 <item>
+                  <widget class="QPushButton" name="profit_and_loss_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Profit and Loss</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="monthly_sales_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Monthly Sales</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="log_page">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_7" native="true">
+            <property name="styleSheet">
+             <string notr="true">QWidget{
+	background-color:white;
+}</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <item>
+                  <widget class="QPushButton" name="logs_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Logs</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="backup_page">
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="0">
+           <widget class="QWidget" name="widget_10" native="true">
+            <property name="styleSheet">
+             <string notr="true">QWidget{
+	background-color:white;
+}</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_9">
+             <item row="0" column="0">
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_10">
+                 <item>
+                  <widget class="QPushButton" name="backup_database_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Backup</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="restore_database_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Restore</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_4">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </widget>
-      </widget>
-      <widget class="QWidget" name="log_page">
-       <widget class="QWidget" name="widget_7" native="true">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1166</width>
-          <height>801</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-        </property>
-        <widget class="QLabel" name="label_5">
-         <property name="geometry">
-          <rect>
-           <x>260</x>
-           <y>190</y>
-           <width>291</width>
-           <height>81</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
-         </property>
-         <property name="text">
-          <string>LOG PAGE</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="import_page">
-       <widget class="QWidget" name="widget_8" native="true">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1166</width>
-          <height>801</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-        </property>
-        <widget class="QLabel" name="label_6">
-         <property name="geometry">
-          <rect>
-           <x>260</x>
-           <y>190</y>
-           <width>291</width>
-           <height>81</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
-         </property>
-         <property name="text">
-          <string>IMPORT PAGE</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="export_page">
-       <widget class="QWidget" name="widget_9" native="true">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1166</width>
-          <height>801</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-        </property>
-        <widget class="QLabel" name="label_7">
-         <property name="geometry">
-          <rect>
-           <x>260</x>
-           <y>190</y>
-           <width>291</width>
-           <height>81</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
-         </property>
-         <property name="text">
-          <string>EXPORT PAGE</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="backup_page">
-       <widget class="QWidget" name="widget_10" native="true">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1166</width>
-          <height>801</height>
-         </rect>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QWidget{
-	background-color:grey;
-}</string>
-        </property>
-        <widget class="QLabel" name="label_8">
-         <property name="geometry">
-          <rect>
-           <x>260</x>
-           <y>190</y>
-           <width>291</width>
-           <height>81</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QLabel{
-	font-size:24px;
-	font-weight:bold;
-	color:white;
-}</string>
-         </property>
-         <property name="text">
-          <string>BACKUP PAGE</string>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-     </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

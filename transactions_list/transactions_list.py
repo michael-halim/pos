@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 from transactions_list.services.transactions_list_services import TransactionListService
-from transactions.transactions import TransactionsWindow, TransactionTableItemModel
+from transactions.transactions import TransactionsWindow
 from printers.printer_service import PrinterService
 
 from helper import format_number, add_prefix
@@ -74,7 +74,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.detail_transactions_table.setSelectionBehavior(SELECT_ROWS)
         self.detail_transactions_table.setSelectionMode(SINGLE_SELECTION)
 
-        # Set wholesale transactions table to be read only
+        # Set transactions and detail transactions table to be read only
         self.transactions_table.setEditTriggers(NO_EDIT_TRIGGERS)
         self.detail_transactions_table.setEditTriggers(NO_EDIT_TRIGGERS)
 

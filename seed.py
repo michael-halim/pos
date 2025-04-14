@@ -73,7 +73,10 @@ class SeedData:
                         ('create_permissions', 'Create Permissions'), ('read_permissions', 'Read Permissions'), ('update_permissions', 'Update Permissions'), ('delete_permissions', 'Delete Permissions'),
                         ('create_logs', 'Create Logs'), ('read_logs', 'Read Logs'), ('update_logs', 'Update Logs'), ('delete_logs', 'Delete Logs'),
                         ('read_stock_card', 'Read Stock Card'),
-                        ('read_stock_opname', 'Read Stock Opname'), ('export_stock_opname', 'Export Stock Opname');'''
+                        ('read_stock_opname', 'Read Stock Opname'), ('export_stock_opname', 'Export Stock Opname'),
+                        ('read_back_office_sales_report', 'Read Back Office Sales Report'),
+                        ('read_cashier_sales_report', 'Read Cashier Sales Report'),
+                        ('read_profit_and_loss_report', 'Read Profit and Loss Report');'''
 
         self.cursor.execute(sql_insert)
 
@@ -100,7 +103,10 @@ class SeedData:
                         (1, 'create_permissions'), (1, 'read_permissions'), (1, 'update_permissions'), (1, 'delete_permissions'),
                         (1, 'create_logs'), (1, 'read_logs'), (1, 'update_logs'), (1, 'delete_logs'),
                         (1, 'read_stock_card'),
-                        (1, 'read_stock_opname'), (1, 'export_stock_opname');'''
+                        (1, 'read_stock_opname'), (1, 'export_stock_opname'),
+                        (1, 'read_back_office_sales_report'),
+                        (1, 'read_cashier_sales_report'),
+                        (1, 'read_profit_and_loss_report');'''
         
         self.cursor.execute(sql_insert)
 
@@ -151,7 +157,9 @@ class SeedData:
                         VALUES 
                         (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, NULL, NULL);'''
 
-        self.cursor.execute(sql_insert, ('admin', password_hash, salt, 1, True))     
+        self.cursor.execute(sql_insert, ('admin', password_hash, salt, 1, True)) 
+        self.cursor.execute(sql_insert, ('kasir', password_hash, salt, 2, True)) 
+        self.cursor.execute(sql_insert, ('manager', password_hash, salt, 3, True)) 
 
 
     def create_customers_table(self):

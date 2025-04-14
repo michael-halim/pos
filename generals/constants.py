@@ -10,6 +10,10 @@ SINGLE_SELECTION = QAbstractItemView.SelectionMode.SingleSelection
 NO_EDIT_TRIGGERS = QTableWidget.EditTrigger.NoEditTriggers
 DATE_EDIT_NO_BUTTONS = QDateEdit.ButtonSymbols.NoButtons
 
+# Backoffice and Cashier
+BACKOFFICE_ID = 1
+CASHIER_ID = 2
+
 DATE_FORMAT_DDMMYYYY = "dd/MM/yyyy"
 TAX_TABLE_KEY = '= TAX ='
 
@@ -73,3 +77,8 @@ PERM_R_STOCK_CARD = 'read_stock_card'
 
 PERM_R_STOCK_OPNAME = 'read_stock_opname'
 PERM_E_STOCK_OPNAME = 'export_stock_opname'
+
+PERM_R_BACK_OFFICE_SALES_REPORT = 'read_back_office_sales_report'
+PERM_R_CASHIER_SALES_REPORT = 'read_cashier_sales_report'
+PERM_R_PROFIT_AND_LOSS_REPORT = 'read_profit_and_loss_report'
+PERM_R_SALES_PER_ITEM_REPORT = 'read_sales_per_item_report'

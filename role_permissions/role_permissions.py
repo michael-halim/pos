@@ -182,6 +182,9 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         added_data = current_permissions - past_permissions_result.data
         deleted_data = past_permissions_result.data - current_permissions
 
+        print('added_data: ', added_data)
+        print('deleted_data: ', deleted_data)
+        print('roles_form_data: ', roles_form_data)
         result = self.role_permissions_service.update_role_permissions(roles_form_data, added_data, deleted_data)
         if result.success:
             POSMessageBox.info(self, title=OK, message=result.message)

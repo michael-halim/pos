@@ -45,6 +45,7 @@ class RolePermissionsService:
         if not self.permission_manager.has_permission(PERM_U_PERMISSIONS):
             return ResponseMessage.fail(message=ERR_PERM_U_PERMISSIONS)
 
+        print('role permissions services')
         return self.repository.update_role_permissions(roles_form_data, added_permissions, deleted_permissions)
 
 
