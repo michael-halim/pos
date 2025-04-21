@@ -14,7 +14,7 @@ class LoginRepository:
             # Get user_id, user_salt, password_hash
             sql = '''SELECT u.user_salt, u.password_hash, u.role_id
                         FROM users u
-                        WHERE u.username = ?
+                        WHERE u.username = ? and u.is_active = 1
                         LIMIT 1'''
             user_result = self.cursor.execute(sql, (username,))
 
@@ -51,7 +51,7 @@ class LoginRepository:
         try:
             sql = '''SELECT user_id
                     FROM users
-                    WHERE username = ?
+                    WHERE username = ? and is_active = 1
                     LIMIT 1'''
             user_result = self.cursor.execute(sql, (username,))
 
@@ -70,7 +70,7 @@ class LoginRepository:
         try:
             sql = '''SELECT role_id
                     FROM users
-                    WHERE user_id = ?
+                    WHERE user_id = ? and is_active = 1
                     LIMIT 1'''
             user_result = self.cursor.execute(sql, (user_id,))
 

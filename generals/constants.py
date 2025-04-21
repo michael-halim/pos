@@ -75,10 +75,15 @@ PERM_D_LOGS = 'delete_logs'
 
 PERM_R_STOCK_CARD = 'read_stock_card'
 
+PERM_C_STOCK_OPNAME = 'create_stock_opname'
 PERM_R_STOCK_OPNAME = 'read_stock_opname'
+PERM_U_STOCK_OPNAME = 'update_stock_opname'
+PERM_D_STOCK_OPNAME = 'delete_stock_opname'
 PERM_E_STOCK_OPNAME = 'export_stock_opname'
 
 PERM_R_BACK_OFFICE_SALES_REPORT = 'read_back_office_sales_report'
 PERM_R_CASHIER_SALES_REPORT = 'read_cashier_sales_report'
 PERM_R_PROFIT_AND_LOSS_REPORT = 'read_profit_and_loss_report'
 PERM_R_SALES_PER_ITEM_REPORT = 'read_sales_per_item_report'
+PERM_R_MONTHLY_SALES_REPORT = 'read_monthly_sales_report'
+PERM_R_DAILY_SALES_REPORT = 'read_daily_sales_report'

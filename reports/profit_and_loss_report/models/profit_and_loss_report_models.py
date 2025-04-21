@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-from typing import Optional
 
 @dataclass
 class ProfitAndLossReportModel:
-    id: int
-    name: str
-    description: Optional[str] = None
+    period: int
+    profit: int
+    accumulated_profit: int

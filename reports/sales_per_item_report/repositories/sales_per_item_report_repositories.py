@@ -18,16 +18,19 @@ class SalesPerItemReportRepository:
         try:
             sales_per_item_report = []
             if category_id is None:
-                sql = '''SELECT t.transaction_id, t.created_at, u.username, dt.price, dt.unit_value, dt.unit, dt.discount_pct, dt.discount_rp_per_item, dt.discount_rp, dt.sub_total
+                sql = '''SELECT t.transaction_id, t.created_at, u.username, dt.qty, dt.price, dt.unit, dt.unit_value, dt.discount_pct, 
+                                dt.discount_rp_per_item, dt.discount_rp, dt.sub_total
                         FROM detail_transactions dt
                         JOIN transactions t ON t.transaction_id = dt.transaction_id
                         JOIN products p ON p.sku = dt.sku
                         JOIN users u ON u.user_id = t.created_by
-                        WHERE dt.sku = ? AND t.created_at >= ? AND t.created_at <= ?'''
+                        WHERE dt.sku = ? AND t.created_at >= ? AND t.created_at <= ?
+                        ORDER BY t.created_at ASC, dt.unit_value DESC'''
                 sales_per_item_report = self.cursor.execute(sql, (sku, start_date, end_date))
 
             else:
-                sql = '''SELECT t.transaction_id, t.created_at, u.username, dt.price, dt.unit_value, dt.unit, dt.discount_pct, dt.discount_rp_per_item, dt.discount_rp, dt.sub_total
+                sql = '''SELECT t.transaction_id, t.created_at, u.username, dt.qty, dt.price, dt.unit, dt.unit_value, dt.discount_pct, 
+                                dt.discount_rp_per_item, dt.discount_rp, dt.sub_total
                         FROM detail_transactions dt
                         JOIN transactions t ON t.transaction_id = dt.transaction_id
                         JOIN products p ON p.sku = dt.sku
@@ -40,9 +43,9 @@ class SalesPerItemReportRepository:
             sales_per_item_report = [
                 SalesPerItemReportModel(
                     transaction_id=row[0], created_at=row[1], username=row[2],
-                    price=row[3], unit_value=row[4], unit=row[5],
-                    discount_pct=row[6], discount_rp_per_item=row[7], discount_rp=row[8],
-                    sub_total=row[9]
+                    qty=row[3], price=row[4], unit=row[5], unit_value=row[6],
+                    discount_pct=row[7], discount_rp_per_item=row[8], discount_rp=row[9],
+                    sub_total=row[10]
                 )
                 for row in sales_per_item_report
             ]

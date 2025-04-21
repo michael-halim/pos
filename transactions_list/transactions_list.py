@@ -44,7 +44,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Connect Filter Transactions
         self.ui.filter_transactions_input.textChanged.connect(self.show_transactions_data)
         self.ui.filter_detail_transactions_input.textChanged.connect(self.filter_detail_transactions)
-        self.ui.create_transactions_button.clicked.connect(lambda: self.transactions_window.showMaximized())
+        self.ui.create_transactions_button.clicked.connect(self.create_transactions)
         self.ui.print_transactions_button.clicked.connect(self.print_transactions)
         self.ui.close_transactions_list_button.clicked.connect(lambda: self.close())
 
@@ -124,6 +124,14 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.show_transactions_data()
 
     
+    def create_transactions(self):
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_TRANSACTIONS)
+            return
+        
+        self.transactions_window.showMaximized()
+
+
     def edit_transactions(self):
         if not self.permission_manager.has_permission(PERM_U_TRANSACTIONS):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_TRANSACTIONS)

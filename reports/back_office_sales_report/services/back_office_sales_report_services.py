@@ -1,6 +1,7 @@
 from datetime import datetime   
 
 from reports.back_office_sales_report.repositories.back_office_sales_report_repositories import BackOfficeSalesReportRepository
+
 from generals.permission_manager import PermissionManager
 from generals.constants import PERM_R_BACK_OFFICE_SALES_REPORT
 from generals.messages import ERR_PERM_R_BACK_OFFICE_SALES_REPORT

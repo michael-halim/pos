@@ -127,7 +127,8 @@ class LogsWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(log.log_type),
                 QtWidgets.QTableWidgetItem(log.log_description),
                 QtWidgets.QTableWidgetItem(log.old_data),
-                QtWidgets.QTableWidgetItem(log.new_data)
+                QtWidgets.QTableWidgetItem(log.new_data),
+                QtWidgets.QTableWidgetItem(log.created_by)
             ]
             
             for col, item in enumerate(table_items):

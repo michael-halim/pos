@@ -18,10 +18,11 @@ from reports.sales_per_item_report.sales_per_item_report import SalesPerItemRepo
 from reports.back_office_sales_report.back_office_sales_report import BackOfficeSalesReportWindow
 from reports.cashier_sales_report.cashier_sales_report import CashierSalesReportWindow
 from reports.profit_and_loss_report.profit_and_loss_report import ProfitAndLossReportWindow
-
+from reports.daily_sales_report.daily_sales_report import DailySalesReportWindow
+from reports.monthly_sales_report.monthly_sales_report import MonthlySalesReportWindow
 from backup_restore_database.backup_database import BackupRestoreDatabase
 from generals.build import resource_path
-
+from stock_opname_list.stock_opname_list import StockOpnameListWindow
 
 class HomeWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -75,15 +76,22 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
         self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
-        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_window.show())
-        c = SalesPerItemReportWindow()
-        self.ui.sales_per_item_report_button.clicked.connect(lambda: c.showMaximized())
 
-        a = BackOfficeSalesReportWindow()
-        b = CashierSalesReportWindow()
-        self.ui.back_office_sales_report_button.clicked.connect(lambda: a.showMaximized())
-        self.ui.cashier_sales_report_button.clicked.connect(lambda: b.showMaximized())
-        self.ui.profit_and_loss_report_button.clicked.connect(lambda: self.profit_and_loss_report_window.showMaximized())
+        so = StockOpnameListWindow()
+
+        self.ui.stock_opname_button.clicked.connect(lambda: so.show())
+        
+        self.ui.sales_per_item_report_button.clicked.connect(lambda: self.sales_per_item_report_window.showMaximized())
+        self.ui.back_office_sales_report_button.clicked.connect(lambda: self.back_office_sales_report_window.showMaximized())
+        self.ui.cashier_sales_report_button.clicked.connect(lambda: self.cashier_sales_report_window.showMaximized())
+
+        daily = DailySalesReportWindow()
+        monthly = MonthlySalesReportWindow()
+        pnl = ProfitAndLossReportWindow()
+
+        self.ui.profit_and_loss_report_button.clicked.connect(lambda: pnl.show())
+        self.ui.daily_sales_report_button.clicked.connect(lambda: daily.show())
+        self.ui.monthly_sales_report_button.clicked.connect(lambda: monthly.show())
         self.ui.backup_database_button.clicked.connect(lambda: self.backup_restore_database.export_database())  
         self.ui.restore_database_button.clicked.connect(lambda: self.backup_restore_database.import_database())
 

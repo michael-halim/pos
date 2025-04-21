@@ -1,11 +1,12 @@
 from PyQt6 import QtWidgets, uic
 from datetime import datetime, timedelta
 
-from helper import format_number, add_prefix
-
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
+from reports.back_office_sales_report.services.back_office_sales_report_services import BackOfficeSalesReportService
 
+from helper import format_number, add_prefix
 from generals.message_box import POSMessageBox
+from generals.build import resource_path
 from generals.fonts import POSFonts
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
@@ -17,10 +18,6 @@ from generals.messages import (
     PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
-
-from generals.build import resource_path
-
-from reports.back_office_sales_report.services.back_office_sales_report_services import BackOfficeSalesReportService
 
 
 class BackOfficeSalesReportWindow(QtWidgets.QWidget):

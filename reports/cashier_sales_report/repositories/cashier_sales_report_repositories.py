@@ -2,6 +2,7 @@ from datetime import datetime
 from connect_db import DatabaseConnection
 
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
+
 from generals.permission_manager import PermissionManager
 from generals.constants import PERM_R_CASHIER_SALES_REPORT
 from generals.messages import ERR_PERM_R_CASHIER_SALES_REPORT

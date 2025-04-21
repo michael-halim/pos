@@ -1,9 +1,12 @@
 from PyQt6 import QtWidgets, uic
 from datetime import datetime, timedelta
 
+from reports.sales_per_item_report.services.sales_per_item_report_services import SalesPerItemReportService
+from reports.sales_per_item_report.models.sales_per_item_report_models import SalesPerItemReportModel
 from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 
 from helper import format_number, add_prefix
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import ( 
@@ -12,23 +15,24 @@ from generals.constants import (
     PERM_R_SALES_PER_ITEM_REPORT
 )
 from generals.messages import (
-    ERR, OK, PERM_DENIED, ERR_PERM_R_SALES_PER_ITEM_REPORT
+    ERR_PERM_R_SALES_PER_ITEM_REPORT, PERM_DENIED
 )
-from generals.build import resource_path
+from generals.permission_manager import PermissionManager
 
-from reports.sales_per_item_report.services.sales_per_item_report_services import SalesPerItemReportService
-from reports.sales_per_item_report.models.sales_per_item_report_models import SalesPerItemReportModel
 
 class SalesPerItemReportWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_SALES_PER_ITEM_REPORT):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/sales_per_item_report.ui'), self)
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
-
 
         # Handle product selected from dialog
         self.products_dialog.product_selected.connect(self.handle_product_selected)
@@ -137,12 +141,13 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
         self.set_sales_per_item_table_data(sales_per_item_result.data)
 
 
-
     # Setters
     # ==============
     def set_sales_per_item_table_data(self, data: list[SalesPerItemReportModel]):
+        # Clear the table
         self.sales_per_item_table.setRowCount(0)
-
+        total_sales = 0
+        list_of_items_sold = {}
         for sales in data:
             current_row = self.sales_per_item_table.rowCount()
             self.sales_per_item_table.insertRow(current_row)
@@ -154,18 +159,44 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
                 QtWidgets.QTableWidgetItem(sales.transaction_id),
                 QtWidgets.QTableWidgetItem(formatted_date),
                 QtWidgets.QTableWidgetItem(sales.username),
+                QtWidgets.QTableWidgetItem(str(sales.qty)),
+                QtWidgets.QTableWidgetItem(str(sales.unit)),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(sales.price))),
                 QtWidgets.QTableWidgetItem(str(sales.unit_value)),
-                QtWidgets.QTableWidgetItem(str(sales.unit)),
                 QtWidgets.QTableWidgetItem(str(sales.discount_pct)),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(sales.discount_rp_per_item))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(sales.discount_rp))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(sales.sub_total)))
             ]
 
+            # Add Total Sales
+            total_sales += sales.sub_total
+
+            # Add List of Items Sold
+            if sales.unit_value not in list_of_items_sold:
+                list_of_items_sold[sales.unit] = {
+                    'unit' : sales.unit,
+                    'unit_value' : sales.unit_value,
+                    'unit_sold' : sales.qty,
+                }
+            else:
+                list_of_items_sold[sales.unit_value]['unit_sold'] += sales.qty
+
+
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.sales_per_item_table.setItem(current_row, col, item)
+
+
+        # Set total sales
+        self.ui.total_transactions_input.setText(add_prefix(format_number(total_sales)))
+
+        # Sorting in descending order
+        sorted_dict_desc = dict(sorted(list_of_items_sold.items(), key=lambda item: item[1]['unit_value'], reverse=True))
+
+        # Set list of items sold
+        items_sold = [ f"{value['unit_sold']} {value['unit']}" for _, value in sorted_dict_desc.items() ]
+        self.ui.total_items_sold_input.setText(' '.join(items_sold))
 
         self.sales_per_item_table.setSortingEnabled(True)
 

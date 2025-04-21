@@ -1,7 +1,7 @@
 from datetime import datetime   
 
-
 from reports.cashier_sales_report.repositories.cashier_sales_report_repositories import CashierSalesReportRepository
+
 from generals.permission_manager import PermissionManager
 from generals.constants import PERM_R_CASHIER_SALES_REPORT
 from generals.messages import ERR_PERM_R_CASHIER_SALES_REPORT

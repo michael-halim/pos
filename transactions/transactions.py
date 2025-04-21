@@ -22,10 +22,12 @@ from generals.fonts import POSFonts
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
-    TAX_TABLE_KEY, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS
+    TAX_TABLE_KEY, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS,
+    PERM_R_PENDING_TRANSACTIONS
 ) 
 from generals.messages import ( 
-    ERR, OK, WARNING, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, PERM_DENIED
+    ERR, OK, WARNING, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, 
+    ERR_PERM_R_PENDING_TRANSACTIONS, PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
 
@@ -48,18 +50,25 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
-        self.pending_transactions_dialog = PendingTransactionsDialogWindow()
         self.customers_dialog = CustomersDialogWindow()
-        self.payment_transactions_dialog = PaymentTransactionsDialogWindow()
 
-        # Handle payment transactions from dialog
-        self.payment_transactions_dialog.transactions_submitted.connect(self.handle_submit_transactions)
+        if self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            self.payment_transactions_dialog = PaymentTransactionsDialogWindow()
+
+            # Handle payment transactions from dialog
+            self.payment_transactions_dialog.transactions_submitted.connect(self.handle_submit_transactions)
+
+
+        # Only show pending transactions dialog if user has permission
+        if self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            self.pending_transactions_dialog = PendingTransactionsDialogWindow()
+            
+            # Handle pending transactions from dialog
+            self.pending_transactions_dialog.pending_transaction_selected.connect(self.handle_pending_transaction_selected)
+        
 
         # Handle product selected from dialog
         self.products_dialog.product_selected.connect(self.handle_product_selected)
-
-        # Handle pending transactions from dialog
-        self.pending_transactions_dialog.pending_transaction_selected.connect(self.handle_pending_transaction_selected)
 
         # Handle customer selected from dialog
         self.customers_dialog.customer_selected.connect(self.handle_customer_selected)
@@ -81,7 +90,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.delete_transaction_button.clicked.connect(self.delete_detail_transaction)
         self.ui.submit_transaction_button.clicked.connect(self.trigger_submit_payment_transactions)
         self.ui.pending_transaction_button.clicked.connect(self.create_pending_transaction)
-        self.ui.open_pending_transaction_button.clicked.connect(lambda: self.pending_transactions_dialog.showMaximized())
+        self.ui.open_pending_transaction_button.clicked.connect(self.open_pending_transaction_dialog)
         self.ui.find_customer_transaction_button.clicked.connect(lambda: self.customers_dialog.show())
 
         # Set date input
@@ -404,6 +413,14 @@ class TransactionsWindow(QtWidgets.QWidget):
         total_amount: int = self.calculate_total_transactions()
         self.payment_transactions_dialog.set_payment(total_amount)
         self.payment_transactions_dialog.show()
+
+
+    def open_pending_transaction_dialog(self):
+        if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PENDING_TRANSACTIONS)
+            return
+        
+        self.pending_transactions_dialog.showMaximized()
 
 
     def submit_transaction(self, payment_amount: int, payment_change: int):

@@ -60,10 +60,16 @@ ERR_PERM_U_LOGS = 'You don\'t have permission to update logs'
 ERR_PERM_D_LOGS = 'You don\'t have permission to delete logs'
 
 ERR_PERM_R_STOCK_CARD = 'You don\'t have permission to view stock card'
+
+ERR_PERM_C_STOCK_OPNAME = 'You don\'t have permission to create stock opname'
 ERR_PERM_R_STOCK_OPNAME = 'You don\'t have permission to view stock opname'
+ERR_PERM_U_STOCK_OPNAME = 'You don\'t have permission to update stock opname'
+ERR_PERM_D_STOCK_OPNAME = 'You don\'t have permission to delete stock opname'
 ERR_PERM_E_STOCK_OPNAME = 'You don\'t have permission to export stock opname'
 
 ERR_PERM_R_BACK_OFFICE_SALES_REPORT = 'You don\'t have permission to view back office sales report'
 ERR_PERM_R_CASHIER_SALES_REPORT = 'You don\'t have permission to view cashier sales report'
 ERR_PERM_R_PROFIT_AND_LOSS_REPORT = 'You don\'t have permission to view profit and loss report'
 ERR_PERM_R_SALES_PER_ITEM_REPORT = 'You don\'t have permission to view sales per item report'
+ERR_PERM_R_MONTHLY_SALES_REPORT = 'You don\'t have permission to view monthly sales report'
+ERR_PERM_R_DAILY_SALES_REPORT = 'You don\'t have permission to view daily sales report'

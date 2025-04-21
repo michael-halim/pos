@@ -49,32 +49,45 @@ class {module_name.replace('_', ' ').title().replace(' ', '')}Model:
 from typing import List
 from response.response_message import ResponseMessage
 from {module_name}.models.{module_name}_models import {module_name.replace('_', ' ').title().replace(' ', '')}Model
+from generals.permission_manager import PermissionManager
 
 class {module_name.replace('_', ' ').title().replace(' ', '')}Repository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
+        self.permission_manager = PermissionManager()
         
 '''
                 elif "services" in file_path:
                     content = f'''from typing import List, Optional
 from {module_name}.repositories.{module_name}_repositories import {module_name.replace('_', ' ').title().replace(' ', '')}Repository
+from generals.permission_manager import PermissionManager
+
 
 class {module_name.replace('_', ' ').title().replace(' ', '')}Service:
     def __init__(self):
         self.repository = {module_name.replace('_', ' ').title().replace(' ', '')}Repository()
+        self.permission_manager = PermissionManager()
 '''
                 else:
                     content = f'''from PyQt6 import QtWidgets, uic
 
-from helper import format_number, add_prefix, remove_non_digit
-from generals.message_box import POSMessageBox
-from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from generals.build import resource_path
-
 from {module_name}.services.{module_name}_services import {module_name.replace('_', ' ').title().replace(' ', '')}Service
 from {module_name}.models.{module_name}_models import {module_name.replace('_', ' ').title().replace(' ', '')}Model
+
+from helper import format_number, add_prefix, remove_non_digit
+from generals.message_box import POSMessageBox
+from generals.build import resource_path
+from generals.fonts import POSFonts
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS
+)
+from generals.messages import (
+    ERR, OK, PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
+
 
 class {module_name.replace('_', ' ').title().replace(' ', '')}Window(QtWidgets.QWidget):
     def __init__(self):

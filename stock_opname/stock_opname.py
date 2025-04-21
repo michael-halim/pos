@@ -2,9 +2,9 @@ from PyQt6 import QtWidgets, uic, QtGui
 from datetime import datetime
 
 from stock_opname.services.stock_opname_services import StockOpnameService
-from stock_opname.models.stock_opname_models import StockOpnameModel
+from stock_opname.models.stock_opname_models import StockOpnameModel, EditStockOpnameModel
 
-from helper import format_number
+from helper import format_number, add_prefix
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.build import resource_path
@@ -39,12 +39,16 @@ class StockOpnameWindow(QtWidgets.QWidget):
         self.stock_opname_table = self.ui.stock_opname_table
 
         # Connect Buttons
+        self.ui.submit_stock_opname_button.clicked.connect(self.submit_stock_opname)
         self.ui.close_stock_opname_button.clicked.connect(lambda: self.close())
         self.ui.export_excel_stock_opname_button.clicked.connect(self.export_excel)
         self.ui.export_pdf_stock_opname_button.clicked.connect(self.export_pdf)
 
         # Connect filter products input
         self.ui.filter_products_stock_opname_input.textChanged.connect(self.show_stock_opname_data)
+
+        # Connect table selection
+        self.stock_opname_table.itemSelectionChanged.connect(self.on_stock_opname_table_selected)
 
         # Set selection behavior to select entire rows
         self.stock_opname_table.setSelectionBehavior(SELECT_ROWS)
@@ -91,6 +95,32 @@ class StockOpnameWindow(QtWidgets.QWidget):
         self.show_stock_opname_data()
 
 
+    def submit_stock_opname(self):
+        sku = self.ui.sku_stock_opname_input.text()
+        product_name = self.ui.product_name_stock_opname_input.text()
+        original_stock = self.ui.original_stock_stock_opname_input.text()
+        final_stock = self.ui.final_stock_stock_opname_input.text()
+        price = self.ui.price_stock_opname_input.text()
+
+        edit_stock_opname_data = EditStockOpnameModel(
+            sku=sku,
+            product_name=product_name,
+            price=price,
+            original_stock=original_stock,
+            final_stock=final_stock
+        )
+
+        stock_opname_result = self.stock_opname_service.create_stock_opname(edit_stock_opname_data)
+        if stock_opname_result.success:
+
+            POSMessageBox.info(self, title=OK, message=stock_opname_result.message)
+            self.clear_edit_stock_opname_data()
+            self.show_stock_opname_data()
+
+        else:
+            POSMessageBox.error(self, title=ERR, message=stock_opname_result.message)
+
+
     # Shows
     # ===============
     def show_stock_opname_data(self):
@@ -129,6 +159,7 @@ class StockOpnameWindow(QtWidgets.QWidget):
             table_items =  [ 
                QtWidgets.QTableWidgetItem(stock_opname.sku),
                QtWidgets.QTableWidgetItem(stock_opname.product_name),
+               QtWidgets.QTableWidgetItem(add_prefix(format_number(str(stock_opname.price)))),
                current_stock,
                QtWidgets.QTableWidgetItem(stock_opname.unit),
             ]
@@ -138,6 +169,26 @@ class StockOpnameWindow(QtWidgets.QWidget):
                 self.stock_opname_table.setItem(current_row, col, item)    
 
         self.stock_opname_table.setSortingEnabled(True)
+
+
+    # Event Listeners
+    # ===============
+    def on_stock_opname_table_selected(self):
+        selected_items = self.stock_opname_table.selectedItems()
+        if not selected_items:
+            return
+        
+        selected_item = selected_items[0]
+        selected_row = selected_item.row()
+        selected_sku = self.stock_opname_table.item(selected_row, 0).text()
+        selected_product_name = self.stock_opname_table.item(selected_row, 1).text()
+        selected_price = self.stock_opname_table.item(selected_row, 2).text()
+        selected_stock = self.stock_opname_table.item(selected_row, 3).text()
+
+        self.ui.sku_stock_opname_input.setText(selected_sku)
+        self.ui.product_name_stock_opname_input.setText(selected_product_name)
+        self.ui.price_stock_opname_input.setText(selected_price)
+        self.ui.original_stock_stock_opname_input.setText(selected_stock)
 
 
     # Exports Excel
@@ -236,3 +287,13 @@ class StockOpnameWindow(QtWidgets.QWidget):
 
     def on_progress_export_pdf(self, progress: int):
         print(f"Progress: {progress}")
+
+
+    # Clears
+    # ===============
+    def clear_edit_stock_opname_data(self):
+        self.ui.sku_stock_opname_input.clear()
+        self.ui.product_name_stock_opname_input.clear()
+        self.ui.price_stock_opname_input.clear()
+        self.ui.original_stock_stock_opname_input.clear()
+        self.ui.final_stock_stock_opname_input.clear()

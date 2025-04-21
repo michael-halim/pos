@@ -9,6 +9,33 @@ class SeedData:
         self.cursor = self.db.cursor()
 
 
+    def create_stock_opname_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS stock_opname (
+            stock_opname_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            sku VARCHAR(20) NOT NULL,
+            product_name VARCHAR(50) NOT NULL,
+            price INT(10) NOT NULL,
+            original_stock INT(10) NOT NULL,
+            opname_stock INT(10) NOT NULL,
+            final_stock INT(10) NOT NULL,
+            created_at DATETIME NOT NULL,
+            created_by INT NOT NULL,
+            updated_at DATETIME NULL DEFAULT NULL,
+            updated_by INT NULL DEFAULT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        sql_insert = '''INSERT INTO stock_opname (sku, product_name, price, original_stock, opname_stock, final_stock, created_at, created_by, updated_at, updated_by)
+                        VALUES 
+                        ('SKU001', 'Product One', 1000, 100, 100, 100, CURRENT_TIMESTAMP, 1, NULL, NULL),
+                        ('SKU002', 'Product Two', 2000, 200, 200, 200, CURRENT_TIMESTAMP, 1, NULL, NULL),
+                        ('SKU003', 'Product Three', 3000, 300, 300, 300, CURRENT_TIMESTAMP, 1, NULL, NULL);'''
+
+
+        self.cursor.execute(sql_insert)
+
+
     def create_stock_card_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS stock_card (
             sku VARCHAR(20) NOT NULL,
@@ -73,9 +100,12 @@ class SeedData:
                         ('create_permissions', 'Create Permissions'), ('read_permissions', 'Read Permissions'), ('update_permissions', 'Update Permissions'), ('delete_permissions', 'Delete Permissions'),
                         ('create_logs', 'Create Logs'), ('read_logs', 'Read Logs'), ('update_logs', 'Update Logs'), ('delete_logs', 'Delete Logs'),
                         ('read_stock_card', 'Read Stock Card'),
-                        ('read_stock_opname', 'Read Stock Opname'), ('export_stock_opname', 'Export Stock Opname'),
+                        ('read_stock_opname', 'Read Stock Opname'), ('create_stock_opname', 'Create Stock Opname'), ('update_stock_opname', 'Update Stock Opname'), ('delete_stock_opname', 'Delete Stock Opname'), ('export_stock_opname', 'Export Stock Opname'),
                         ('read_back_office_sales_report', 'Read Back Office Sales Report'),
                         ('read_cashier_sales_report', 'Read Cashier Sales Report'),
+                        ('read_sales_per_item_report', 'Read Sales Per Item Report'),
+                        ('read_daily_sales_report', 'Read Daily Sales Report'),
+                        ('read_monthly_sales_report', 'Read Monthly Sales Report'),
                         ('read_profit_and_loss_report', 'Read Profit and Loss Report');'''
 
         self.cursor.execute(sql_insert)
@@ -103,10 +133,14 @@ class SeedData:
                         (1, 'create_permissions'), (1, 'read_permissions'), (1, 'update_permissions'), (1, 'delete_permissions'),
                         (1, 'create_logs'), (1, 'read_logs'), (1, 'update_logs'), (1, 'delete_logs'),
                         (1, 'read_stock_card'),
-                        (1, 'read_stock_opname'), (1, 'export_stock_opname'),
+                        (1, 'read_stock_opname'), (1, 'create_stock_opname'), (1, 'update_stock_opname'), (1, 'delete_stock_opname'), (1, 'export_stock_opname'), 
                         (1, 'read_back_office_sales_report'),
                         (1, 'read_cashier_sales_report'),
-                        (1, 'read_profit_and_loss_report');'''
+                        (1, 'read_sales_per_item_report'),
+                        (1, 'read_daily_sales_report'),
+                        (1, 'read_monthly_sales_report'),
+                        (1, 'read_profit_and_loss_report'),
+                        (2, 'create_transactions'), (2, 'print_transactions');'''
         
         self.cursor.execute(sql_insert)
 
@@ -468,6 +502,7 @@ class SeedData:
 
 
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS stock_opname')
         self.cursor.execute('DROP TABLE IF EXISTS stock_card')
         self.cursor.execute('DROP TABLE IF EXISTS roles')
         self.cursor.execute('DROP TABLE IF EXISTS permissions')
@@ -494,6 +529,7 @@ class SeedData:
 
         self.drop_all_tables()
 
+        self.create_stock_opname_table()
         self.create_stock_card_table()
         self.create_suppliers_table()
         self.create_purchasing_history_table()

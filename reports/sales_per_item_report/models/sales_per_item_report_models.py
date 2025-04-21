@@ -14,9 +14,10 @@ class SalesPerItemReportModel:
     transaction_id: str
     created_at: datetime
     username: str
+    qty: int
+    unit: str
     price: int
     unit_value: int
-    unit: str
     discount_pct: int
     discount_rp_per_item: int
     discount_rp: int

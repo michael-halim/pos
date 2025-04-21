@@ -1,10 +1,11 @@
 from PyQt6 import QtWidgets, uic
 from datetime import datetime, timedelta
 
-from helper import format_number, add_prefix
-
+from reports.cashier_sales_report.services.cashier_sales_report_services import CashierSalesReportService
 from transactions_list.models.transactions_list_models import TransactionListModel, DetailTransactionListModel
 
+from helper import format_number, add_prefix
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import (
@@ -17,9 +18,6 @@ from generals.messages import (
     PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
-from generals.build import resource_path
-
-from reports.cashier_sales_report.services.cashier_sales_report_services import CashierSalesReportService
 
 
 class CashierSalesReportWindow(QtWidgets.QWidget):

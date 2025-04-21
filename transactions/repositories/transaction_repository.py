@@ -92,11 +92,12 @@ class TransactionRepository:
                 updated_stock = self.cursor.fetchone()[0]
 
                 # Update Stock Card by Inserting Data to Stock Card Table
+                remarks = f'by {self.permission_manager.get_username()}'
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
                 
-                self.cursor.execute(stock_card_sql, (sku, transaction_id, None, stock_affected, updated_stock, ''))
+                self.cursor.execute(stock_card_sql, (sku, transaction_id, None, stock_affected, updated_stock, remarks))
             
 
             # Insert Customer Points
@@ -277,7 +278,6 @@ class TransactionRepository:
 
                     # Update Stock Card by Inserting Data to Stock Card Table
                     remarks = f'Correction Stock from Edit Transaction#{transaction.transaction_id} by {self.permission_manager.get_username()}'
-
                     stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''

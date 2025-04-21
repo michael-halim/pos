@@ -7,6 +7,7 @@ from generals.messages import ERR_PERM_R_TRANSACTIONS, ERR_PERM_D_TRANSACTIONS
 from generals.permission_manager import PermissionManager
 from response.response_message import ResponseMessage
 
+
 class TransactionListService:
     def __init__(self):
         self.repository = TransactionRepository()

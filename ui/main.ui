@@ -313,6 +313,16 @@ QPushButton:disabled {
            <property name="text">
             <string>Master Data</string>
            </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../assets/master-data-white.png</normaloff>../assets/master-data-white.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>12</width>
+             <height>12</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
@@ -347,6 +357,16 @@ QPushButton:disabled {
            </property>
            <property name="text">
             <string>Transaction</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../assets/transaction-history-white.png</normaloff>../assets/transaction-history-white.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>12</width>
+             <height>12</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -383,6 +403,16 @@ QPushButton:disabled {
            <property name="text">
             <string>Report</string>
            </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../assets/report-white.png</normaloff>../assets/report-white.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>12</width>
+             <height>12</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
@@ -417,6 +447,16 @@ QPushButton:disabled {
            </property>
            <property name="text">
             <string>Settings</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../assets/settings-white.png</normaloff>../assets/settings-white.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>12</width>
+             <height>12</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -453,6 +493,16 @@ QPushButton:disabled {
            <property name="text">
             <string>Log</string>
            </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../assets/log-white.png</normaloff>../assets/log-white.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>12</width>
+             <height>12</height>
+            </size>
+           </property>
           </widget>
          </item>
          <item>
@@ -486,7 +536,17 @@ QPushButton:disabled {
 }</string>
            </property>
            <property name="text">
-            <string>Backup</string>
+            <string>Database</string>
+           </property>
+           <property name="icon">
+            <iconset>
+             <normaloff>../assets/database.png</normaloff>../assets/database.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>12</width>
+             <height>12</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -532,7 +592,7 @@ QPushButton:hover {
            </property>
            <property name="icon">
             <iconset>
-             <normaloff>C:/Users/micha/.designer/assets/logout.png</normaloff>C:/Users/micha/.designer/assets/logout.png</iconset>
+             <normaloff>../assets/power-off-white.png</normaloff>../assets/power-off-white.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -548,7 +608,7 @@ QPushButton:hover {
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>3</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="master_data_page">
          <property name="styleSheet">
@@ -1200,6 +1260,16 @@ QPushButton:disabled {
                    <property name="text">
                     <string>Role Permissions</string>
                    </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/permission-management-white.png</normaloff>../assets/permission-management-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>30</width>
+                     <height>30</height>
+                    </size>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -1277,8 +1347,8 @@ QPushButton:disabled {
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>40</width>
-                     <height>40</height>
+                     <width>35</width>
+                     <height>35</height>
                     </size>
                    </property>
                   </widget>
@@ -1322,8 +1392,8 @@ QPushButton:disabled {
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>35</width>
-                     <height>35</height>
+                     <width>30</width>
+                     <height>30</height>
                     </size>
                    </property>
                   </widget>
@@ -1371,51 +1441,12 @@ QPushButton:disabled {
                    </property>
                    <property name="iconSize">
                     <size>
-                     <width>35</width>
-                     <height>35</height>
+                     <width>30</width>
+                     <height>30</height>
                     </size>
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <widget class="QPushButton" name="stock_report_button">
-                   <property name="minimumSize">
-                    <size>
-                     <width>500</width>
-                     <height>200</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <pointsize>30</pointsize>
-                    </font>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">QPushButton{
-    color: #fff;
-    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
-    border-color: rgba(13, 110, 253, 0.7);
-}
-QPushButton:hover {
-    background-color: rgba(11, 94, 215, 0.9);
-    border-color: rgba(10, 88, 202, 0.9);
-    opacity: 0.95;
-}
-QPushButton:disabled {
-    background-color: #a8c1ff;
-    border-color: #a8c1ff;
-    color: #e6eeff;
-}</string>
-                   </property>
-                   <property name="text">
-                    <string>Stock</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_14">
                  <item>
                   <widget class="QPushButton" name="profit_and_loss_report_button">
                    <property name="minimumSize">
@@ -1448,6 +1479,65 @@ QPushButton:disabled {
                    </property>
                    <property name="text">
                     <string>Profit and Loss</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/exchange-white.png</normaloff>../assets/exchange-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>30</width>
+                     <height>30</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_14">
+                 <item>
+                  <widget class="QPushButton" name="daily_sales_report_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Daily Sales</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/day.png</normaloff>../assets/day.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>30</width>
+                     <height>30</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -1483,6 +1573,16 @@ QPushButton:disabled {
                    </property>
                    <property name="text">
                     <string>Monthly Sales</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/month.png</normaloff>../assets/month.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>30</width>
+                     <height>30</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -1554,6 +1654,16 @@ QPushButton:disabled {
                    </property>
                    <property name="text">
                     <string>Logs</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/log-white.png</normaloff>../assets/log-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>28</width>
+                     <height>28</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -1639,6 +1749,16 @@ QPushButton:disabled {
                    <property name="text">
                     <string>Backup</string>
                    </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/download-white.png</normaloff>../assets/download-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>30</width>
+                     <height>30</height>
+                    </size>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -1673,6 +1793,16 @@ QPushButton:disabled {
                    </property>
                    <property name="text">
                     <string>Restore</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/upload-white.png</normaloff>../assets/upload-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>30</width>
+                     <height>30</height>
+                    </size>
                    </property>
                   </widget>
                  </item>

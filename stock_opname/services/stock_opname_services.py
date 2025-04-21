@@ -5,14 +5,14 @@ from exports.export_service import ExportService
 from threads.thread_service import ThreadManager
 
 from stock_opname.repositories.stock_opname_repositories import StockOpnameRepository
-from stock_opname.models.stock_opname_models import StockOpnameModel
+from stock_opname.models.stock_opname_models import StockOpnameModel, EditStockOpnameModel
 from stock_opname.services.stock_opname_export import (
     HEADER_HTML_WITH_CURRENT_STOCK, HEADER_HTML_NO_CURRENT_STOCK, FOOTER_HTML
 ) 
 
 from response.response_message import ResponseMessage
-from generals.constants import PERM_R_STOCK_OPNAME, PERM_E_STOCK_OPNAME
-from generals.messages import ERR_PERM_R_STOCK_OPNAME, ERR_PERM_E_STOCK_OPNAME
+from generals.constants import PERM_R_STOCK_OPNAME, PERM_E_STOCK_OPNAME, PERM_C_STOCK_OPNAME
+from generals.messages import ERR_PERM_R_STOCK_OPNAME, ERR_PERM_E_STOCK_OPNAME, ERR_PERM_C_STOCK_OPNAME
 from generals.permission_manager import PermissionManager
 
 class StockOpnameService:
@@ -21,6 +21,13 @@ class StockOpnameService:
         self.thread_manager = ThreadManager()
         self.export_service = ExportService()
         self.permission_manager = PermissionManager()
+
+
+    def create_stock_opname(self, edit_stock_opname_data: EditStockOpnameModel):
+        if not self.permission_manager.has_permission(PERM_C_STOCK_OPNAME):
+            return ResponseMessage.fail(message=ERR_PERM_C_STOCK_OPNAME)
+
+        return self.repository.create_stock_opname(edit_stock_opname_data)
 
 
     def get_stock_opname(self, search_text: str = None):
