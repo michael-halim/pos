@@ -27,7 +27,7 @@ class LanguageManager:
     
     def translate(self, text):
         """Translate text to current language"""
-        return self._translations.get(self._current_language, {}).get(text, text)
+        return self._translations.get(self._current_language, {}).get(text.lower(), text)
     
 
     def get_current_language(self):
@@ -66,10 +66,17 @@ class LanguageManager:
 
     def translate_widget_text(self, widget):
         """Translate text in a widget (label, button, etc.)"""
+ 
+        if isinstance(widget, QtWidgets.QDateEdit):
+            return 
+        
+        
         if hasattr(widget, 'text') and callable(getattr(widget, 'text')):
             current_text = widget.text()
             if current_text:
+                print('current_text: ', current_text)
                 translated_text = self.translate(current_text.lower())
+                print('translated_text: ', translated_text)
                 widget.setText(translated_text.title())
         
 

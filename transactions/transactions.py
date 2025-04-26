@@ -29,6 +29,8 @@ from generals.messages import (
     ERR, OK, WARNING, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, 
     ERR_PERM_R_PENDING_TRANSACTIONS, PERM_DENIED
 )
+from transactions.translations import TRANSACTIONS_TRANSLATIONS
+from generals.language_manager import LanguageManager
 from generals.permission_manager import PermissionManager
 
 
@@ -47,6 +49,23 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Init Services
         self.transaction_service = TransactionService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(TRANSACTIONS_TRANSLATIONS)
+
+        self.transaction_headers = ['SKU', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Nilai Satuan', 'Discount (%)', 'Discount Per Item (Rp)', 'Discount (Rp)', 'Subtotal']
+        self.wholesale_transaction_headers = ['Satuan', 'Nilai Satuan', 'Harga']
+        self.transaction_history_headers = ['Tanggal', 'Qty', 'Satuan']
+        self.purchase_history_headers = ['Tanggal', 'Qty', 'Satuan']
+
+        self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
+        self.language_manager.translate_table_headers(self.ui.wholesale_transactions_table, self.wholesale_transaction_headers)
+        self.language_manager.translate_table_headers(self.ui.transaction_history_table, self.transaction_history_headers)
+        self.language_manager.translate_table_headers(self.ui.purchase_history_table, self.purchase_history_headers)
+        
+        self.language_manager.translate_widget_text(self)
+
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
@@ -172,6 +191,21 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.purchase_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.transaction_history_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.transaction_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+
+
+    # Overrides
+    #====================
+    def showMaximized(self):
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            self.close()
+
+        # Translate widget text and update table headers
+        self.language_manager.translate_widget_text(self)
+        self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
+        self.language_manager.translate_table_headers(self.ui.wholesale_transactions_table, self.wholesale_transaction_headers)
+        self.language_manager.translate_table_headers(self.ui.transaction_history_table, self.transaction_history_headers)
+        self.language_manager.translate_table_headers(self.ui.purchase_history_table, self.purchase_history_headers)
 
 
     def add_tax_transaction(self):

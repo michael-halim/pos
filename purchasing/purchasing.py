@@ -22,6 +22,8 @@ from generals.messages import (
     ERR, OK, WARNING, CONFIRM, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING,
     PERM_DENIED
 )
+from purchasing.translations import PURCHASING_TRANSLATIONS
+from generals.language_manager import LanguageManager
 from generals.permission_manager import PermissionManager
 
 
@@ -40,6 +42,15 @@ class PurchasingWindow(QtWidgets.QWidget):
         
         # Init Services
         self.purchasing_service = PurchasingService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PURCHASING_TRANSLATIONS)
+
+        self.purchasing_headers = ['SKU', 'Nama Produk', 'Qty', 'Satuan', 'Nilai Satuan', 'Harga', 'Discount (%)', 'Discount (Rp)', 'Subtotal']
+        self.purchasing_history_headers = ['Tanggal', 'Supplier', 'Qty', 'Satuan', 'Harga', 'Disc (%)', 'Disc (Rp)', 'Subtotal']
+        self.language_manager.translate_table_headers(self.ui.purchasing_detail_table, self.purchasing_headers)
+        self.language_manager.translate_table_headers(self.ui.purchasing_history_table, self.purchasing_history_headers)
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
@@ -125,6 +136,22 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.purchasing_detail_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.purchasing_history_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.purchasing_history_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+
+
+    # Overrides
+    # ===============
+    def showMaximized(self):
+        """Override showMaximized to refresh data when window is shown"""
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_C_PURCHASING):
+            self.close()
+
+
+        # Translate widget text and update table headers
+        self.language_manager.translate_widget_text(self)
+        self.language_manager.translate_table_headers(self.ui.purchasing_detail_table, self.purchasing_headers)
+        self.language_manager.translate_table_headers(self.ui.purchasing_history_table, self.purchasing_history_headers)
+
 
 
     def add_detail_purchasing(self):

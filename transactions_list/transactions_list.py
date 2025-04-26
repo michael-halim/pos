@@ -19,7 +19,9 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_TRANSACTIONS, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, ERR_PERM_D_TRANSACTIONS,
     PERM_DENIED, CONFIRM, WARNING
 )
+from transactions_list.translations import TRANSACTION_LIST_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class TransactionsListWindow(QtWidgets.QWidget):
@@ -38,6 +40,16 @@ class TransactionsListWindow(QtWidgets.QWidget):
 
         # Init Services
         self.transaction_list_service = TransactionListService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(TRANSACTION_LIST_TRANSLATIONS)
+        
+        self.transaction_headers = ['Tanggal', 'ID Transaksi', 'Total', 'Metode', 'Keterangan']
+        self.detail_transaction_headers = ['SKU', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
+        self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
+        self.language_manager.translate_table_headers(self.ui.detail_transactions_table, self.detail_transaction_headers)
+
 
         self.ui.delete_transactions_button.clicked.connect(self.delete_transactions)
         self.ui.edit_transactions_button.clicked.connect(self.edit_transactions)
@@ -109,6 +121,13 @@ class TransactionsListWindow(QtWidgets.QWidget):
             self.close()
             return
         
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+        self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
+        self.language_manager.translate_table_headers(self.ui.detail_transactions_table, self.detail_transaction_headers)
+
+
         # Refresh the data
         self.show_transactions_data()
 

@@ -633,7 +633,7 @@ QPushButton:disabled {
 }</string>
               </property>
               <property name="text">
-               <string>Add</string>
+               <string>Create</string>
               </property>
               <property name="icon">
                <iconset>
@@ -760,7 +760,7 @@ QLineEdit:focus {
                  </font>
                 </property>
                 <property name="text">
-                 <string>Filter Product :</string>
+                 <string>Filter Product : </string>
                 </property>
                </widget>
               </item>

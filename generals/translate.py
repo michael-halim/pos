@@ -6,6 +6,7 @@ EN_TRANSLATIONS = {
     'baru': 'create',
     'simpan': 'submit',
     'tutup': 'close',
+    'cari': 'find',
     
     # Main menu
     'produk': 'products',
@@ -44,6 +45,7 @@ ID_TRANSLATIONS = {
     'create': 'baru',
     'submit': 'simpan',
     'close': 'tutup',
+    'find': 'cari',
         
     # Main menu
     'products' : 'produk',
