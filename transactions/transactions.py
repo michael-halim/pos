@@ -23,7 +23,7 @@ from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
     TAX_TABLE_KEY, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS,
-    PERM_R_PENDING_TRANSACTIONS
+    PERM_R_PENDING_TRANSACTIONS, DATE_FORMAT_DDMMYYYY
 ) 
 from generals.messages import ( 
     ERR, OK, WARNING, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, 
@@ -95,7 +95,7 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Set date input
         self.ui.date_transaction_input.setDate(datetime.now())
-        self.ui.date_transaction_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.date_transaction_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Add selected tracking
         self.current_selected_sku = None

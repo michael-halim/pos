@@ -23,7 +23,6 @@ class SuppliersWindow(QtWidgets.QWidget):
 
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
-            POSMessageBox.error(self, title=ERR, message=ERR_PERM_R_SUPPLIERS)
             return
 
         # Load the UI file
@@ -65,7 +64,7 @@ class SuppliersWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
-            POSMessageBox.error(self, title=ERR, message=ERR_PERM_R_SUPPLIERS)
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_SUPPLIERS)
             self.close()
             return
         
@@ -77,7 +76,6 @@ class SuppliersWindow(QtWidgets.QWidget):
         """Override show to ensure data is refreshed"""
         super().show()
         if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
-            POSMessageBox.error(self, title=ERR, message=ERR_PERM_R_SUPPLIERS)
             return
 
         # Refresh the data
@@ -88,7 +86,6 @@ class SuppliersWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
-            POSMessageBox.error(self, title=ERR, message=ERR_PERM_R_SUPPLIERS)
             return
 
         # Refresh the data
@@ -275,6 +272,10 @@ class SuppliersWindow(QtWidgets.QWidget):
         search_text = search_text.upper() if search_text else None
 
         suppliers_result = self.suppliers_service.get_suppliers(search_text)
+
+        if not suppliers_result.success:
+            POSMessageBox.error(self, title=ERR, message=suppliers_result.message)
+            return
 
         self.set_suppliers_table_data(suppliers_result.data)
 

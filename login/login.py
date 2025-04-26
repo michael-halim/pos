@@ -6,6 +6,7 @@ from login.services.login_services import LoginService
 
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
+from generals.language_manager import LanguageManager
 
 class LoginWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -13,6 +14,10 @@ class LoginWindow(QtWidgets.QWidget):
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/login.ui'), self)
+        
+        # Initialize language manager
+        self.language_manager = LanguageManager()
+      
 
         # Init Services
         self.login_service = LoginService()

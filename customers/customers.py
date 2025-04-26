@@ -71,6 +71,7 @@ class CustomersWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
             self.close()
             return
+        
         # Refresh the data
         self.show_customers_data()
 
@@ -80,6 +81,7 @@ class CustomersWindow(QtWidgets.QWidget):
         super().show()
         if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
             return
+        
         # Refresh the data
         self.show_customers_data()
 
@@ -89,6 +91,7 @@ class CustomersWindow(QtWidgets.QWidget):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
             return
+        
         # Refresh the data
         self.show_customers_data()
 
@@ -220,6 +223,10 @@ class CustomersWindow(QtWidgets.QWidget):
         search_text = search_text.lower() if search_text else None
 
         customers_result = self.customer_service.get_customers(search_text)
+
+        if not customers_result.success:
+            POSMessageBox.error(self, title=ERR, message=customers_result.message)
+            return
 
         self.set_customers_table_data(customers_result.data)
 

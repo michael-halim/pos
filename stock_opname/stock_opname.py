@@ -80,8 +80,7 @@ class StockOpnameWindow(QtWidgets.QWidget):
     def show(self):
         super().show()
         if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
-            return
+            self.close()
         
         self.show_stock_opname_data()
    
@@ -89,8 +88,7 @@ class StockOpnameWindow(QtWidgets.QWidget):
     def showMaximized(self):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
-            return
+            self.close()
         
         self.show_stock_opname_data()
 
@@ -134,6 +132,10 @@ class StockOpnameWindow(QtWidgets.QWidget):
         search_text = search_text.lower() if search_text else None
 
         stock_opname_result = self.stock_opname_service.get_stock_opname(search_text)
+
+        if not stock_opname_result.success:
+            POSMessageBox.warning(self, title=ERR, message=stock_opname_result.message)
+            return
 
         self.set_stock_opname_table_data(stock_opname_result.data)
 
@@ -189,7 +191,6 @@ class StockOpnameWindow(QtWidgets.QWidget):
         self.ui.product_name_stock_opname_input.setText(selected_product_name)
         self.ui.price_stock_opname_input.setText(selected_price)
         self.ui.original_stock_stock_opname_input.setText(selected_stock)
-
 
     # Exports Excel
     # ===============

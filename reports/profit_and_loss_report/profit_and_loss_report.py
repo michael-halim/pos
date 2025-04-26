@@ -14,7 +14,7 @@ from generals.constants import (
     PERM_R_PROFIT_AND_LOSS_REPORT
 ) 
 from generals.messages import (
-    ERR_PERM_R_PROFIT_AND_LOSS_REPORT, PERM_DENIED
+    ERR, ERR_PERM_R_PROFIT_AND_LOSS_REPORT, PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
 
@@ -78,16 +78,14 @@ class ProfitAndLossReportWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PROFIT_AND_LOSS_REPORT)
-            return
+            self.close()
 
 
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PROFIT_AND_LOSS_REPORT)
-            return
+            self.close()
         
 
     # Shows
@@ -106,6 +104,10 @@ class ProfitAndLossReportWindow(QtWidgets.QWidget):
         profit_and_loss_result = self.profit_and_loss_report_service.get_profit_and_loss_report(
             year = year
         )
+
+        if not profit_and_loss_result.success:
+            POSMessageBox.error(self, title=ERR, message=profit_and_loss_result.message)
+            return
 
         # Set profit and loss table data
         self.set_profit_and_loss_table_data(profit_and_loss_result.data)

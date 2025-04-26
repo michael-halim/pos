@@ -12,7 +12,7 @@ from generals.fonts import POSFonts
 from generals.constants import ( 
     RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, BACKOFFICE_ID, CASHIER_ID,
-    PERM_R_SALES_PER_ITEM_REPORT
+    PERM_R_SALES_PER_ITEM_REPORT, DATE_FORMAT_DDMMYYYY
 )
 from generals.messages import (
     ERR_PERM_R_SALES_PER_ITEM_REPORT, PERM_DENIED
@@ -52,8 +52,8 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
         self.ui.start_date_sales_per_item_input.setDate(datetime.now() - timedelta(days=1))
         self.ui.end_date_sales_per_item_input.setDate(datetime.now())
 
-        self.ui.start_date_sales_per_item_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_sales_per_item_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_sales_per_item_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_sales_per_item_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Set selection behavior to select entire rows
         self.sales_per_item_table.setSelectionBehavior(SELECT_ROWS)
@@ -115,8 +115,8 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
         self.sales_per_item_table.setSortingEnabled(False)
         
         # Get Dates
-        start_date = datetime.strptime(self.ui.start_date_sales_per_item_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_sales_per_item_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_sales_per_item_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_sales_per_item_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         category_id = None
         if self.ui.back_office_sales_radio_button.isChecked():

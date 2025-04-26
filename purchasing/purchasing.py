@@ -19,7 +19,7 @@ from generals.constants import (
     PERM_C_PURCHASING, PERM_U_PURCHASING
 )
 from generals.messages import (
-    ERR, OK, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING,
+    ERR, OK, WARNING, CONFIRM, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING,
     PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
@@ -160,39 +160,42 @@ class PurchasingWindow(QtWidgets.QWidget):
     def edit_detail_purchasing(self):
         # Get selected row
         selected_rows = self.purchasing_detail_table.selectedItems()
-        if selected_rows:
-            self.current_selected_sku = selected_rows[0].row()
+        if not selected_rows:
+            POSMessageBox.warning(self, title=WARNING, message="Please select a purchasing to edit")
+            return
 
-            # Disconnect existing connections and connect to update function
-            self.ui.add_purchasing_button.setText('Update')
-            self.ui.add_purchasing_button.clicked.disconnect()
-            self.ui.add_purchasing_button.clicked.connect(self.update_detail_purchasing)
+        self.current_selected_sku = selected_rows[0].row()
 
-            # Get sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal
-            sku = self.purchasing_detail_table.item(self.current_selected_sku, 0).text()
-            product_name = self.purchasing_detail_table.item(self.current_selected_sku, 1).text()
-            qty = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 2).text())
-            unit = self.purchasing_detail_table.item(self.current_selected_sku, 3).text()
-            unit_value = self.purchasing_detail_table.item(self.current_selected_sku, 4).text()
-            price = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 5).text())
-            discount_pct = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 6).text())
-            discount_rp = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 7).text())
+        # Disconnect existing connections and connect to update function
+        self.ui.add_purchasing_button.setText('Update')
+        self.ui.add_purchasing_button.clicked.disconnect()
+        self.ui.add_purchasing_button.clicked.connect(self.update_detail_purchasing)
 
-            is_toogle_disc_pct = (int(discount_pct) > 0 and int(discount_rp) > 0)
-            self.set_discount_radio_button(discount_pct, discount_rp, is_toogle_disc_pct= is_toogle_disc_pct)
+        # Get sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal
+        sku = self.purchasing_detail_table.item(self.current_selected_sku, 0).text()
+        product_name = self.purchasing_detail_table.item(self.current_selected_sku, 1).text()
+        qty = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 2).text())
+        unit = self.purchasing_detail_table.item(self.current_selected_sku, 3).text()
+        unit_value = self.purchasing_detail_table.item(self.current_selected_sku, 4).text()
+        price = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 5).text())
+        discount_pct = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 6).text())
+        discount_rp = remove_non_digit(self.purchasing_detail_table.item(self.current_selected_sku, 7).text())
 
-            # Put the data into the form
-            self.ui.sku_purchasing_input.setText(sku)
-            self.ui.product_name_purchasing_input.setText(product_name)
-            self.ui.price_purchasing_input.setText(price)
-            self.ui.qty_purchasing_input.setText(qty)
-            self.ui.qty_purchasing_combobox.setCurrentText(unit)
-            self.ui.unit_value_purchasing_input.setText(unit_value)
+        is_toogle_disc_pct = (int(discount_pct) > 0 and int(discount_rp) > 0)
+        self.set_discount_radio_button(discount_pct, discount_rp, is_toogle_disc_pct= is_toogle_disc_pct)
 
-            # Make sure only qty is editable
-            self.ui.price_purchasing_input.setEnabled(True)
-            self.ui.sku_purchasing_input.setEnabled(False)
-            self.ui.product_name_purchasing_input.setEnabled(False)
+        # Put the data into the form
+        self.ui.sku_purchasing_input.setText(sku)
+        self.ui.product_name_purchasing_input.setText(product_name)
+        self.ui.price_purchasing_input.setText(price)
+        self.ui.qty_purchasing_input.setText(qty)
+        self.ui.qty_purchasing_combobox.setCurrentText(unit)
+        self.ui.unit_value_purchasing_input.setText(unit_value)
+
+        # Make sure only qty is editable
+        self.ui.price_purchasing_input.setEnabled(True)
+        self.ui.sku_purchasing_input.setEnabled(False)
+        self.ui.product_name_purchasing_input.setEnabled(False)
     
 
     def update_detail_purchasing(self):
@@ -245,11 +248,11 @@ class PurchasingWindow(QtWidgets.QWidget):
     def delete_detail_purchasing(self):
         selected_rows = self.purchasing_detail_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title='Warning', message="Please select a purchasing to delete")
+            POSMessageBox.warning(self, title=WARNING, message="Please select a purchasing to delete")
             return
 
         # Confirm deletion
-        confirm = POSMessageBox.confirm(self, title="Confirm Deletion", message="Are you sure you want to delete this purchasing ?")
+        confirm = POSMessageBox.confirm(self, title=CONFIRM, message="Are you sure you want to delete this purchasing ?")
 
         if confirm:
             row = selected_rows[0].row()
@@ -257,7 +260,6 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Get the transaction details before deletion
             sku = self.purchasing_detail_table.item(row, 0).text()
             unit = self.purchasing_detail_table.item(row, 3).text()
-            subtotal = remove_non_digit(self.purchasing_detail_table.item(row, 7).text())
 
             # Remove from cached index
             purchasing_index_key = f'{sku}_{unit}'

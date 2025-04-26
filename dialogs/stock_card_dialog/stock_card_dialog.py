@@ -8,7 +8,9 @@ from dialogs.stock_card_dialog.models.stock_card_dialog_models import StockCardT
 from helper import format_number
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from generals.constants import (
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, DATE_FORMAT_DDMMYYYY
+)
 from generals.build import resource_path
 
 
@@ -36,8 +38,8 @@ class StockCardDialogWindow(QtWidgets.QWidget):
         # Saved SKU
         self.saved_sku = None
 
-        self.ui.start_date_stock_card_dialog_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_stock_card_dialog_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_stock_card_dialog_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_stock_card_dialog_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
        
         # Set selection behavior to select entire rows
         self.stock_card_table.setSelectionBehavior(SELECT_ROWS)
@@ -131,8 +133,8 @@ class StockCardDialogWindow(QtWidgets.QWidget):
         start_date = start_date_params
         end_date = end_date_params
         if start_date is None or end_date is None:
-            start_date = datetime.strptime(self.ui.start_date_stock_card_dialog_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-            end_date = datetime.strptime(self.ui.end_date_stock_card_dialog_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+            start_date = datetime.strptime(self.ui.start_date_stock_card_dialog_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+            end_date = datetime.strptime(self.ui.end_date_stock_card_dialog_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         stock_card_result = self.stock_card_dialog_service.get_stock_card(sku, start_date, end_date)
 

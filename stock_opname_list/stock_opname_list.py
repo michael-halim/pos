@@ -7,8 +7,7 @@ from stock_opname_list.models.stock_opname_list_models import StockOpnameListMod
 from stock_opname.models.stock_opname_models import EditStockOpnameModel
 from stock_opname.stock_opname import StockOpnameWindow
 
-
-from helper import format_number, add_prefix, remove_non_digit
+from helper import format_number, add_prefix
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
 from generals.fonts import POSFonts
@@ -16,12 +15,12 @@ from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
     PERM_R_STOCK_OPNAME, PERM_C_STOCK_OPNAME, PERM_U_STOCK_OPNAME, 
-    PERM_D_STOCK_OPNAME
+    PERM_D_STOCK_OPNAME, DATE_FORMAT_DDMMYYYY
 ) 
 from generals.messages import (
     ERR, OK, ERR_PERM_R_STOCK_OPNAME, 
     ERR_PERM_C_STOCK_OPNAME, ERR_PERM_U_STOCK_OPNAME, 
-    ERR_PERM_D_STOCK_OPNAME, PERM_DENIED
+    ERR_PERM_D_STOCK_OPNAME, PERM_DENIED, CONFIRM
 )
 from generals.permission_manager import PermissionManager
 
@@ -58,8 +57,8 @@ class StockOpnameListWindow(QtWidgets.QWidget):
         self.ui.start_date_stock_opname_list_input.setDate(datetime.now() - timedelta(days=1))
         self.ui.end_date_stock_opname_list_input.setDate(datetime.now())
 
-        self.ui.start_date_stock_opname_list_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_stock_opname_list_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_stock_opname_list_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_stock_opname_list_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Set selection behavior to select entire rows
         self.stock_opname_list_table.setSelectionBehavior(SELECT_ROWS)
@@ -81,6 +80,7 @@ class StockOpnameListWindow(QtWidgets.QWidget):
     def show(self):
         """Override show to refresh data when window is shown"""
         super().show()
+
         if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
             self.close()
@@ -93,8 +93,8 @@ class StockOpnameListWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+
         if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
             return
         
         # Refresh the data
@@ -104,8 +104,8 @@ class StockOpnameListWindow(QtWidgets.QWidget):
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+
         if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_OPNAME)
             return
         
         # Refresh the data
@@ -158,8 +158,9 @@ class StockOpnameListWindow(QtWidgets.QWidget):
         stock_opname_id = self.stock_opname_list_table.item(row, 0).text()
 
         confirm = POSMessageBox.confirm(
-                    self, title='Confirm Deletion', 
-                    message=f'Are you sure you want to delete stock opname SO#{stock_opname_id} ?')
+            self, title=CONFIRM, 
+            message=f'Are you sure you want to delete stock opname SO#{stock_opname_id} ?'
+        )
 
         if confirm:
             result = self.stock_opname_list_service.delete_stock_opname_by_id(stock_opname_id)
@@ -184,8 +185,8 @@ class StockOpnameListWindow(QtWidgets.QWidget):
         self.stock_opname_list_table.setSortingEnabled(False)
         
         # Get Dates
-        start_date = datetime.strptime(self.ui.start_date_stock_opname_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_stock_opname_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_stock_opname_list_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_stock_opname_list_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         # Get search text if any
         search_text = self.ui.filter_stock_opname_list_input.text().strip()
@@ -198,7 +199,11 @@ class StockOpnameListWindow(QtWidgets.QWidget):
             search_text=search_text
         )
 
-        # Set transactions_data table data
+        if not stock_opname_result.success:
+            POSMessageBox.error(self, title=ERR, message=stock_opname_result.message)
+            return
+        
+        # Set stock opname table data
         self.set_stock_opname_list_table_data(stock_opname_result.data)
         
 

@@ -13,13 +13,14 @@ from generals.message_box import POSMessageBox
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
-    PERM_R_TRANSACTIONS, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS, PERM_D_TRANSACTIONS
+    PERM_R_TRANSACTIONS, PERM_C_TRANSACTIONS, PERM_U_TRANSACTIONS, PERM_D_TRANSACTIONS, DATE_FORMAT_DDMMYYYY
 ) 
 from generals.messages import (
     ERR, OK, ERR_PERM_R_TRANSACTIONS, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, ERR_PERM_D_TRANSACTIONS,
-    PERM_DENIED
+    PERM_DENIED, CONFIRM, WARNING
 )
 from generals.permission_manager import PermissionManager
+
 
 class TransactionsListWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -62,8 +63,8 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.ui.start_date_transactions_list_input.setDate(datetime.now() - timedelta(days=1))
         self.ui.end_date_transactions_list_input.setDate(datetime.now())
 
-        self.ui.start_date_transactions_list_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_transactions_list_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_transactions_list_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_transactions_list_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Add selected tracking
         self.current_selected_sku = None
@@ -94,9 +95,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         """Override show to refresh data when window is shown"""
         super().show()
         if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
             self.close()
-            return
         
         # Refresh the data
         self.show_transactions_data()
@@ -107,6 +106,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
+            self.close()
             return
         
         # Refresh the data
@@ -117,8 +117,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
-            return
+            self.close()
         
         # Refresh the data
         self.show_transactions_data()
@@ -163,7 +162,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         transaction_id = self.transactions_table.item(row, 1).text()
 
         confirm = POSMessageBox.confirm(
-                    self, title='Confirm Deletion', 
+                    self, title=CONFIRM, 
                     message=f'Are you sure you want to delete {transaction_id} ?')
 
         if confirm:
@@ -225,8 +224,8 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.transactions_table.setSortingEnabled(False)
         
         # Get Dates
-        start_date = datetime.strptime(self.ui.start_date_transactions_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_transactions_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_transactions_list_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_transactions_list_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         # Get search text if any
         search_text = self.ui.filter_transactions_input.text().strip()
@@ -238,6 +237,10 @@ class TransactionsListWindow(QtWidgets.QWidget):
             end_date = end_date.replace(hour=23, minute=59, second=59),
             search_text=search_text
         )
+
+        if not transactions_result.success:
+            POSMessageBox.error(self, title=ERR, message=transactions_result.message)
+            return
 
         # Set transactions_data table data
         self.set_transactions_table_data(transactions_result.data)

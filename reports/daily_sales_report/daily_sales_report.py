@@ -11,10 +11,10 @@ from generals.fonts import POSFonts
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
-    PERM_R_DAILY_SALES_REPORT
+    PERM_R_DAILY_SALES_REPORT, DATE_FORMAT_DDMMYYYY
 ) 
 from generals.messages import (
-    ERR_PERM_R_DAILY_SALES_REPORT, PERM_DENIED
+    ERR, ERR_PERM_R_DAILY_SALES_REPORT, PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
 
@@ -41,8 +41,8 @@ class DailySalesReportWindow(QtWidgets.QWidget):
         self.ui.start_date_daily_sales_input.setDate(datetime.now() - timedelta(days=1))
         self.ui.end_date_daily_sales_input.setDate(datetime.now())
 
-        self.ui.start_date_daily_sales_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_daily_sales_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_daily_sales_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_daily_sales_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
 
         # Set selection behavior to select entire rows
@@ -72,16 +72,14 @@ class DailySalesReportWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_DAILY_SALES_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_DAILY_SALES_REPORT)
-            return
+            self.close()
 
 
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_DAILY_SALES_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_DAILY_SALES_REPORT)
-            return
+            self.close()
         
 
 
@@ -96,14 +94,18 @@ class DailySalesReportWindow(QtWidgets.QWidget):
         self.daily_sales_table.setSortingEnabled(False)
         
         # Get Dates
-        start_date = datetime.strptime(self.ui.start_date_daily_sales_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_daily_sales_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_daily_sales_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_daily_sales_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         # Get all daily sales
         daily_sales_result = self.daily_sales_report_service.get_daily_sales_report(
             start_date = start_date.replace(hour=0, minute=0, second=0),
             end_date = end_date.replace(hour=23, minute=59, second=59),
         )
+
+        if not daily_sales_result.success:
+            POSMessageBox.error(self, title=ERR, message=daily_sales_result.message)
+            return
 
         # Set daily sales table data
         self.set_daily_sales_table_data(daily_sales_result.data)

@@ -27,10 +27,10 @@ class StockOpnameListRepository:
                 sql = '''SELECT stock_opname_id, created_at, sku, product_name, price, original_stock, opname_stock, final_stock 
                             FROM stock_opname 
                             WHERE created_at BETWEEN ? AND ? 
-                                AND (sku LIKE ? OR product_name LIKE ? OR price LIKE ? OR original_stock LIKE ? OR opname_stock LIKE ? OR final_stock LIKE ?)'''
+                                AND (sku LIKE ? OR product_name LIKE ?)'''
                 
                 search_text = f'%{search_text}%'
-                stock_opname_result = self.cursor.execute(sql, (start_date, end_date, search_text, search_text, search_text, search_text))
+                stock_opname_result = self.cursor.execute(sql, (start_date, end_date, search_text, search_text))
             else:
 
                 sql = '''SELECT stock_opname_id, created_at, sku, product_name, price, original_stock, opname_stock, final_stock 

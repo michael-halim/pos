@@ -7,7 +7,6 @@ from helper import add_prefix, format_number
 from generals.build import resource_path
 from generals.fonts import POSFonts
 from generals.widget import create_checkbox_item
-from generals.permission_manager import PermissionManager
 from generals.message_box import POSMessageBox
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
@@ -18,6 +17,9 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_CATEGORIES, ERR_PERM_C_CATEGORIES, ERR_PERM_U_CATEGORIES, ERR_PERM_D_CATEGORIES,
     PERM_DENIED
 )
+from categories.translations import CATEGORIES_TRANSLATIONS
+from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class CategoriesWindow(QtWidgets.QWidget):
@@ -33,6 +35,15 @@ class CategoriesWindow(QtWidgets.QWidget):
         
         # Setup permissions
         self.setup_permissions()
+
+        # Setup language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CATEGORIES_TRANSLATIONS)
+        
+        self.category_headers = ['Id Kategori', 'Nama Kategori']
+        self.product_headers = ['SKU', 'Nama Produk', 'Harga Jual', 'Stok', 'Satuan']
+        self.language_manager.translate_table_headers(self.ui.categories_table, self.category_headers)
+        self.language_manager.translate_table_headers(self.ui.products_table_in_categories, self.product_headers)
 
         # Init Services
         self.categories_service = CategoriesService()
@@ -83,6 +94,12 @@ class CategoriesWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        
+        # Translate widget text and update table headers
+        self.language_manager.translate_widget_text(self)
+        self.language_manager.translate_table_headers(self.ui.categories_table, self.category_headers)
+        self.language_manager.translate_table_headers(self.ui.products_table_in_categories, self.product_headers)
+
         # Refresh the data
         self.show_categories_data()
 
@@ -254,8 +271,6 @@ class CategoriesWindow(QtWidgets.QWidget):
         self.toggle_add_edit_categories_and_products(True)
     
     
-
-
     # Setters
     # ===============
     def set_categories_table_data(self, data: list[CategoriesTableModel]):
@@ -365,6 +380,10 @@ class CategoriesWindow(QtWidgets.QWidget):
 
         categories_result = self.categories_service.get_categories(search_text)
 
+        if not categories_result.success:
+            POSMessageBox.error(self, title=ERR, message=categories_result.message)
+            return
+        
         self.set_categories_table_data(categories_result.data)
 
 

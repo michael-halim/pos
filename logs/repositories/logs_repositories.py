@@ -23,7 +23,7 @@ class LogsRepository:
         try:
             logs_result = []
             if search_text:
-                sql = '''SELECT l.created_at, l.log_type, l.log_description, l.old_data, l.new_data, u.user_name
+                sql = '''SELECT l.created_at, l.log_type, l.log_description, l.old_data, l.new_data, u.username
                             FROM logs l
                             JOIN users u ON l.created_by = u.user_id
                             WHERE l.created_at BETWEEN ? AND ? 
@@ -40,8 +40,9 @@ class LogsRepository:
                             JOIN users u ON l.created_by = u.user_id
                             WHERE l.created_at BETWEEN ? AND ?
                             ORDER BY l.created_at DESC'''
-                logs_result = self.cursor.execute(sql, (start_date, end_date))
-            
+                
+                logs_result = self.cursor.execute(sql, (start_date, end_date,))
+
             logs_list = [
                 LogsModel(
                     created_at=row[0], log_type=row[1],

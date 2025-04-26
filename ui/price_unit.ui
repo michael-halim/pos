@@ -259,7 +259,67 @@ QPushButton {
     border-radius: 3px;
     margin: 0.25rem;
 	opacity: 0.55;
+	padding-bottom: 2px;
 
+}
+
+/* Message Dialog Styling */
+QMessageBox {
+    background-color: #ffffff;
+    border-radius: 8px;
+    min-width: 300px;
+}
+
+QMessageBox QLabel {
+    color: #333333;
+    font-size: 14px;
+    padding: 12px;
+    min-height: 40px;
+}
+
+QMessageBox QPushButton {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-weight: bold;
+    min-width: 80px;
+    margin: 8px 5px;
+    opacity: 1.0;
+}
+
+QMessageBox QPushButton:hover {
+    background-color: #2563eb;
+}
+
+QMessageBox QPushButton:pressed {
+    background-color: #1d4ed8;
+}
+
+QMessageBox QIcon {
+    padding: 15px;
+}
+
+QMessageBox #qt_msgbox_label {
+    min-height: 40px;
+}
+
+/* Warning icon styling */
+QMessageBox#warning-box {
+    background-color: #fff9ed;
+    border: 1px solid #fbbf24;
+}
+
+/* Error icon styling */
+QMessageBox#error-box {
+    background-color: #fef2f2;
+    border: 1px solid #ef4444;
+}
+
+/* Info icon styling */
+QMessageBox#info-box {
+    background-color: #eff6ff; 
+    border: 1px solid #3b82f6;
 }
 </string>
   </property>

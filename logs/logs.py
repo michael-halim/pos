@@ -10,9 +10,11 @@ from generals.permission_manager import PermissionManager
 from generals.message_box import POSMessageBox
 from generals.constants import (
     RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS,
-    PERM_R_LOGS
+    PERM_R_LOGS, DATE_FORMAT_DDMMYYYY
 )
-from generals.messages import ERR_PERM_R_LOGS, PERM_DENIED
+from generals.messages import (
+    ERR, ERR_PERM_R_LOGS, PERM_DENIED
+)
 
 
 class LogsWindow(QtWidgets.QWidget):
@@ -43,8 +45,8 @@ class LogsWindow(QtWidgets.QWidget):
         self.ui.start_date_logs_input.setDate(datetime.now())
         self.ui.end_date_logs_input.setDate(datetime.now())
 
-        self.ui.start_date_logs_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_logs_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_logs_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_logs_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Set selection behavior to select entire rows
         self.logs_table.setSelectionBehavior(SELECT_ROWS)
@@ -79,8 +81,7 @@ class LogsWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_LOGS):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_LOGS)
-            return
+            self.close()
         
         # Refresh the data
         self.show_logs_data()
@@ -91,8 +92,8 @@ class LogsWindow(QtWidgets.QWidget):
         self.logs_table.setSortingEnabled(False)
         
         # Get Dates
-        start_date = datetime.strptime(self.ui.start_date_logs_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_logs_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_logs_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_logs_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         # Get search text if any
         search_text = self.ui.filter_logs_input.text().strip()
@@ -105,8 +106,12 @@ class LogsWindow(QtWidgets.QWidget):
             search_text=search_text
         )
 
-        # Set logs_data table data
-        self.set_logs_table_data(logs_result.data)
+        if logs_result.success and logs_result.data is not None:
+            self.set_logs_table_data(logs_result.data)
+
+        elif not logs_result.success:
+            POSMessageBox.warning(self, title=ERR, message=logs_result.message)
+            self.set_logs_table_data([])
         
 
     # Setters
@@ -120,7 +125,7 @@ class LogsWindow(QtWidgets.QWidget):
 
             # Convert created_at string to datetime and format
             created_at_dt = datetime.strptime(log.created_at, '%Y-%m-%d %H:%M:%S')
-            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M:%S')
 
             table_items =  [ 
                 QtWidgets.QTableWidgetItem(formatted_date),

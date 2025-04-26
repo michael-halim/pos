@@ -20,6 +20,7 @@ from generals.messages import (
 )
 from generals.permission_manager import PermissionManager
 
+
 class StockCardListWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -79,6 +80,7 @@ class StockCardListWindow(QtWidgets.QWidget):
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+
         if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
             self.close()
@@ -90,9 +92,9 @@ class StockCardListWindow(QtWidgets.QWidget):
 
     def show(self):
         super().show()
+
         if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
-            return
+            self.close()
 
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)
@@ -100,9 +102,9 @@ class StockCardListWindow(QtWidgets.QWidget):
 
     def showMaximized(self):
         super().showMaximized()
+
         if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
-            return
+            self.close()
 
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)
@@ -122,6 +124,10 @@ class StockCardListWindow(QtWidgets.QWidget):
 
         products_result = self.stock_card_list_service.get_products(search_text)
 
+        if not products_result.success:
+            POSMessageBox.error(self, title=ERR, message=products_result.message)
+            return
+
         self.set_products_table_data(products_result.data)
 
 
@@ -139,6 +145,10 @@ class StockCardListWindow(QtWidgets.QWidget):
         end_date = datetime.strptime(self.ui.end_date_stock_card_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         stock_card_result = self.stock_card_list_service.get_stock_card(sku, start_date, end_date)
+
+        if not stock_card_result.success:
+            POSMessageBox.error(self, title=ERR, message=stock_card_result.message)
+            return
 
         self.set_stock_card_table_data(stock_card_result.data)
 

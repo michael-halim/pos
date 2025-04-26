@@ -105,6 +105,9 @@ QLineEdit:focus {
     background-color: #ffffff;       /* White background when focused */
 }</string>
             </property>
+            <property name="clearButtonEnabled">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -325,7 +328,7 @@ QPushButton:disabled {
 }</string>
               </property>
               <property name="text">
-               <string>Add Product</string>
+               <string>Create</string>
               </property>
               <property name="icon">
                <iconset>

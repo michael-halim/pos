@@ -15,7 +15,7 @@ from generals.constants import (
     PERM_R_MONTHLY_SALES_REPORT
 ) 
 from generals.messages import (
-    ERR_PERM_R_MONTHLY_SALES_REPORT, PERM_DENIED
+    ERR, ERR_PERM_R_MONTHLY_SALES_REPORT, PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
 
@@ -88,8 +88,7 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_MONTHLY_SALES_REPORT)
-            return
+            self.close()
         
         # Refresh the data
         self.show_monthly_sales_data()
@@ -99,8 +98,7 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_MONTHLY_SALES_REPORT)
-            return
+            self.close()
         
         # Refresh the data
         self.show_monthly_sales_data()
@@ -135,6 +133,10 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
             start_date = start_of_month_date,
             end_date = end_of_month_date
         )
+
+        if not monthly_sales_result.success:
+            POSMessageBox.error(self, title=ERR, message=monthly_sales_result.message)
+            return
 
         # Set monthly sales table data
         self.set_monthly_sales_table_data(monthly_sales_result.data)

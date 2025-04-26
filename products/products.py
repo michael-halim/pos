@@ -21,7 +21,9 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_PRODUCTS, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
     ERR_PERM_I_PRODUCTS, ERR_PERM_R_STOCK_CARD, PERM_DENIED
 )
+from products.translations import PRODUCTS_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class ProductsWindow(QtWidgets.QWidget):
@@ -40,6 +42,13 @@ class ProductsWindow(QtWidgets.QWidget):
         
         # Setup permissions
         self.setup_permissions()
+
+        # Setup language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PRODUCTS_TRANSLATIONS)
+        
+        self.product_headers = ['SKU', 'Nama Produk', 'Harga Beli', 'Harga Jual', 'Stok', 'Satuan', 'Keterangan']
+        self.language_manager.translate_table_headers(self.ui.products_table, self.product_headers)
 
         # Init Services
         self.products_service = ProductsService()
@@ -83,11 +92,15 @@ class ProductsWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Translate widget text and update table headers
+        self.language_manager.translate_widget_text(self)
+        self.language_manager.translate_table_headers(self.ui.products_table, self.product_headers)
+
         # Only refresh data if it hasn't been loaded yet or if we need to refresh
         if not self.data_loaded:
             self.show_products_data()
             self.data_loaded = True
-
+            
 
     def show(self):
         """Override show to ensure data is refreshed"""
@@ -102,6 +115,7 @@ class ProductsWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
             self.close()
         
+
 
     # Setters
     # ===============
@@ -134,6 +148,7 @@ class ProductsWindow(QtWidgets.QWidget):
                 self.products_table.setItem(current_row, col, item)
 
         self.products_table.setSortingEnabled(True)
+
 
     # Shows
     # ===============

@@ -11,6 +11,7 @@ import sqlite3
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
 
+
 class BackupRestoreDatabase(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -35,8 +36,8 @@ class BackupRestoreDatabase(QtWidgets.QWidget):
             
             POSMessageBox.info(
                 self,
-                "Success",
-                f"Database backed up successfully to {backup_path}"
+                title="Success",
+                message=f"Database backed up successfully to {backup_path}"
             )
 
         except Exception as e:

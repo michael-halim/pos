@@ -13,6 +13,7 @@ from customers.customers import CustomersWindow
 from logs.logs import LogsWindow
 from users.users import UsersWindow
 from stock_card_list.stock_card_list import StockCardListWindow
+from stock_opname_list.stock_opname_list import StockOpnameListWindow
 from stock_opname.stock_opname import StockOpnameWindow
 from reports.sales_per_item_report.sales_per_item_report import SalesPerItemReportWindow
 from reports.back_office_sales_report.back_office_sales_report import BackOfficeSalesReportWindow
@@ -22,7 +23,9 @@ from reports.daily_sales_report.daily_sales_report import DailySalesReportWindow
 from reports.monthly_sales_report.monthly_sales_report import MonthlySalesReportWindow
 from backup_restore_database.backup_database import BackupRestoreDatabase
 from generals.build import resource_path
-from stock_opname_list.stock_opname_list import StockOpnameListWindow
+
+from generals.language_manager import LanguageManager
+
 
 class HomeWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -49,11 +52,18 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._users_dialog_window = None
         self._stock_card_list_window = None
         self._stock_opname_window = None
+        self._stock_opname_list_window = None
         self._backup_restore_database = None
         self._sales_per_item_report_window = None
         self._back_office_sales_report_window = None
         self._cashier_sales_report_window = None
+        self._daily_sales_report_window = None
+        self._monthly_sales_report_window = None
         self._profit_and_loss_report_window = None
+
+        self.language_manager = LanguageManager()
+        self.ui.language_combobox.currentTextChanged.connect(self.on_language_combobox_changed)
+
 
         # Connect Button to Stacked Widget
         self.ui.master_data_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.master_data_page))
@@ -64,34 +74,36 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.backup_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.backup_page))
         
         # Connect Button to Dialog in Master Data Menu - using property getters
+        # Master Data Menu
         self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
         self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
+        self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
+
+        # Transaction Menu
         self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
-        self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
-        self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
-        self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
-        self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
+        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_window.show())
 
-        so = StockOpnameListWindow()
+        # Settings Menu
+        self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
+        self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
 
-        self.ui.stock_opname_button.clicked.connect(lambda: so.show())
-        
+        # Report Menu
         self.ui.sales_per_item_report_button.clicked.connect(lambda: self.sales_per_item_report_window.showMaximized())
         self.ui.back_office_sales_report_button.clicked.connect(lambda: self.back_office_sales_report_window.showMaximized())
         self.ui.cashier_sales_report_button.clicked.connect(lambda: self.cashier_sales_report_window.showMaximized())
+        self.ui.profit_and_loss_report_button.clicked.connect(lambda: self.profit_and_loss_report_window.show())
+        self.ui.daily_sales_report_button.clicked.connect(lambda: self.daily_sales_report_window.show())
+        self.ui.monthly_sales_report_button.clicked.connect(lambda: self.monthly_sales_report_window.show())
 
-        daily = DailySalesReportWindow()
-        monthly = MonthlySalesReportWindow()
-        pnl = ProfitAndLossReportWindow()
+        # Logs Menu
+        self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
 
-        self.ui.profit_and_loss_report_button.clicked.connect(lambda: pnl.show())
-        self.ui.daily_sales_report_button.clicked.connect(lambda: daily.show())
-        self.ui.monthly_sales_report_button.clicked.connect(lambda: monthly.show())
+        # Database Menu   
         self.ui.backup_database_button.clicked.connect(lambda: self.backup_restore_database.export_database())  
         self.ui.restore_database_button.clicked.connect(lambda: self.backup_restore_database.import_database())
 
@@ -191,6 +203,13 @@ class HomeWindow(QtWidgets.QMainWindow):
 
 
     @property
+    def stock_opname_list_window(self):
+        if self._stock_opname_list_window is None:
+            self._stock_opname_list_window = StockOpnameListWindow()
+        return self._stock_opname_list_window
+
+
+    @property
     def backup_restore_database(self):
         if self._backup_restore_database is None:
             self._backup_restore_database = BackupRestoreDatabase()
@@ -224,6 +243,19 @@ class HomeWindow(QtWidgets.QMainWindow):
             self._profit_and_loss_report_window = ProfitAndLossReportWindow()
         return self._profit_and_loss_report_window
     
+
+    @property
+    def daily_sales_report_window(self):
+        if self._daily_sales_report_window is None:
+            self._daily_sales_report_window = DailySalesReportWindow()
+        return self._daily_sales_report_window
+        
+
+    @property
+    def monthly_sales_report_window(self):
+        if self._monthly_sales_report_window is None:
+            self._monthly_sales_report_window = MonthlySalesReportWindow()
+        return self._monthly_sales_report_window
     
 
     def get_user_permissions(self) -> set:
@@ -232,6 +264,15 @@ class HomeWindow(QtWidgets.QMainWindow):
 
     def set_user_permissions(self, permissions: set) -> None:
         self.user_permissions = permissions
+
+
+    def on_language_combobox_changed(self, text):
+        if text == 'Indonesia':
+            self.language_manager.set_language('id')
+        elif text == 'English':
+            self.language_manager.set_language('en')
+            
+        self.language_manager.translate_widget_text(self)
 
 
     def closeEvent(self, event):

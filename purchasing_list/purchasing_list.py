@@ -12,13 +12,14 @@ from generals.message_box import POSMessageBox
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
-    PERM_R_PURCHASING, PERM_C_PURCHASING, PERM_U_PURCHASING, PERM_D_PURCHASING,
+    PERM_R_PURCHASING, PERM_C_PURCHASING, PERM_U_PURCHASING, PERM_D_PURCHASING, DATE_FORMAT_DDMMYYYY
 ) 
 from generals.messages import (
     ERR, OK, ERR_PERM_R_PURCHASING, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING, ERR_PERM_D_PURCHASING,
     PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
+
 
 class PurchasingListWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -48,7 +49,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
         self.ui.find_purchasing_list_button.clicked.connect(self.show_purchasing_data)
         self.ui.edit_purchasing_button.clicked.connect(self.edit_purchasing)
         self.ui.delete_purchasing_button.clicked.connect(self.delete_purchasing)
-        self.ui.create_purchasing_button.clicked.connect(lambda: self.purchasing_window.showMaximized())
+        self.ui.create_purchasing_button.clicked.connect(self.create_purchasing)
         self.ui.close_purchasing_list_button.clicked.connect(lambda: self.close())
 
         # Init Tables
@@ -62,8 +63,8 @@ class PurchasingListWindow(QtWidgets.QWidget):
         self.ui.start_date_purchasing_list_input.setDate(datetime.now())
         self.ui.end_date_purchasing_list_input.setDate(datetime.now())
 
-        self.ui.start_date_purchasing_list_input.setDisplayFormat("dd/MM/yyyy")
-        self.ui.end_date_purchasing_list_input.setDisplayFormat("dd/MM/yyyy")
+        self.ui.start_date_purchasing_list_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
+        self.ui.end_date_purchasing_list_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Add selected tracking
         self.current_selected_sku = None
@@ -100,6 +101,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_purchasing_data() 
 
+
     def showEvent(self, event):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_PURCHASING):
@@ -109,6 +111,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_purchasing_data()
 
+
     def showMaximized(self):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_PURCHASING):
@@ -117,6 +120,14 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
         # Refresh the data
         self.show_purchasing_data()
+
+
+    def create_purchasing(self):
+        if not self.permission_manager.has_permission(PERM_C_PURCHASING):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_PURCHASING)
+            return
+
+        self.purchasing_window.showMaximized()
 
 
     def edit_purchasing(self):
@@ -236,8 +247,8 @@ class PurchasingListWindow(QtWidgets.QWidget):
         self.purchasing_table.setSortingEnabled(False)
         
         # Get Dates
-        start_date = datetime.strptime(self.ui.start_date_purchasing_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
-        end_date = datetime.strptime(self.ui.end_date_purchasing_list_input.date().toString('dd/MM/yyyy'), '%d/%m/%Y')
+        start_date = datetime.strptime(self.ui.start_date_purchasing_list_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
+        end_date = datetime.strptime(self.ui.end_date_purchasing_list_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         # Get search text if any
         search_text = self.ui.filter_purchasing_list_input.text().strip()
@@ -253,7 +264,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
         # Set purchasing data
         if purchasing_result.success and purchasing_result.data:
             self.set_purchasing_table_data(purchasing_result.data)
-        
+
 
     # Event Listeners
     # ===============
