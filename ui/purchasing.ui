@@ -1695,7 +1695,7 @@ QPushButton:disabled {
                      <cursorShape>PointingHandCursor</cursorShape>
                     </property>
                     <property name="text">
-                     <string>Discount (%)  : </string>
+                     <string>Discount (%) : </string>
                     </property>
                    </widget>
                   </item>

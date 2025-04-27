@@ -39,11 +39,6 @@ class CategoriesWindow(QtWidgets.QWidget):
         # Setup language Manager
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(CATEGORIES_TRANSLATIONS)
-        
-        self.category_headers = ['Id Kategori', 'Nama Kategori']
-        self.product_headers = ['SKU', 'Nama Produk', 'Harga Jual', 'Stok', 'Satuan']
-        self.language_manager.translate_table_headers(self.ui.categories_table, self.category_headers)
-        self.language_manager.translate_table_headers(self.ui.products_table_in_categories, self.product_headers)
 
         # Init Services
         self.categories_service = CategoriesService()
@@ -97,6 +92,13 @@ class CategoriesWindow(QtWidgets.QWidget):
         
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)
+
+        self.category_headers = ['Category ID', 'Category Name']
+        self.product_headers = ['SKU', 'Product Name', 'Price', 'Stock', 'Unit']
+        if self.language_manager.get_current_language() == 'id':
+            self.category_headers = ['Id Kategori', 'Nama Kategori']
+            self.product_headers = ['Kode Barang', 'Nama Produk', 'Harga Jual', 'Stok', 'Satuan']
+
         self.language_manager.translate_table_headers(self.ui.categories_table, self.category_headers)
         self.language_manager.translate_table_headers(self.ui.products_table_in_categories, self.product_headers)
 

@@ -18,6 +18,9 @@ from generals.messages import (
     ERR_PERM_R_PENDING_TRANSACTIONS, PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
+from dialogs.pending_transactions_dialog.translations import PENDING_TRANSACTIONS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
 
 class PendingTransactionsDialogWindow(QtWidgets.QWidget):
     pending_transaction_selected = pyqtSignal(dict)
@@ -28,7 +31,6 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PENDING_TRANSACTIONS)
-            self.close()
             return
         
         
@@ -37,6 +39,10 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         
         # Init Services
         self.pending_transactions_dialog_service = PendingTransactionsDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PENDING_TRANSACTIONS_DIALOG_TRANSLATIONS)
 
         # Init Tables
         self.pending_transactions_table = self.ui.pending_transactions_table
@@ -115,6 +121,18 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         super().showEvent(event)
         # Reset the current selection
         self.current_pending_transaction_id = None
+
+        self.language_manager.translate_widget_text(self)
+
+        self.pending_transactions_headers = ['Transaction #', 'Total', 'Created At', 'Remarks']
+        self.pending_detail_transactions_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':
+            self.pending_transactions_headers = ['Transaksi #', 'Total', 'Tanggal', 'Keterangan']
+            self.pending_detail_transactions_headers = ['SKU', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Diskon (%)', 'Diskon Per Item (Rp)', 'Diskon (Rp)', 'Subtotal']
+
+        self.language_manager.translate_table_headers(self.ui.pending_transactions_table, self.pending_transactions_headers)
+        self.language_manager.translate_table_headers(self.ui.pending_detail_transactions_table, self.pending_detail_transactions_headers)
+
         # Refresh the data
         self.show_pending_transactions_data()
         self.show_detail_pending_transactions_data()

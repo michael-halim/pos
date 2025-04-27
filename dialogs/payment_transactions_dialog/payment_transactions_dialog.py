@@ -5,6 +5,9 @@ from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
 
+from dialogs.payment_transactions_dialog.translations import PAYMENT_TRANSACTIONS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
 
 class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
     transactions_submitted = pyqtSignal(dict)
@@ -24,6 +27,18 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
 
         # Handle enter on payment input
         self.ui.payment_transaction_input.returnPressed.connect(self.submit_payment_transactions)
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PAYMENT_TRANSACTIONS_DIALOG_TRANSLATIONS)
+
+
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        self.language_manager.translate_widget_text(self)
 
 
     def submit_payment_transactions(self):

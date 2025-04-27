@@ -18,7 +18,9 @@ from generals.messages import (
     ERR, ERR_PERM_R_STOCK_CARD,
     PERM_DENIED
 )
+from stock_card_list.translations import STOCK_CARD_LIST_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class StockCardListWindow(QtWidgets.QWidget):
@@ -35,6 +37,10 @@ class StockCardListWindow(QtWidgets.QWidget):
         # Init Services
         self.stock_card_list_service = StockCardListService()
 
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(STOCK_CARD_LIST_TRANSLATIONS)
+        
         # Init Tables
         self.products_table = self.ui.products_table
         self.stock_card_table = self.ui.stock_card_table
@@ -85,6 +91,18 @@ class StockCardListWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
             self.close()
             return
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.product_headers = ['SKU', 'Product Name', 'Current Stock', 'Unit']
+        self.stock_card_headers = ['Date', 'Time', 'Transaction ID', 'Stock In', 'Stock Out', 'Running Balance', 'Remarks']
+        if self.language_manager.get_current_language() == 'id':
+            self.product_headers = ['Kode Barang', 'Nama Produk', 'Stok', 'Satuan']
+            self.stock_card_headers = ['Tanggal', 'Waktu', 'ID Transaksi', 'Stok Masuk', 'Stok Keluar', 'Total Stok', 'Keterangan']
+
+        self.language_manager.translate_table_headers(self.ui.products_table, self.product_headers)
+        self.language_manager.translate_table_headers(self.ui.stock_card_table, self.stock_card_headers)
 
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)

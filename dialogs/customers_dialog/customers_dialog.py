@@ -14,6 +14,8 @@ from generals.constants import (
     PERM_R_CUSTOMERS
 ) 
 from generals.messages import ERR_PERM_R_CUSTOMERS,PERM_DENIED
+from dialogs.customers_dialog.translations import CUSTOMERS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
 
 
 class CustomersDialogWindow(QtWidgets.QWidget):
@@ -28,7 +30,12 @@ class CustomersDialogWindow(QtWidgets.QWidget):
 
         self.ui = uic.loadUi(resource_path('ui/customers_dialog.ui'), self)
 
+        # Init Services
         self.customer_dialog_service = CustomersDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CUSTOMERS_DIALOG_TRANSLATIONS)
         
         # Init Table
         self.customers_dialog_table = self.ui.customers_dialog_table
@@ -64,6 +71,16 @@ class CustomersDialogWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
             self.close()
             return
+        
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.customers_dialog_table_headers = ['Id', 'Name', 'Phone', 'Points', 'Tx (#)', 'Tx (Rp.)']
+        if self.language_manager.get_current_language() == 'id':
+            self.customers_dialog_table_headers = ['Id', 'Nama', 'Telepon', 'Poin', 'Transaksi (#)', 'Transaksi (Rp.)']
+
+        self.language_manager.translate_table_headers(self.customers_dialog_table, self.customers_dialog_table_headers)
+
         # Refresh the data
         self.show_customers_data()
 

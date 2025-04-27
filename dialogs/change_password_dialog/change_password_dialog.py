@@ -3,6 +3,8 @@ from PyQt6 import QtWidgets, QtCore, uic
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
 
+from dialogs.change_password_dialog.translations import CHANGE_PASSWORD_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
 
 class ChangePasswordDialogWindow(QtWidgets.QWidget):
     password_changed = QtCore.pyqtSignal(dict)
@@ -16,10 +18,17 @@ class ChangePasswordDialogWindow(QtWidgets.QWidget):
         self.ui.close_change_password_button.clicked.connect(lambda: self.close())
         self.ui.submit_change_password_button.clicked.connect(self.change_password)
 
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CHANGE_PASSWORD_DIALOG_TRANSLATIONS)
+
 
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
 
 
     def show(self):

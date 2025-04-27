@@ -18,7 +18,9 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_PURCHASING, ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING, ERR_PERM_D_PURCHASING,
     PERM_DENIED
 )
+from purchasing_list.translations import PURCHASING_LIST_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class PurchasingListWindow(QtWidgets.QWidget):
@@ -38,9 +40,10 @@ class PurchasingListWindow(QtWidgets.QWidget):
         # Init Services
         self.purchasing_list_service = PurchasingListService()
 
-        # Init Services
-        self.purchasing_list_service = PurchasingListService()
-
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PURCHASING_LIST_TRANSLATIONS)
+        
         # Connect Filter Purchasing
         self.ui.filter_purchasing_list_input.textChanged.connect(self.show_purchasing_data)
         self.ui.filter_detail_purchasing_list_input.textChanged.connect(self.filter_detail_purchasing)
@@ -107,6 +110,20 @@ class PurchasingListWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_R_PURCHASING):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
             return
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.purchasing_table_headers = ['Date', 'Purchasing #', 'Supplier Name', 'Total', 'Remarks']
+        self.detail_purchasing_table_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Disc (%)', 'Disc (Rp)', 'Subtotal']
+
+        if self.language_manager.get_current_language() == 'id':    
+            self.purchasing_table_headers = ['Tanggal', 'ID Pembelian', 'Nama Supplier', 'Total', 'Keterangan']
+            self.detail_purchasing_table_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Disc (%)', 'Disc (Rp)', 'Subtotal']
+
+        self.language_manager.translate_table_headers(self.ui.purchasing_table, self.purchasing_table_headers)
+        self.language_manager.translate_table_headers(self.ui.detail_purchasing_table, self.detail_purchasing_table_headers)
+
 
         # Refresh the data
         self.show_purchasing_data()

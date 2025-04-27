@@ -10,16 +10,31 @@ from dialogs.products_dialog.products_dialog import ProductsDialogWindow
 from dialogs.categories_dialog.categories_dialog import CategoriesDialogWindow
 
 from helper import format_number, add_prefix, remove_non_digit
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from generals.build import resource_path
+from generals.constants import (
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, 
+    PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS,
+)
+from generals.messages import ( 
+    ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
+    PERM_DENIED
+)
+from dialogs.master_stock_dialog.translations import MASTER_STOCK_DIALOG_TRANSLATIONS
+from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
+
 
 class MasterStockDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         self.ui = uic.loadUi(resource_path('ui/master_stock.ui'), self)
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
+            return 
 
         # Init Dialog
         self.suppliers_dialog = SuppliersDialogWindow()
@@ -29,6 +44,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
         # Init Services
         self.master_stock_dialog_service = MasterStockDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(MASTER_STOCK_DIALOG_TRANSLATIONS)
 
         # Init Table
         self.purchasing_history_in_master_stock_table = self.ui.purchasing_history_in_master_stock_table
@@ -42,7 +61,6 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.find_category_master_stock_button.clicked.connect(lambda: self.categories_dialog.show())
         self.ui.find_supplier_master_stock_button.clicked.connect(lambda: self.suppliers_dialog.show())
 
-        
         self.ui.price_unit_master_stock_button.clicked.connect(self.show_price_unit_dialog)
         # self.ui.discount_master_stock_button.clicked.connect(self.discount_master_stock_button)
         self.ui.delete_master_stock_button.clicked.connect(self.delete_master_stock)
@@ -67,6 +85,23 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.purchasing_history_in_master_stock_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_PRODUCTS)
+            self.close()
+            return
+        
+        self.language_manager.translate_widget_text(self)   
+
+        self.purchasing_history_headers = ['Date', 'Supplier Name', 'Qty', 'Unit', 'Price', 'Disc (%)', 'Disc (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':    
+            self.purchasing_history_headers = ['Tanggal', 'Nama Supplier', 'Qty', 'Satuan', 'Harga', 'Diskon (%)', 'Diskon (Rp)', 'Subtotal']
+
+        self.language_manager.translate_table_headers(self.ui.purchasing_history_in_master_stock_table, self.purchasing_history_headers)
+
     def handle_supplier_selected(self, supplier_data: dict):
         supplier_result = self.master_stock_dialog_service.get_supplier_by_id(supplier_data['supplier_id'])
         if supplier_result.success and supplier_result.data:
@@ -85,6 +120,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
     
     def submit_master_stock(self):
+        if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_PRODUCTS)
+            return
+        
         master_stock_form_data: MasterStockModel = self.get_master_stock_form_data()
         if not master_stock_form_data.sku or not master_stock_form_data.product_name \
             or not master_stock_form_data.unit or not master_stock_form_data.price \
@@ -104,6 +143,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
     
 
     def update_master_stock(self):
+        if not self.permission_manager.has_permission(PERM_U_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_U_PRODUCTS)
+            return
+        
         master_stock_form_data: MasterStockModel = self.get_master_stock_form_data()
         sku = self.ui.sku_master_stock_input.text().strip()
         master_stock_form_data.sku = sku
@@ -124,6 +167,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
 
     def delete_master_stock(self):
+        if not self.permission_manager.has_permission(PERM_D_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_D_PRODUCTS)
+            return
+        
         sku = self.ui.sku_master_stock_input.text().strip()
 
         if not sku:
@@ -203,6 +250,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.remarks_master_stock_input.setText(data.remarks)
         self.ui.last_price_master_stock_input.setText(add_prefix(format_number(str(int(data.last_price)))))
         self.ui.average_price_master_stock_input.setText(add_prefix(format_number(str(int(data.average_price)))))
+
 
     def set_master_stock_form_by_sku(self, sku: str):
         self.clear_master_stock_form()

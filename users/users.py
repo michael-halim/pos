@@ -19,7 +19,10 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_USERS, ERR_PERM_C_USERS, ERR_PERM_U_USERS, ERR_PERM_D_USERS,
     PERM_DENIED
 )
+from users.translations import USERS_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
+
 
 class UsersWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -34,6 +37,10 @@ class UsersWindow(QtWidgets.QWidget):
 
         # Setup permissions
         self.setup_permissions()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(USERS_TRANSLATIONS)
 
         # Init Dialog
         self.roles_dialog = RolesDialogWindow()
@@ -93,6 +100,16 @@ class UsersWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_USERS)
             self.close()
             return
+        
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.users_table_headers = ['Id', 'Name', 'Role Name', 'Is Active', 'Created At']
+        if self.language_manager.get_current_language() == 'id':
+            self.users_table_headers = ['Id', 'Nama', 'Nama Jabatan', 'Masih Aktif ?', 'Dibuat Pada']
+
+        self.language_manager.translate_table_headers(self.users_table, self.users_table_headers)
+
         # Refresh the data
         self.show_users_data()
 

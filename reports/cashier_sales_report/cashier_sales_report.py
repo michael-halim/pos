@@ -17,7 +17,9 @@ from generals.messages import (
     ERR, ERR_PERM_R_CASHIER_SALES_REPORT,
     PERM_DENIED
 )
+from reports.cashier_sales_report.translations import CASHIER_SALES_REPORT_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class CashierSalesReportWindow(QtWidgets.QWidget):
@@ -33,6 +35,14 @@ class CashierSalesReportWindow(QtWidgets.QWidget):
 
         # Init Services
         self.cashier_sales_report_service = CashierSalesReportService()
+        
+        # Init Tables
+        self.transactions_table = self.ui.cashier_sales_transactions_table
+        self.detail_transactions_table = self.ui.cashier_sales_detail_transactions_table
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CASHIER_SALES_REPORT_TRANSLATIONS)
 
         # Connect Filter Transactions
         self.ui.filter_cashier_sales_transactions_input.textChanged.connect(self.show_transactions_data)
@@ -41,10 +51,6 @@ class CashierSalesReportWindow(QtWidgets.QWidget):
 
         # Connect Buttons
         self.ui.find_cashier_sales_button.clicked.connect(self.show_transactions_data)
-
-        # Init Tables
-        self.transactions_table = self.ui.cashier_sales_transactions_table
-        self.detail_transactions_table = self.ui.cashier_sales_detail_transactions_table
 
         # Connect table selection
         self.transactions_table.itemSelectionChanged.connect(self.on_transaction_selected)
@@ -96,6 +102,18 @@ class CashierSalesReportWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_R_CASHIER_SALES_REPORT):
             self.close()
         
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.transactions_headers = ['Date', 'Tx Num', 'Total', 'Method', 'Remarks']
+        self.detail_transactions_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':
+            self.transactions_headers = ['Tanggal', 'ID Transaksi', 'Total', 'Metode Pembayaran', 'Keterangan']
+            self.detail_transactions_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Diskon (%)', 'Diskon Per Item (Rp)', 'Diskon (Rp)', 'Subtotal']
+
+        self.language_manager.translate_table_headers(self.transactions_table, self.transactions_headers)
+        self.language_manager.translate_table_headers(self.detail_transactions_table, self.detail_transactions_headers)
+
         # Refresh the data
         self.show_transactions_data()
 

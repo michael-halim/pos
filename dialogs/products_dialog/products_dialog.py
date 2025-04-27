@@ -8,6 +8,9 @@ from helper import format_number, add_prefix
 from generals.fonts import POSFonts
 from generals.build import resource_path
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
+from dialogs.products_dialog.translations import PRODUCTS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
 
 class ProductsDialogWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -25,6 +28,10 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         self.products_dialog_table = self.ui.products_dialog_table
         self.products_dialog_table.setSortingEnabled(True)
         
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PRODUCTS_DIALOG_TRANSLATIONS)
+
         # Init Button
         self.ui.add_products_dialog_button.clicked.connect(self.send_product_data)
         self.ui.close_products_dialog_button.clicked.connect(lambda: self.close())
@@ -65,6 +72,15 @@ class ProductsDialogWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+
+        self.language_manager.translate_widget_text(self) 
+
+        self.products_dialog_headers = ['SKU', 'Product Name', 'Price', 'Stock', 'Unit', 'Created At']
+        if self.language_manager.get_current_language() == 'id':
+            self.products_dialog_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Stok', 'Satuan', 'Tanggal Dibuat']
+
+        self.language_manager.translate_table_headers(self.products_dialog_table, self.products_dialog_headers)
+
         # Refresh the data
         self.show_products_data()
 

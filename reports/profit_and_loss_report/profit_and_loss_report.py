@@ -16,7 +16,9 @@ from generals.constants import (
 from generals.messages import (
     ERR, ERR_PERM_R_PROFIT_AND_LOSS_REPORT, PERM_DENIED
 )
+from reports.profit_and_loss_report.translations import PROFIT_AND_LOSS_REPORT_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class ProfitAndLossReportWindow(QtWidgets.QWidget):
@@ -32,6 +34,10 @@ class ProfitAndLossReportWindow(QtWidgets.QWidget):
 
         # Init Services
         self.profit_and_loss_report_service = ProfitAndLossReportService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PROFIT_AND_LOSS_REPORT_TRANSLATIONS)
 
         # Connect Filter Profit and Loss
         self.ui.find_profit_and_loss_button.clicked.connect(self.show_profit_and_loss_data)
@@ -79,6 +85,16 @@ class ProfitAndLossReportWindow(QtWidgets.QWidget):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
             self.close()
+
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.profit_and_loss_headers = ['Period', 'Profit/Loss Period', 'Total Profit/Loss']
+        if self.language_manager.get_current_language() == 'id':
+            self.profit_and_loss_headers = ['Periode', 'Periode Profit/Loss', 'Total Profit/Loss']
+
+        self.language_manager.translate_table_headers(self.ui.profit_and_loss_table, self.profit_and_loss_headers)
 
 
     def showMaximized(self):

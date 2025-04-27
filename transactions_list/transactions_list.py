@@ -45,12 +45,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(TRANSACTION_LIST_TRANSLATIONS)
         
-        self.transaction_headers = ['Tanggal', 'ID Transaksi', 'Total', 'Metode', 'Keterangan']
-        self.detail_transaction_headers = ['SKU', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
-        self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
-        self.language_manager.translate_table_headers(self.ui.detail_transactions_table, self.detail_transaction_headers)
-
-
+        
         self.ui.delete_transactions_button.clicked.connect(self.delete_transactions)
         self.ui.edit_transactions_button.clicked.connect(self.edit_transactions)
 
@@ -121,11 +116,18 @@ class TransactionsListWindow(QtWidgets.QWidget):
             self.close()
             return
         
-
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
+
+        self.transaction_headers = ['Date', 'Tx Num', 'Total', 'Method', 'Remarks']
+        self.detail_transaction_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':
+            self.transaction_headers = ['Tanggal', 'ID Transaksi', 'Total', 'Metode', 'Keterangan']
+            self.detail_transaction_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
+
         self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
         self.language_manager.translate_table_headers(self.ui.detail_transactions_table, self.detail_transaction_headers)
+
 
 
         # Refresh the data

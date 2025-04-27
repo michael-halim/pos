@@ -17,7 +17,9 @@ from generals.messages import (
     ERR, ERR_PERM_R_BACK_OFFICE_SALES_REPORT,
     PERM_DENIED
 )
+from reports.back_office_sales_report.translations import BACK_OFFICE_SALES_REPORT_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class BackOfficeSalesReportWindow(QtWidgets.QWidget):
@@ -33,6 +35,10 @@ class BackOfficeSalesReportWindow(QtWidgets.QWidget):
 
         # Init Services
         self.back_office_sales_report_service = BackOfficeSalesReportService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(BACK_OFFICE_SALES_REPORT_TRANSLATIONS)
 
         # Connect Filter Transactions
         self.ui.filter_back_office_sales_transactions_input.textChanged.connect(self.show_transactions_data)
@@ -95,7 +101,21 @@ class BackOfficeSalesReportWindow(QtWidgets.QWidget):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_BACK_OFFICE_SALES_REPORT):
             self.close()
-        
+
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.transactions_headers = ['Date', 'Tx Num', 'Total', 'Method', 'Remarks']
+        self.detail_transactions_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':
+            self.transactions_headers = ['Tanggal', 'ID Transaksi', 'Total', 'Metode Pembayaran', 'Keterangan']
+            self.detail_transactions_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Diskon (%)', 'Diskon Per Item (Rp)', 'Diskon (Rp)', 'Subtotal']
+
+        self.language_manager.translate_table_headers(self.transactions_table, self.transactions_headers)
+        self.language_manager.translate_table_headers(self.detail_transactions_table, self.detail_transactions_headers)
+
+
         # Refresh the data
         self.show_transactions_data()
 

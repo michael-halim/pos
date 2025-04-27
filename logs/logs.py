@@ -6,7 +6,6 @@ from logs.models.logs_models import LogsModel
 
 from generals.fonts import POSFonts
 from generals.build import resource_path
-from generals.permission_manager import PermissionManager
 from generals.message_box import POSMessageBox
 from generals.constants import (
     RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS,
@@ -15,6 +14,9 @@ from generals.constants import (
 from generals.messages import (
     ERR, ERR_PERM_R_LOGS, PERM_DENIED
 )
+from logs.translations import LOGS_TRANSLATIONS
+from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class LogsWindow(QtWidgets.QWidget):
@@ -30,6 +32,10 @@ class LogsWindow(QtWidgets.QWidget):
 
         # Init Services
         self.logs_service = LogsService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(LOGS_TRANSLATIONS)
 
         # Connect Filter Transactions
         self.ui.filter_logs_input.textChanged.connect(self.show_logs_data)
@@ -73,6 +79,15 @@ class LogsWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+        
+        self.logs_headers = ['Date', 'Log Type', 'Log Description', 'Old Data', 'New Data', 'Created By']
+        if self.language_manager.get_current_language() == 'id':
+            self.logs_headers = ['Tanggal', 'Tipe Log', 'Deskripsi Log', 'Data Lama', 'Data Baru', 'Dibuat Oleh']
+
+        self.language_manager.translate_table_headers(self.logs_table, self.logs_headers)
+
         # Refresh the data
         self.show_logs_data()
 

@@ -8,6 +8,9 @@ from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
+from dialogs.price_unit_dialog.translations import PRICE_UNIT_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
 
 class PriceUnitDialogWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -17,6 +20,10 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
 
         # Init Services
         self.price_unit_dialog_service = PriceUnitDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(PRICE_UNIT_DIALOG_TRANSLATIONS)
 
         # Init Table
         self.price_unit_table = self.ui.price_unit_table
@@ -40,7 +47,20 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         self.price_unit_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.price_unit_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
     
-    
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        self.language_manager.translate_widget_text(self)
+
+        self.price_unit_headers = ['Unit', 'Barcode', 'Unit Value', 'Price']
+        if self.language_manager.get_current_language() == 'id':
+            self.price_unit_headers = ['Satuan', 'Barcode', 'Nilai Satuan', 'Harga']
+
+        self.language_manager.translate_table_headers(self.price_unit_table, self.price_unit_headers)
+
+
     def create_new_price_unit_form(self):
         self.clear_price_unit_form()
         self.set_enabled_form(True)

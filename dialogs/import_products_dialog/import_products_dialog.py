@@ -5,6 +5,9 @@ from dialogs.import_products_dialog.services.import_products_dialog_services imp
 
 from generals.build import resource_path
 from generals.message_box import POSMessageBox
+from dialogs.import_products_dialog.translations import IMPORT_PRODUCTS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
 
 class ImportProductsDialogWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -18,6 +21,14 @@ class ImportProductsDialogWindow(QtWidgets.QWidget):
 
         self.ui.select_file_import_products_button.clicked.connect(self.select_file)
         self.ui.submit_import_products_button.clicked.connect(self.submit_import_products)
+        
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(IMPORT_PRODUCTS_DIALOG_TRANSLATIONS)
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
         
 
     def select_file(self):

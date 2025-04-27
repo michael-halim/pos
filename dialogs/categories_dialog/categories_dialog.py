@@ -5,7 +5,6 @@ from dialogs.categories_dialog.services.categories_dialog_services import Catego
 
 from generals.fonts import POSFonts
 from generals.build import resource_path
-from generals.permission_manager import PermissionManager
 from generals.message_box import POSMessageBox
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
@@ -13,6 +12,9 @@ from generals.constants import (
     PERM_R_CATEGORIES
 ) 
 from generals.messages import ERR_PERM_R_CATEGORIES,PERM_DENIED
+from dialogs.categories_dialog.translations import CATEGORIES_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+from generals.permission_manager import PermissionManager
 
 
 class CategoriesDialogWindow(QtWidgets.QDialog):
@@ -30,6 +32,11 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
         
         # Init Services
         self.categories_dialog_service = CategoriesDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CATEGORIES_DIALOG_TRANSLATIONS)
+
         # Init Table
         self.categories_dialog_table = self.ui.categories_dialog_table
         self.categories_dialog_table.setSortingEnabled(True)
@@ -81,6 +88,15 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
             self.close()
             return
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.categories_dialog_table_headers = ['Category Id', 'Category Name']
+        if self.language_manager.get_current_language() == 'id':
+            self.categories_dialog_table_headers = ['Id Kategori', 'Nama Kategori']
+
+        self.language_manager.translate_table_headers(self.categories_dialog_table, self.categories_dialog_table_headers)
 
         # Refresh the data
         self.show_categories_data()

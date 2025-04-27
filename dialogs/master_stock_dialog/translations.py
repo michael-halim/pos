@@ -1,0 +1,32 @@
+MASTER_STOCK_DIALOG_TRANSLATIONS = {
+    'en': {
+        'kode barang : ': 'SKU : ',
+        'nama produk : ': 'Product Name : ',
+        'kategori : ': 'Category : ',
+        'nama kategori : ': 'Category Name : ',
+        'nama supplier : ': 'Supplier Name : ',
+        'satuan : ': 'Unit : ',
+        'harga beli : ': 'Cost Price : ',
+        'harga jual : ': 'Price : ',
+        'stok : ': 'Stock : ',
+        'harga terakhir : ': 'Last Price : ',
+        'harga rata-rata : ': 'Average Price : ',
+        'keterangan : ': 'Remarks : ',
+        'harga / unit': 'Price / Unit',
+    },
+    'id': {
+        'SKU : ' : 'kode barang : ',
+        'Product Name : ' : 'nama produk : ',
+        'Category : ' : 'kategori : ',
+        'Category Name : ' : 'nama kategori : ',
+        'Supplier Name : ' : 'nama supplier : ',
+        'Unit : ' : 'satuan : ',
+        'Cost Price : ' : 'harga beli : ',
+        'Price : ' : 'harga jual : ',
+        'Stock : ' : 'stok : ',
+        'Last Price : ' : 'harga terakhir : ',
+        'Average Price : ' : 'harga rata-rata : ',
+        'Remarks : ' : 'keterangan : ',
+        'Price / Unit' : 'harga / unit',
+    }       
+}

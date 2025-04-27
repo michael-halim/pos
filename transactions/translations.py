@@ -1,6 +1,5 @@
 TRANSACTIONS_TRANSLATIONS = {
     'en': {
-        'remarks : ': 'keterangan : ',
         'tanggal : ': 'date : ',
         'id pelanggan : ': 'customer id : ',
         'nama : ': 'name : ',
@@ -14,7 +13,6 @@ TRANSACTIONS_TRANSLATIONS = {
 
         'kode barang : ': 'sku : ',
         'nama produk : ': 'product name : ',
-        'harga : ': 'price : ',
         'stok : ': 'stock : ',
         'setelah transaksi : ': 'after transaction : ',
         'nilai satuan : ': 'unit value : ',
@@ -34,11 +32,9 @@ TRANSACTIONS_TRANSLATIONS = {
     },
 
     'id': {
-        'keterangan : ' : 'remarks : ',
         'date : ' : 'tanggal : ',
         'customer id : ' : 'id pelanggan : ',
         'name : ' : 'nama : ',
-        'price : ' : 'harga : ',
         'filter transaction : ' : 'filter transaksi : ',
         'create pending' : 'buat pending',
         'open pending' : 'buka pending',

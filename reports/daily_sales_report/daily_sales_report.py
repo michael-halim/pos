@@ -16,7 +16,9 @@ from generals.constants import (
 from generals.messages import (
     ERR, ERR_PERM_R_DAILY_SALES_REPORT, PERM_DENIED
 )
+from reports.daily_sales_report.translations import DAILY_SALES_REPORT_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class DailySalesReportWindow(QtWidgets.QWidget):
@@ -33,6 +35,10 @@ class DailySalesReportWindow(QtWidgets.QWidget):
         # Init Services
         self.daily_sales_report_service = DailySalesReportService()
 
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(DAILY_SALES_REPORT_TRANSLATIONS)
+
         # Connect Filter Daily Sales
         self.ui.find_daily_sales_report_button.clicked.connect(self.show_daily_sales_data)
         self.ui.close_button.clicked.connect(lambda: self.close())
@@ -43,7 +49,6 @@ class DailySalesReportWindow(QtWidgets.QWidget):
 
         self.ui.start_date_daily_sales_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
         self.ui.end_date_daily_sales_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
-
 
         # Set selection behavior to select entire rows
         self.ui.daily_sales_table.setSelectionBehavior(SELECT_ROWS)
@@ -73,6 +78,16 @@ class DailySalesReportWindow(QtWidgets.QWidget):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_DAILY_SALES_REPORT):
             self.close()
+
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.daily_sales_headers = ['Date', 'Total', 'Method', 'Created By']
+        if self.language_manager.get_current_language() == 'id':
+            self.daily_sales_headers = ['Tanggal', 'Total', 'Metode', 'Dibuat Oleh']
+
+        self.language_manager.translate_table_headers(self.ui.daily_sales_table, self.daily_sales_headers)
 
 
     def showMaximized(self):

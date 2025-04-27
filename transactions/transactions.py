@@ -54,19 +54,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(TRANSACTIONS_TRANSLATIONS)
 
-        self.transaction_headers = ['SKU', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Nilai Satuan', 'Discount (%)', 'Discount Per Item (Rp)', 'Discount (Rp)', 'Subtotal']
-        self.wholesale_transaction_headers = ['Satuan', 'Nilai Satuan', 'Harga']
-        self.transaction_history_headers = ['Tanggal', 'Qty', 'Satuan']
-        self.purchase_history_headers = ['Tanggal', 'Qty', 'Satuan']
-
-        self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
-        self.language_manager.translate_table_headers(self.ui.wholesale_transactions_table, self.wholesale_transaction_headers)
-        self.language_manager.translate_table_headers(self.ui.transaction_history_table, self.transaction_history_headers)
-        self.language_manager.translate_table_headers(self.ui.purchase_history_table, self.purchase_history_headers)
-        
-        self.language_manager.translate_widget_text(self)
-
-
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
         self.customers_dialog = CustomersDialogWindow()
@@ -202,6 +189,17 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)
+
+        self.transaction_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Unit Value', 'Discount (%)', 'Discount Per Item (Rp)', 'Discount (Rp)', 'Subtotal']
+        self.wholesale_transaction_headers = ['Unit', 'Unit Value', 'Price']
+        self.transaction_history_headers = ['Date', 'Qty', 'Unit']
+        self.purchase_history_headers = ['Date', 'Qty', 'Unit']
+        if self.language_manager.get_current_language() == 'id':    
+            self.transaction_headers = ['Kode Barang', 'Nama', 'Harga', 'Qty', 'Satuan', 'Nilai Satuan', 'Diskon (%)', 'Diskon Per Item (Rp)', 'Diskon (Rp)', 'Subtotal']
+            self.wholesale_transaction_headers = ['Satuan', 'Nilai Satuan', 'Harga']
+            self.transaction_history_headers = ['Tanggal', 'Qty', 'Satuan']
+            self.purchase_history_headers = ['Tanggal', 'Qty', 'Satuan']
+
         self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)
         self.language_manager.translate_table_headers(self.ui.wholesale_transactions_table, self.wholesale_transaction_headers)
         self.language_manager.translate_table_headers(self.ui.transaction_history_table, self.transaction_history_headers)

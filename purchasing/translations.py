@@ -15,6 +15,9 @@ PURCHASING_TRANSLATIONS = {
         'hapus data pembelian' : 'clear data purchasing',
         'tambah detail pembelian' : 'add detail purchasing',
         'simpan pembelian' : 'submit purchasing',
+        'diskon : ' : 'discount : ',
+        'diskon (%) : ' : 'discount (%) : ',
+        'diskon (rp. ) : ' : 'discount (rp. ) : ',
 
     },
 
@@ -34,5 +37,9 @@ PURCHASING_TRANSLATIONS = {
         'clear data purchasing' : 'hapus data pembelian',
         'add detail purchasing' : 'tambah detail pembelian',
         'submit purchasing' : 'simpan pembelian',
+        'discount : ' : 'diskon : ',
+        'discount (%) : ' : 'diskon (%) : ',
+        'discount (rp. ) : ' : 'diskon (rp. ) : ',
+
     }
 }

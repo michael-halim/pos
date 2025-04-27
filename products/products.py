@@ -47,9 +47,6 @@ class ProductsWindow(QtWidgets.QWidget):
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(PRODUCTS_TRANSLATIONS)
         
-        self.product_headers = ['SKU', 'Nama Produk', 'Harga Beli', 'Harga Jual', 'Stok', 'Satuan', 'Keterangan']
-        self.language_manager.translate_table_headers(self.ui.products_table, self.product_headers)
-
         # Init Services
         self.products_service = ProductsService()
 
@@ -94,6 +91,11 @@ class ProductsWindow(QtWidgets.QWidget):
         
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)
+        
+        self.product_headers = ['SKU', 'Product Name', 'Cost Price', 'Price', 'Stock', 'Unit', 'Remarks']
+        if self.language_manager.get_current_language() == 'id':
+            self.product_headers = ['Kode Barang', 'Nama Produk', 'Harga Beli', 'Harga Jual', 'Stok', 'Satuan', 'Keterangan']
+
         self.language_manager.translate_table_headers(self.ui.products_table, self.product_headers)
 
         # Only refresh data if it hasn't been loaded yet or if we need to refresh

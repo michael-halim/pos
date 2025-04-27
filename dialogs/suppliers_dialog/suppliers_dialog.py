@@ -6,6 +6,9 @@ from dialogs.suppliers_dialog.services.suppliers_dialog_services import Supplier
 from generals.fonts import POSFonts
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
+from dialogs.suppliers_dialog.translations import SUPPLIERS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
 
 class SuppliersDialogWindow(QtWidgets.QWidget):
     # Add signal to communicate with main window
@@ -18,6 +21,10 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
 
         # Init Services
         self.suppliers_dialog_service = SuppliersDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(SUPPLIERS_DIALOG_TRANSLATIONS)
 
         # Init Table
         self.suppliers_table = self.ui.suppliers_table
@@ -47,6 +54,15 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+
+        self.language_manager.translate_widget_text(self)
+
+        self.suppliers_headers = ['Supplier ID', 'Supplier Name', 'Address', 'Phone Number', 'City', 'Remarks']
+        if self.language_manager.get_current_language() == 'id':
+            self.suppliers_headers = ['ID Supplier', 'Nama Supplier', 'Alamat', 'Telepon', 'Kota', 'Keterangan']
+
+        self.language_manager.translate_table_headers(self.suppliers_table, self.suppliers_headers)
+
         # Reset the current selection
         self.current_selected_supplier = None
         # Refresh the data

@@ -16,7 +16,9 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_PERMISSIONS, ERR_PERM_C_PERMISSIONS, ERR_PERM_U_PERMISSIONS, ERR_PERM_D_PERMISSIONS,
     PERM_DENIED
 )
+from role_permissions.translations import ROLE_PERMISSIONS_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class RolePermissionsWindow(QtWidgets.QWidget):
@@ -32,6 +34,10 @@ class RolePermissionsWindow(QtWidgets.QWidget):
 
         # Init Services
         self.role_permissions_service = RolePermissionsService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(ROLE_PERMISSIONS_TRANSLATIONS)
 
         # Init Table
         self.roles_table = self.ui.roles_table
@@ -80,6 +86,18 @@ class RolePermissionsWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
             self.close()
             return
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.roles_table_headers = ['Id', 'Role', 'Description']
+        self.permissions_table_headers = ['#', 'Permissions']
+        if self.language_manager.get_current_language() == 'id':
+            self.roles_table_headers = ['Id', 'Jabatan', 'Deskripsi']
+            self.permissions_table_headers = ['#', 'Akses']
+
+        self.language_manager.translate_table_headers(self.roles_table, self.roles_table_headers)
+        self.language_manager.translate_table_headers(self.permissions_table, self.permissions_table_headers)
 
         # Refresh the data
         self.show_roles_data()

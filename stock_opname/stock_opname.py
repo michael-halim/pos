@@ -17,7 +17,9 @@ from generals.constants import (
 from generals.messages import (
     ERR, OK, ERR_PERM_R_STOCK_OPNAME, ERR_PERM_E_STOCK_OPNAME, PERM_DENIED
 )
+from stock_opname.translations import STOCK_OPNAME_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class StockOpnameWindow(QtWidgets.QWidget):
@@ -34,6 +36,10 @@ class StockOpnameWindow(QtWidgets.QWidget):
         # Init Services
         self.stock_opname_service = StockOpnameService()
         self.export_service = ExportService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(STOCK_OPNAME_TRANSLATIONS)
 
         # Init Tables
         self.stock_opname_table = self.ui.stock_opname_table
@@ -74,6 +80,15 @@ class StockOpnameWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.stock_opname_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit']
+        if self.language_manager.get_current_language() == 'id':
+            self.stock_opname_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Qty', 'Satuan']
+
+        self.language_manager.translate_table_headers(self.stock_opname_table, self.stock_opname_headers)
+
         self.show_stock_opname_data()
 
 

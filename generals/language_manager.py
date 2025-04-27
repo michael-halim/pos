@@ -74,9 +74,7 @@ class LanguageManager:
         if hasattr(widget, 'text') and callable(getattr(widget, 'text')):
             current_text = widget.text()
             if current_text:
-                print('current_text: ', current_text)
                 translated_text = self.translate(current_text.lower())
-                print('translated_text: ', translated_text)
                 widget.setText(translated_text.title())
         
 
@@ -85,7 +83,7 @@ class LanguageManager:
             title = widget.windowTitle()
             if title:
                 translated_title = self.translate(title)
-                widget.setWindowTitle(translated_title)
+                widget.setWindowTitle(translated_title.title())
         
         # Handle table widgets and their headers
         if isinstance(widget, QtWidgets.QTableWidget):

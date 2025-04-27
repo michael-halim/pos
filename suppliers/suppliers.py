@@ -5,7 +5,7 @@ from suppliers.services.suppliers_services import SuppliersService
 from suppliers.models.suppliers_models import SuppliersModel
 
 from generals.fonts import POSFonts
-from generals.permission_manager import PermissionManager
+from generals.message_box import POSMessageBox
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
@@ -15,8 +15,9 @@ from generals.messages import (
     ERR, ERR_PERM_R_SUPPLIERS, ERR_PERM_C_SUPPLIERS, ERR_PERM_U_SUPPLIERS, ERR_PERM_D_SUPPLIERS, PERM_DENIED, OK
 )
 from suppliers.translations import SUPPLIERS_TRANSLATIONS
+from generals.permission_manager import PermissionManager
 from generals.language_manager import LanguageManager
-from generals.message_box import POSMessageBox
+
 
 class SuppliersWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -32,13 +33,9 @@ class SuppliersWindow(QtWidgets.QWidget):
         # Setup permissions
         self.setup_permissions()
 
-
         # Setup language manager
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(SUPPLIERS_TRANSLATIONS)
-
-        self.supplier_headers = ['Id Supplier', 'Nama Supplier', 'Alamat', 'No. Telp', 'Kota', 'Keterangan']
-        self.language_manager.translate_table_headers(self.ui.suppliers_table, self.supplier_headers)
 
         # Init Services
         self.suppliers_service = SuppliersService()
@@ -79,6 +76,11 @@ class SuppliersWindow(QtWidgets.QWidget):
         
         # Translate the UI
         self.language_manager.translate_widget_text(self.ui)
+   
+        self.supplier_headers = ['Supplier ID', 'Supplier Name', 'Address', 'Phone Number', 'City', 'Remarks']
+        if self.language_manager.get_current_language() == 'id':
+            self.supplier_headers = ['Id Supplier', 'Nama Supplier', 'Alamat', 'No. Telp', 'Kota', 'Keterangan']
+
         self.language_manager.translate_table_headers(self.ui.suppliers_table, self.supplier_headers)
 
         # Refresh the data

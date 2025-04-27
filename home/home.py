@@ -81,13 +81,12 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
 
         # Transaction Menu
-        t = TransactionsWindow()
-        self.ui.transactions_button.clicked.connect(lambda: t.showMaximized())
+        self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
-        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_window.show())
+        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_dialog.show())
 
         # Settings Menu
         self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())

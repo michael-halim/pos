@@ -22,7 +22,9 @@ from generals.messages import (
     ERR_PERM_C_STOCK_OPNAME, ERR_PERM_U_STOCK_OPNAME, 
     ERR_PERM_D_STOCK_OPNAME, PERM_DENIED, CONFIRM
 )
+from stock_opname_list.translations import STOCK_OPNAME_LIST_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class StockOpnameListWindow(QtWidgets.QWidget):
@@ -38,6 +40,10 @@ class StockOpnameListWindow(QtWidgets.QWidget):
 
         # Init Services
         self.stock_opname_list_service = StockOpnameListService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(STOCK_OPNAME_LIST_TRANSLATIONS)
 
         # Init Stock Opname Window
         self.stock_opname_window = StockOpnameWindow()
@@ -97,6 +103,15 @@ class StockOpnameListWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_R_STOCK_OPNAME):
             return
         
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.stock_opname_headers = ['SO #', 'Created At', 'SKU', 'Product Name', 'Price', 'Original Stock', 'Opname Stock', 'Final Stock' ]
+        if self.language_manager.get_current_language() == 'id':
+            self.stock_opname_headers = ['Id Stock Opname', 'Tanggal', 'Kode Barang', 'Nama Produk', 'Harga', 'Stok Awal', 'Opname', 'Stok Akhir' ]
+
+        self.language_manager.translate_table_headers(self.ui.stock_opname_list_table, self.stock_opname_headers)
+
         # Refresh the data
         self.show_stock_opname_data()
 

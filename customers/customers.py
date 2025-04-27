@@ -16,7 +16,9 @@ from generals.messages import (
     ERR, OK, ERR_PERM_R_CUSTOMERS, ERR_PERM_C_CUSTOMERS, ERR_PERM_U_CUSTOMERS, ERR_PERM_D_CUSTOMERS,
     PERM_DENIED
 )
+from customers.translations import CUSTOMERS_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class CustomersWindow(QtWidgets.QWidget):
@@ -32,6 +34,10 @@ class CustomersWindow(QtWidgets.QWidget):
 
         # Init Services
         self.customer_service = CustomersService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CUSTOMERS_TRANSLATIONS)
 
         # Init Table
         self.customers_table = self.ui.customers_table
@@ -72,6 +78,15 @@ class CustomersWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.customer_headers = ['Id', 'Name', 'Phone', 'Points', 'Tx (#)', 'Tx (Rp.)']
+        if self.language_manager.get_current_language() == 'id':
+            self.customer_headers = ['Id', 'Nama', 'Nomor', 'Poin', 'Transaksi (#)', 'Transaksi (Rp.)']
+
+        self.language_manager.translate_table_headers(self.customers_table, self.customer_headers)
+
         # Refresh the data
         self.show_customers_data()
 

@@ -47,10 +47,7 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(PURCHASING_TRANSLATIONS)
 
-        self.purchasing_headers = ['SKU', 'Nama Produk', 'Qty', 'Satuan', 'Nilai Satuan', 'Harga', 'Discount (%)', 'Discount (Rp)', 'Subtotal']
-        self.purchasing_history_headers = ['Tanggal', 'Supplier', 'Qty', 'Satuan', 'Harga', 'Disc (%)', 'Disc (Rp)', 'Subtotal']
-        self.language_manager.translate_table_headers(self.ui.purchasing_detail_table, self.purchasing_headers)
-        self.language_manager.translate_table_headers(self.ui.purchasing_history_table, self.purchasing_history_headers)
+        
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
@@ -149,9 +146,15 @@ class PurchasingWindow(QtWidgets.QWidget):
 
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)
+
+        self.purchasing_headers = ['SKU', 'Product Name', 'Qty', 'Unit', 'Unit Value', 'Price', 'Discount (%)', 'Discount (Rp)', 'Subtotal']
+        self.purchasing_history_headers = ['Date', 'Supplier', 'Qty', 'Unit', 'Price', 'Disc (%)', 'Disc (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':
+            self.purchasing_headers = ['Kode Barang', 'Nama Produk', 'Qty', 'Satuan', 'Nilai Satuan', 'Harga', 'Diskon (%)', 'Diskon (Rp)', 'Subtotal']
+            self.purchasing_history_headers = ['Tanggal', 'Supplier', 'Qty', 'Satuan', 'Harga', 'Diskon (%)', 'Diskon (Rp)', 'Subtotal']
+
         self.language_manager.translate_table_headers(self.ui.purchasing_detail_table, self.purchasing_headers)
         self.language_manager.translate_table_headers(self.ui.purchasing_history_table, self.purchasing_history_headers)
-
 
 
     def add_detail_purchasing(self):

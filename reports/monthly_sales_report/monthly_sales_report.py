@@ -17,7 +17,9 @@ from generals.constants import (
 from generals.messages import (
     ERR, ERR_PERM_R_MONTHLY_SALES_REPORT, PERM_DENIED
 )
+from reports.monthly_sales_report.translations import MONTHLY_SALES_REPORT_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class MonthlySalesReportWindow(QtWidgets.QWidget):
@@ -34,6 +36,10 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
         # Init Services
         self.monthly_sales_report_service = MonthlySalesReportService()
         
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(MONTHLY_SALES_REPORT_TRANSLATIONS)
+
         # Connect Filter Transactions
         self.ui.close_button.clicked.connect(lambda: self.close())
 
@@ -89,7 +95,16 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
             self.close()
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
         
+        self.monthly_sales_headers = ['Date', 'Total', 'Method', 'Created By']
+        if self.language_manager.get_current_language() == 'id':
+            self.monthly_sales_headers = ['Bulan', 'Total', 'Metode', 'Dibuat Oleh']
+
+        self.language_manager.translate_table_headers(self.ui.monthly_sales_table, self.monthly_sales_headers)
+
         # Refresh the data
         self.show_monthly_sales_data()
 

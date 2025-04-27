@@ -12,6 +12,8 @@ from generals.constants import (
     RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, DATE_FORMAT_DDMMYYYY
 )
 from generals.build import resource_path
+from dialogs.stock_card_dialog.translations import STOCK_CARD_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
 
 
 class StockCardDialogWindow(QtWidgets.QWidget):
@@ -23,6 +25,10 @@ class StockCardDialogWindow(QtWidgets.QWidget):
 
         # Init Services
         self.stock_card_dialog_service = StockCardDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(STOCK_CARD_DIALOG_TRANSLATIONS)
 
         # Init Tables
         self.stock_card_table = self.ui.stock_card_table
@@ -54,6 +60,14 @@ class StockCardDialogWindow(QtWidgets.QWidget):
 
     def showEvent(self, event):
         super().showEvent(event)
+
+        self.language_manager.translate_widget_text(self)
+
+        self.stock_card_headers = ['Date', 'Time', 'Transaction ID', 'Stock In', 'Stock Out', 'Running Balance', 'Remarks']
+        if self.language_manager.get_current_language() == 'id':
+            self.stock_card_headers = ['Tanggal', 'Waktu', 'ID Transaksi', 'Stok Masuk', 'Stok Keluar', 'Saldo Berjalan', 'Keterangan']
+
+        self.language_manager.translate_table_headers(self.stock_card_table, self.stock_card_headers)
 
     
     def show(self):

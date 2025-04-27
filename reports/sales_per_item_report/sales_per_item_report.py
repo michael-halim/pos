@@ -17,7 +17,9 @@ from generals.constants import (
 from generals.messages import (
     ERR_PERM_R_SALES_PER_ITEM_REPORT, PERM_DENIED
 )
+from reports.sales_per_item_report.translations import SALES_PER_ITEM_REPORT_TRANSLATIONS
 from generals.permission_manager import PermissionManager
+from generals.language_manager import LanguageManager
 
 
 class SalesPerItemReportWindow(QtWidgets.QWidget):
@@ -40,6 +42,10 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
         # Init Services
         self.sales_per_item_report_service = SalesPerItemReportService()
 
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(SALES_PER_ITEM_REPORT_TRANSLATIONS)
+
         # Init Buttons
         self.ui.find_sales_per_item_button.clicked.connect(self.show_sales_per_item_data)
         self.ui.find_sku_sales_per_item_button.clicked.connect(lambda: self.products_dialog.show())
@@ -56,15 +62,15 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
         self.ui.end_date_sales_per_item_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
 
         # Set selection behavior to select entire rows
-        self.sales_per_item_table.setSelectionBehavior(SELECT_ROWS)
-        self.sales_per_item_table.setSelectionMode(SINGLE_SELECTION)
+        self.ui.sales_per_item_table.setSelectionBehavior(SELECT_ROWS)
+        self.ui.sales_per_item_table.setSelectionMode(SINGLE_SELECTION)
 
         # Set sales per item table to be read only
-        self.sales_per_item_table.setEditTriggers(NO_EDIT_TRIGGERS)
+        self.ui.sales_per_item_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties to resize to contents
-        self.sales_per_item_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        self.sales_per_item_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.ui.sales_per_item_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.ui.sales_per_item_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
 
@@ -89,6 +95,15 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_SALES_PER_ITEM_REPORT)
             return
         
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.sales_per_item_headers = ['Tx Id', 'Datetime', 'Username', 'Qty', 'Unit', 'Price', 'Unit Value', 'Discount Pct (%)', 'Discount Per Item (Rp)', 'Discount (Rp)', 'Subtotal']
+        if self.language_manager.get_current_language() == 'id':
+            self.sales_per_item_headers = ['ID Transaksi', 'Tanggal', 'Username', 'Qty', 'Satuan', 'Harga', 'Nilai Satuan', 'Diskon (%)', 'Diskon Per Item (Rp)', 'Diskon (Rp)', 'Subtotal']
+
+        self.language_manager.translate_table_headers(self.ui.sales_per_item_table, self.sales_per_item_headers)
+
         # Refresh the data
         self.show_sales_per_item_data()
 
@@ -112,7 +127,7 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
             return
         
         # Temporarily disable sorting
-        self.sales_per_item_table.setSortingEnabled(False)
+        self.ui.sales_per_item_table.setSortingEnabled(False)
         
         # Get Dates
         start_date = datetime.strptime(self.ui.start_date_sales_per_item_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
@@ -145,12 +160,12 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
     # ==============
     def set_sales_per_item_table_data(self, data: list[SalesPerItemReportModel]):
         # Clear the table
-        self.sales_per_item_table.setRowCount(0)
+        self.ui.sales_per_item_table.setRowCount(0)
         total_sales = 0
         list_of_items_sold = {}
         for sales in data:
-            current_row = self.sales_per_item_table.rowCount()
-            self.sales_per_item_table.insertRow(current_row)
+            current_row = self.ui.sales_per_item_table.rowCount()
+            self.ui.sales_per_item_table.insertRow(current_row)
 
             created_at_dt = datetime.strptime(sales.created_at, '%Y-%m-%d %H:%M:%S')
             formatted_date = created_at_dt.strftime('%d %b %y %H:%M:%S')
@@ -185,7 +200,7 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
 
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
-                self.sales_per_item_table.setItem(current_row, col, item)
+                self.ui.sales_per_item_table.setItem(current_row, col, item)
 
 
         # Set total sales
@@ -198,7 +213,7 @@ class SalesPerItemReportWindow(QtWidgets.QWidget):
         items_sold = [ f"{value['unit_sold']} {value['unit']}" for _, value in sorted_dict_desc.items() ]
         self.ui.total_items_sold_input.setText(' '.join(items_sold))
 
-        self.sales_per_item_table.setSortingEnabled(True)
+        self.ui.sales_per_item_table.setSortingEnabled(True)
 
     
     # Event Listeners

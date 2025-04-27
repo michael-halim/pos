@@ -5,6 +5,8 @@ from stock_opname.models.stock_opname_models import EditStockOpnameModel
 
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
+from dialogs.edit_stock_opname_dialog.translations import EDIT_STOCK_OPNAME_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
 
 
 class EditStockOpnameDialogWindow(QtWidgets.QWidget):
@@ -20,6 +22,13 @@ class EditStockOpnameDialogWindow(QtWidgets.QWidget):
         # Connect buttons
         self.ui.cancel_stock_opname_button.clicked.connect(lambda: self.close())
         self.ui.edit_stock_opname_button.clicked.connect(self.edit_stock_opname)
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(EDIT_STOCK_OPNAME_DIALOG_TRANSLATIONS)
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)   
 
 
     def edit_stock_opname(self):
