@@ -11,7 +11,7 @@ from generals.constants import (
     NO_EDIT_TRIGGERS, RESIZE_MODE_INTERACTIVE,
     PERM_R_CATEGORIES
 ) 
-from generals.messages import ERR_PERM_R_CATEGORIES,PERM_DENIED
+from generals.messages import ERR_PERM_R_CATEGORIES, PERM_DENIED
 from dialogs.categories_dialog.translations import CATEGORIES_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
 from generals.permission_manager import PermissionManager
@@ -62,23 +62,6 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
         self.show_categories_data()
 
 
-    # Shows
-    # ===============
-    def show_categories_data(self):
-        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
-            return
-
-        self.categories_dialog_table.setSortingEnabled(False)
-
-        search_text = self.ui.filter_categories_dialog_input.text().strip()
-        search_text = search_text.lower() if search_text else None
-
-        categories_dialog_result = self.categories_dialog_service.get_categories(search_text)
-
-        self.set_categories_table_data(categories_dialog_result.data)
-
-
     # Overrides
     # ===============
     def showEvent(self, event):
@@ -122,6 +105,23 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
 
         # Refresh the data
         self.show_categories_data()
+
+
+    # Shows
+    # ===============
+    def show_categories_data(self):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
+        self.categories_dialog_table.setSortingEnabled(False)
+
+        search_text = self.ui.filter_categories_dialog_input.text().strip()
+        search_text = search_text.lower() if search_text else None
+
+        categories_dialog_result = self.categories_dialog_service.get_categories(search_text)
+
+        self.set_categories_table_data(categories_dialog_result.data)
 
 
     # Setters
@@ -180,3 +180,22 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
                     match_found = True
                     break
             self.categories_dialog_table.setRowHidden(row, not match_found)
+
+
+    # Events Listeners
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.categories_dialog_table.rowCount() > 0 and not self.categories_dialog_table.selectedItems():
+                self.categories_dialog_table.selectRow(0)
+                self.categories_dialog_table.setFocus()
+                event.accept()
+                return
+
+        elif event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            if self.categories_dialog_table.selectedItems():
+                self.send_category_data()
+                event.accept()
+                return  
+            
+        super().keyPressEvent(event)

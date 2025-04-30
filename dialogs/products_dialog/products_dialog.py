@@ -26,7 +26,6 @@ class ProductsDialogWindow(QtWidgets.QWidget):
 
         # Init Table
         self.products_dialog_table = self.ui.products_dialog_table
-        self.products_dialog_table.setSortingEnabled(True)
         
         # Init Language Manager
         self.language_manager = LanguageManager()
@@ -59,6 +58,8 @@ class ProductsDialogWindow(QtWidgets.QWidget):
     # Shows
     # ===============
     def show_products_data(self):
+        self.products_dialog_table.setSortingEnabled(False)
+
         search_text = self.ui.filter_products_dialog_input.text().strip()
         search_text = search_text.lower() if search_text else None
 
@@ -73,13 +74,15 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
 
-        self.language_manager.translate_widget_text(self) 
+        self.language_manager.translate_widget_text(self)
 
         self.products_dialog_headers = ['SKU', 'Product Name', 'Price', 'Stock', 'Unit', 'Created At']
         if self.language_manager.get_current_language() == 'id':
             self.products_dialog_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Stok', 'Satuan', 'Tanggal Dibuat']
 
         self.language_manager.translate_table_headers(self.products_dialog_table, self.products_dialog_headers)
+
+        self.ui.filter_products_dialog_input.setFocus()
 
         # Refresh the data
         self.show_products_data()
@@ -131,6 +134,8 @@ class ProductsDialogWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.products_dialog_table.setItem(current_row, col, item)
 
+        self.products_dialog_table.setSortingEnabled(True)
+
 
     # Signal Handlers
     # ===============
@@ -138,12 +143,12 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         selected_rows = self.products_dialog_table.selectedItems()
         if selected_rows:
             row = selected_rows[0].row()
-            
+
             # Create dictionary with product details
             product_data = {
                 'sku': self.products_dialog_table.item(row, 0).text(),
             }
-            
+
             # Emit signal with product data
             self.product_selected.emit(product_data)
             self.close()
@@ -171,16 +176,18 @@ class ProductsDialogWindow(QtWidgets.QWidget):
     # Event Listeners
     # ===============
     def handle_key_press(self, event):
-        # Check for Enter key
-        if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
-            # Don't handle Enter if we're in a text field
-            if not isinstance(QtWidgets.QApplication.focusWidget(), QtWidgets.QLineEdit):
-                # If a row is selected or there are rows, send the data
-                if self.products_dialog_table.rowCount() > 0:
-                    if not self.products_dialog_table.selectedItems():
-                        self.products_dialog_table.selectRow(0)
-                    self.send_product_data()
-                    return
-        
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.products_dialog_table.rowCount() > 0 and not self.products_dialog_table.selectedItems():
+                self.products_dialog_table.selectRow(0)
+                self.products_dialog_table.setFocus()
+                event.accept()
+                return
+            
+        elif event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            if self.products_dialog_table.selectedItems():
+                self.send_product_data()
+                event.accept()
+                return
+
         # Let the parent class handle other keys
         super().keyPressEvent(event)

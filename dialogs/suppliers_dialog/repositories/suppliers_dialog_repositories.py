@@ -10,7 +10,7 @@ class SuppliersDialogRepository:
         self.cursor = self.db.cursor()
         
     
-    def get_suppliers(self, search_text: str = ''):
+    def get_suppliers(self, search_text: str = None):
         try:
             suppliers_result = []
             if search_text:

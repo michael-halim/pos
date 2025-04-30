@@ -15,6 +15,7 @@ def create_module_structure(module_name: str):
         f"{module_name}/models/{module_name}_models.py",
         f"{module_name}/repositories/{module_name}_repositories.py",
         f"{module_name}/services/{module_name}_services.py",
+        f"{module_name}/translations.py",
         f"{module_name}/{module_name}.py",
     ]
     
@@ -69,6 +70,16 @@ class {module_name.replace('_', ' ').title().replace(' ', '')}Service:
         self.repository = {module_name.replace('_', ' ').title().replace(' ', '')}Repository()
         self.permission_manager = PermissionManager()
 '''
+                elif "translations" in file_path:
+                    content = f'''{module_name.upper()}_TRANSLATIONS = {{
+    'en': {{
+    }},
+
+    'id': {{
+    }}
+}}
+'''
+
                 else:
                     content = f'''from PyQt6 import QtWidgets, uic
 

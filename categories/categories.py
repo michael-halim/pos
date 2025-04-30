@@ -400,7 +400,7 @@ class CategoriesWindow(QtWidgets.QWidget):
         self.current_category_id = None
         
         # Reset button if it was in update mode
-        self.ui.submit_category_button.setText("Submit")
+        self.ui.submit_category_button.setText('Submit')
         self.ui.submit_category_button.clicked.disconnect()
         self.ui.submit_category_button.clicked.connect(self.submit_category)
         

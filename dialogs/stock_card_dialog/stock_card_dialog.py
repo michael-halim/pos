@@ -9,16 +9,25 @@ from helper import format_number
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
 from generals.constants import (
-    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, DATE_FORMAT_DDMMYYYY
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS, DATE_FORMAT_DDMMYYYY,
+    PERM_R_STOCK_CARD
+)
+from generals.messages import (
+    ERR_PERM_R_STOCK_CARD, PERM_DENIED
 )
 from generals.build import resource_path
 from dialogs.stock_card_dialog.translations import STOCK_CARD_DIALOG_TRANSLATIONS
+from generals.permission_manager import PermissionManager
 from generals.language_manager import LanguageManager
 
 
 class StockCardDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/stock_card_dialog.ui'), self)
@@ -58,8 +67,15 @@ class StockCardDialogWindow(QtWidgets.QWidget):
         self.stock_card_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
+    # Overrides
+    # ===============
     def showEvent(self, event):
         super().showEvent(event)
+
+        if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_STOCK_CARD)
+            self.close()
+            return
 
         self.language_manager.translate_widget_text(self)
 
@@ -78,6 +94,8 @@ class StockCardDialogWindow(QtWidgets.QWidget):
         super().showMaximized()
 
 
+    # Setters
+    # ===============
     def set_stock_card_data(self, data: list[StockCardTableItemModel]):
         # Clear the table
         self.stock_card_table.setRowCount(0)
@@ -130,7 +148,11 @@ class StockCardDialogWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.stock_card_table.setItem(current_row, col, item)
 
+        self.stock_card_table.setSortingEnabled(True)
+        
 
+    # Shows
+    # ===============
     def show_stock_card_data(self, sku: str = None, start_date_params: date = None, end_date_params: date = None):
         if not sku and not self.saved_sku:
             POSMessageBox.warning(self, 'Warning', 'Please enter a valid SKU')
@@ -154,7 +176,6 @@ class StockCardDialogWindow(QtWidgets.QWidget):
 
         self.ui.sku_stock_card_dialog_input.setText(str(self.saved_sku))
 
+        # Set stock card data
         self.set_stock_card_data(stock_card_result.data)
-
-        # Re-enable sorting
-        self.stock_card_table.setSortingEnabled(True)
+       

@@ -51,7 +51,6 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._logs_dialog = None
         self._users_dialog_window = None
         self._stock_card_list_window = None
-        self._stock_opname_window = None
         self._stock_opname_list_window = None
         self._backup_restore_database = None
         self._sales_per_item_report_window = None
@@ -75,18 +74,20 @@ class HomeWindow(QtWidgets.QMainWindow):
         
         # Connect Button to Dialog in Master Data Menu - using property getters
         # Master Data Menu
-        self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
+        p = ProductsWindow()
+        self.ui.products_button.clicked.connect(lambda: p.show())
         self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
         self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
         self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
 
         # Transaction Menu
-        self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
+        t = TransactionsWindow()
+        self.ui.transactions_button.clicked.connect(lambda: t.showMaximized())
         self.ui.transactions_list_button.clicked.connect(lambda: self.transactions_list_dialog.showMaximized())
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
-        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_dialog.show())
+        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_window.show())
 
         # Settings Menu
         self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
@@ -193,13 +194,6 @@ class HomeWindow(QtWidgets.QMainWindow):
         if self._stock_card_list_window is None:
             self._stock_card_list_window = StockCardListWindow()
         return self._stock_card_list_window
-
-
-    @property
-    def stock_opname_window(self):
-        if self._stock_opname_window is None:
-            self._stock_opname_window = StockOpnameWindow()
-        return self._stock_opname_window
 
 
     @property

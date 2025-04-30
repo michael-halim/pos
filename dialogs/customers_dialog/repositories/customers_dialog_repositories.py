@@ -7,6 +7,7 @@ from generals.permission_manager import PermissionManager
 from generals.constants import PERM_R_CUSTOMERS
 from generals.messages import ERR_PERM_R_CUSTOMERS
 
+
 class CustomersDialogRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()

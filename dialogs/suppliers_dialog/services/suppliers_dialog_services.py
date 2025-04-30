@@ -7,7 +7,7 @@ class SuppliersDialogService:
         self.repository = SuppliersDialogRepository()
         
 
-    def get_suppliers(self, search_text: str = '') -> ResponseMessage:
+    def get_suppliers(self, search_text: str = None) -> ResponseMessage:
         return self.repository.get_suppliers(search_text)
     
     

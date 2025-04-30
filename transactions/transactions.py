@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 
 from datetime import datetime
 
@@ -137,9 +137,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Connect qty input to update stock after input
         self.ui.qty_transaction_input.textChanged.connect(self.on_qty_transaction_input_changed)
 
-        # Connect payment input to update payment change
-        self.ui.payment_transaction_input.textChanged.connect(self.on_payment_transaction_input_changed)
-
         # Connect tax input to update tax rp input
         self.ui.tax_pct_transaction_input.textChanged.connect(self.on_tax_transaction_input_changed)
 
@@ -149,8 +146,17 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Connect customer id input to update customer name input
         self.ui.customer_id_transaction_input.returnPressed.connect(self.on_handle_customer_enter)
 
-        # Enter in Payment will trigger submit transaction
-        self.ui.payment_transaction_input.returnPressed.connect(self.on_handle_payment_enter)
+        # UX For Shortcut
+        # =================
+
+        # Set focus to customer input
+        self.ui.customer_id_transaction_input.setFocus()
+
+        self.ui.qty_transaction_input.installEventFilter(self)
+
+        # Connect combobox activated signal
+        self.ui.qty_transaction_combobox.activated.connect(self.on_unit_selected)
+
 
         # Set selection behavior to select entire rows
         self.transactions_table.setSelectionBehavior(SELECT_ROWS)
@@ -229,9 +235,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         subtotal = self.calculate_total_transactions()
         self.ui.total_transaction_input.setText(add_prefix(format_number(str(subtotal))))
 
-        # Update payment change
-        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
-
 
     def remove_tax_transaction(self):
         if self.ui.tax_pct_transaction_input.isEnabled():
@@ -250,7 +253,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         
         subtotal = self.calculate_total_transactions()
         self.ui.total_transaction_input.setText(add_prefix(format_number(str(subtotal))))
-        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(subtotal))))
 
 
     def add_detail_transaction(self):
@@ -274,9 +276,6 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Update total discount
             total_discount = self.calculate_total_discount()
             self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
-
-            # Update payment change
-            self.set_payment_change_transaction_input(total_amount, is_color_red=True)
 
             # Clear data transaction
             self.clear_data_transaction()
@@ -345,9 +344,6 @@ class TransactionsWindow(QtWidgets.QWidget):
                 # Update total discount
                 total_discount = self.calculate_total_discount()
                 self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
-
-                # Update payment change
-                self.set_payment_change_transaction_input(total, is_color_red=True)
 
                 # Re-calculate tax if any
                 if not self.ui.tax_pct_transaction_input.isEnabled():
@@ -425,16 +421,6 @@ class TransactionsWindow(QtWidgets.QWidget):
                 self.add_tax_transaction()  
 
             
-            # Update payment change if payment exists
-            payment_rp: str = remove_non_digit(self.ui.payment_transaction_input.text()) if self.ui.payment_transaction_input.text().strip() else '0'
-            if payment_rp:
-                payment_change: int = int(total_amount) - int(payment_rp)
-
-                # Set color red if payment change is less than 0
-                is_color_red = True if payment_change > 0 else False
-                self.set_payment_change_transaction_input(payment_change, is_color_red=is_color_red)
-
-
     def trigger_submit_payment_transactions(self):
         # Get detail transactions from transactions table
         detail_transactions_data: list[DetailTransactionModel] = self.get_detail_transactions()
@@ -503,6 +489,9 @@ class TransactionsWindow(QtWidgets.QWidget):
 
             # Clear the transactions table and total
             self.clear_transaction()
+
+            # Set focus to customer input
+            self.ui.customer_id_transaction_input.setFocus()
 
         else:
             POSMessageBox.error(self, title=ERR, message=result.message)
@@ -721,9 +710,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         total_discount = self.calculate_total_discount()
         self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
 
-        # Update payment change
-        self.set_payment_change_transaction_input(subtotal, is_color_red=True)
-
 
     def handle_product_selected(self, product_data):
         # Clear existing items
@@ -766,6 +752,9 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Trigger qty input changed event
         self.on_qty_transaction_input_changed()
 
+        # Set focus to qty input
+        self.ui.qty_transaction_input.setFocus()
+
         # Reset loading flag
         self.is_loading_combo = False
 
@@ -776,6 +765,9 @@ class TransactionsWindow(QtWidgets.QWidget):
         if result.success:
             self.ui.customer_name_transaction_input.setText(result.data)
 
+        # Set focus to sku input
+        self.ui.sku_transaction_input.setFocus()
+        
 
     # Getters
     #==========
@@ -973,13 +965,11 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.on_handle_customer_enter()
 
         self.ui.total_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.total_amount))))
-        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.payment_change))))
         self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.total_discount))))
         self.ui.tax_pct_transaction_input.setText(str(transactions_result.data.tax_pct))
         self.ui.tax_rp_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.tax_amount))))
 
         self.ui.payment_method_transaction_combobox.setCurrentText(transactions_result.data.payment_method)
-        self.ui.payment_transaction_input.setText(add_prefix(format_number(str(transactions_result.data.payment_amount))))
         self.ui.remarks_transaction_input.setText(transactions_result.data.payment_remarks)
 
         # Set Detail Transactions Data
@@ -1059,13 +1049,6 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.cached_qty[cache_key] = (pud.unit_value, pud.price)
             self.ui.qty_transaction_combobox.addItem(pud.unit)
 
-
-    def set_payment_change_transaction_input(self, total_amount: int, is_color_red: bool = True):
-        self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(total_amount))))
-        self.ui.payment_change_transaction_input.setStyleSheet('color: black;')
-        if is_color_red:
-            self.ui.payment_change_transaction_input.setStyleSheet('color: red;')
-            
 
     def set_wholesale_transactions_table_data(self, data: list[WholesaleTableModel]) -> None:
         for item in data:
@@ -1201,27 +1184,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.on_qty_transaction_input_changed()
 
 
-    def on_payment_transaction_input_changed(self):
-        self.ui.payment_transaction_input.textChanged.disconnect()
-
-        # Format payment input
-        payment_rp = remove_non_digit(self.ui.payment_transaction_input.text().strip()) if remove_non_digit(self.ui.payment_transaction_input.text().strip()) != '' else '0'
-
-        self.ui.payment_transaction_input.setText(add_prefix(format_number(str(int(payment_rp)))))
-        self.ui.payment_transaction_input.textChanged.connect(self.on_payment_transaction_input_changed)
-
-        total_amount = remove_non_digit(self.ui.total_transaction_input.text())
-        if payment_rp == '':
-            self.set_payment_change_transaction_input(total_amount, is_color_red=True)
-            return
-        
-        payment_change = int(total_amount) - int(payment_rp)
-
-        # Set color red if payment change is less than 0
-        is_color_red = True if payment_change > 0 else False
-        self.set_payment_change_transaction_input(payment_change, is_color_red=is_color_red)
-
-
     def on_transaction_selected(self):
         if self.transactions_table.selectedItems():
             self.current_selected_sku = self.transactions_table.selectedItems()[0].row()
@@ -1341,21 +1303,14 @@ class TransactionsWindow(QtWidgets.QWidget):
         if result.success and result.data:
             # Customer found - fill the form
             self.ui.customer_name_transaction_input.setText(result.data)
+
+            # Set focus to sku input
+            self.ui.sku_transaction_input.setFocus()
             
         else:
             # Customer not found - show dialog with filter
             self.customers_dialog.set_filter(customer_id)
             self.customers_dialog.show()
-
-
-    def on_handle_payment_enter(self):
-        if self.ui.submit_transaction_button.text() == 'Update':
-            self.ui.submit_transaction_button.clicked.disconnect()
-            self.ui.submit_transaction_button.clicked.connect(self.update_transaction)
-
-        else:
-            self.ui.submit_transaction_button.clicked.disconnect()
-            self.ui.submit_transaction_button.clicked.connect(self.submit_transaction)
 
 
     # Calculate
@@ -1421,7 +1376,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Remove All Items from Transactions Table
         self.transactions_table.setRowCount(0)
         self.ui.total_transaction_input.setText(add_prefix('0'))
-        self.ui.payment_change_transaction_input.setText(add_prefix('0'))
         self.ui.total_discount_transaction_input.setText(add_prefix('0'))
         self.cached_transaction_index = {}
         self.cached_qty = {}
@@ -1437,6 +1391,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.submit_transaction_button.clicked.connect(self.trigger_submit_payment_transactions)
         self.clear_data_transaction()
 
+
     def clear_data_transaction(self):
         self.ui.sku_transaction_input.clear()
         self.ui.product_name_transaction_input.clear()
@@ -1446,7 +1401,6 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.unit_value_transaction_input.clear()
         self.ui.qty_transaction_input.clear()
         self.ui.qty_transaction_combobox.clear()
-        self.ui.payment_transaction_input.clear()
         self.ui.discount_pct_transaction_input.clear()
         self.ui.discount_rp_per_item_transaction_input.clear()
         self.ui.discount_rp_total_transaction_input.clear()
@@ -1467,3 +1421,38 @@ class TransactionsWindow(QtWidgets.QWidget):
         printer_service = PrinterService()
         # printer_service.print_receipt(transaction_data=transaction_data, detail_transactions=detail_transactions, customer_name=customer_name)
         printer_service.show_preview(transaction_data=transaction_data, detail_transactions=detail_transactions_data, customer_name=customer_name)        
+
+
+    # Event Filter
+    # ===============
+    def eventFilter(self, obj, event):
+        # If qty input is focused and key pressed is Enter it automatically show the unit combobox
+        if obj == self.ui.qty_transaction_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            key = event.key()
+
+            # Check for Enter
+            if key in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                text = self.ui.qty_transaction_input.text()
+                if text.isdigit():
+                    self.ui.qty_transaction_combobox.showPopup()
+                else:
+                    self.ui.qty_transaction_input.clear()
+        
+        return super().eventFilter(obj, event)        
+
+
+    def keyPressEvent(self, event):
+        if (event.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier) and event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            self.trigger_submit_payment_transactions()
+            return
+            
+        super().keyPressEvent(event)
+
+
+    def on_unit_selected(self, index):
+        qty_text = self.ui.qty_transaction_input.text()
+        # Only proceed if qty is a valid number and not empty
+        if qty_text.isdigit() and int(qty_text) > 0:
+            self.add_detail_transaction()
+            self.ui.sku_transaction_input.setFocus()
+        

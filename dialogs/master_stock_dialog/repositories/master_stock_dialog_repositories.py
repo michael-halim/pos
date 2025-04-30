@@ -6,7 +6,14 @@ from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierMode
 from dialogs.master_stock_dialog.models.master_stock_dialog_models import PurchasingHistoryTableItemModel, MasterStockModel, CategoriesModel
 
 from response.response_message import ResponseMessage
+from generals.constants import (
+    PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS,
+)
+from generals.messages import ( 
+    ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
+)
 from generals.permission_manager import PermissionManager
+
 
 class MasterStockDialogRepository:
     def __init__(self):
@@ -177,6 +184,9 @@ class MasterStockDialogRepository:
 
 
     def submit_master_stock(self, master_stock: MasterStockModel):
+        if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
+            return ResponseMessage.fail(message=ERR_PERM_C_PRODUCTS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -228,6 +238,9 @@ class MasterStockDialogRepository:
 
 
     def update_master_stock(self, master_stock: MasterStockModel):
+        if not self.permission_manager.has_permission(PERM_U_PRODUCTS):
+            return ResponseMessage.fail(message=ERR_PERM_U_PRODUCTS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -297,6 +310,9 @@ class MasterStockDialogRepository:
 
 
     def delete_master_stock_by_sku(self, sku: str):
+        if not self.permission_manager.has_permission(PERM_D_PRODUCTS):
+            return ResponseMessage.fail(message=ERR_PERM_D_PRODUCTS)
+
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')

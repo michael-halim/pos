@@ -4,17 +4,29 @@ from dialogs.price_unit_dialog.services.price_unit_dialog_services import PriceU
 from dialogs.price_unit_dialog.models.price_unit_dialog_models import PriceUnitTableItemModel, PriceUnitsModel
 
 from helper import format_number, add_prefix, remove_non_digit
+from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
-from generals.build import resource_path
+from generals.constants import (
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS,
+    PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS, PERM_R_PRODUCTS
+)
+from generals.messages import (
+    ERR, OK, WARNING, CONFIRM, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, 
+    ERR_PERM_D_PRODUCTS, ERR_PERM_R_PRODUCTS, PERM_DENIED
+)
 from dialogs.price_unit_dialog.translations import PRICE_UNIT_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
+from generals.permission_manager import PermissionManager
 
 
 class PriceUnitDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            return
 
         self.ui = uic.loadUi(resource_path('ui/price_unit.ui'), self)
 
@@ -27,7 +39,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
 
         # Init Table
         self.price_unit_table = self.ui.price_unit_table
-        self.price_unit_table.setSortingEnabled(True)
+        
         
         # Init Button
         self.ui.delete_price_unit_button.clicked.connect(self.delete_price_unit)
@@ -36,6 +48,9 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         self.ui.clear_data_price_unit_button.clicked.connect(self.clear_price_unit_form)
         self.ui.submit_price_unit_button.clicked.connect(self.submit_price_unit)
         self.ui.close_price_unit_button.clicked.connect(lambda: self.close())
+
+        self.ui.unit_value_price_unit_input.textChanged.connect(self.on_number_input_changed)
+        self.ui.price_price_unit_input.textChanged.connect(self.on_number_input_changed)
 
         # Set selection behavior to select entire rows
         self.price_unit_table.setSelectionBehavior(SELECT_ROWS)
@@ -47,10 +62,17 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         self.price_unit_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.price_unit_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
     
+
+
     # Overrides
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+
+        if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PRODUCTS)
+            self.close()
+            return
 
         self.language_manager.translate_widget_text(self)
 
@@ -67,13 +89,27 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
 
 
     def submit_price_unit(self):
+        if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
+            POSMessageBox.error(self, title=ERR, message=ERR_PERM_C_PRODUCTS)
+            return
+
         # Get data from table
         price_unit_data = self.get_price_unit_form_data()
 
         if price_unit_data is None or price_unit_data.unit == '' or price_unit_data.unit_value == '' or price_unit_data.price == '':
-            POSMessageBox.error(self, title='Error', message='Please fill all the fields')
+            POSMessageBox.error(self, title=ERR, message='Please fill all the fields')
             return
         
+        if int(price_unit_data.unit_value) <= 0:
+            POSMessageBox.error(self, title=ERR, message='Unit value cannot be 0 or lower than 0')
+            return
+        
+
+        if int(price_unit_data.price) <= 0:
+            POSMessageBox.error(self, title=ERR, message='Price cannot be 0 or lower than 0')
+            return
+
+
         sku = self.ui.sku_price_unit_input.text().strip()
      
         price_unit_table_item = PriceUnitsModel(
@@ -88,7 +124,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         result = self.price_unit_dialog_service.submit_price_unit(price_unit_table_item)
 
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
 
             # Clear price unit form
             self.clear_price_unit_form()
@@ -98,7 +134,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
             self.set_price_unit_form_by_sku(sku)
             
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
     
 
     def edit_price_unit(self):
@@ -123,11 +159,15 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
 
 
     def update_price_unit(self):
+        if not self.permission_manager.has_permission(PERM_U_PRODUCTS):
+            POSMessageBox.error(self, title=ERR, message=ERR_PERM_U_PRODUCTS)
+            return
+
         # Get data from table
         price_unit_data = self.get_price_unit_form_data()
 
         if price_unit_data is None or price_unit_data.unit == '' or price_unit_data.unit_value == '' or price_unit_data.price == '':
-            POSMessageBox.error(self, title='Error', message='Please fill all the fields')
+            POSMessageBox.error(self, title=ERR, message='Please fill all the fields')
             return
         
         sku = self.ui.sku_price_unit_input.text().strip()
@@ -144,7 +184,7 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         update_price_unit_result = self.price_unit_dialog_service.update_price_unit(price_unit_table_item)
 
         if update_price_unit_result.success:
-            POSMessageBox.info(self, title='Success', message=update_price_unit_result.message)
+            POSMessageBox.info(self, title=OK, message=update_price_unit_result.message)
 
             # Clear price unit form
             self.clear_price_unit_form()
@@ -158,13 +198,17 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
             self.ui.unit_price_unit_input.setClearButtonEnabled(True)
             
         else:
-            POSMessageBox.error(self, title='Error', message=update_price_unit_result.message)
+            POSMessageBox.error(self, title=ERR, message=update_price_unit_result.message)
 
 
     def delete_price_unit(self):
+        if not self.permission_manager.has_permission(PERM_D_PRODUCTS):
+            POSMessageBox.error(self, title=ERR, message=ERR_PERM_D_PRODUCTS)
+            return
+
         selected_rows = self.price_unit_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title='Warning', message="Please select a price unit to delete")
+            POSMessageBox.warning(self, title=WARNING, message="Please select a price unit to delete")
             return
 
         row = selected_rows[0].row()
@@ -173,14 +217,14 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
 
         # Confirm deletion
         confirm = POSMessageBox.confirm(
-                        self, title="Confirm Deletion", 
+                        self, title=CONFIRM, 
                         message=f'Are you sure you want to delete {unit} from {sku} ?')
 
         if confirm:
             delete_price_unit_result = self.price_unit_dialog_service.delete_price_unit_by_sku_and_unit(sku, unit)
 
             if delete_price_unit_result.success:
-                POSMessageBox.info(self, title='Success', message=delete_price_unit_result.message)
+                POSMessageBox.info(self, title=OK, message=delete_price_unit_result.message)
 
                 # Remove the row from table
                 self.price_unit_table.removeRow(row)
@@ -192,12 +236,14 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
                 self.set_price_unit_form_by_sku(sku)
 
             else:
-                POSMessageBox.error(self, title='Error', message=delete_price_unit_result.message)
+                POSMessageBox.error(self, title=ERR, message=delete_price_unit_result.message)
 
 
     # Setters
     # ===============
     def set_price_unit_table(self, data: list[PriceUnitTableItemModel]):
+        self.price_unit_table.setRowCount(0)
+
         for price_unit in data:
             current_row = self.price_unit_table.rowCount()
             self.price_unit_table.insertRow(current_row)
@@ -213,13 +259,16 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
                 item.setFont(POSFonts.get_font(size=12))
                 self.price_unit_table.setItem(current_row, col, item)
 
+        self.price_unit_table.setSortingEnabled(True)
+
 
     def set_price_unit_form_by_sku(self, sku: str):
         self.clear_price_unit_form()
 
         product_result = self.price_unit_dialog_service.get_product_by_sku(sku)  
-
         if product_result.success and product_result.data:
+            self.price_unit_table.setSortingEnabled(False)
+
             self.ui.sku_price_unit_input.setText(sku)
             self.ui.product_name_price_unit_input.setText(product_result.data.product_name)
             price_unit_table_items = [
@@ -237,9 +286,6 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
                 price_unit_table_items.extend(product_unit_result.data)
 
 
-            # Clear Price Unit Table
-            self.price_unit_table.setRowCount(0)
-
             # Set Price Unit Table
             self.set_price_unit_table(price_unit_table_items)
 
@@ -247,8 +293,8 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
     def set_price_unit_form_data(self, data: PriceUnitTableItemModel):
         self.ui.unit_price_unit_input.setText(data.unit)
         self.ui.barcode_price_unit_input.setText(data.barcode)
-        self.ui.unit_value_price_unit_input.setValue(int(data.unit_value))
-        self.ui.price_price_unit_input.setValue(int(remove_non_digit(data.price)))
+        self.ui.unit_value_price_unit_input.setText(format_number(str(data.unit_value)))
+        self.ui.price_price_unit_input.setText(add_prefix(format_number(str(data.price))))
 
 
     def set_enabled_form(self, enabled: bool = True):
@@ -296,6 +342,22 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
             )
         
         return None
+
+
+    # Events Listeners
+    # ===============
+    def on_number_input_changed(self):
+        self.ui.unit_value_price_unit_input.textChanged.disconnect()
+        self.ui.price_price_unit_input.textChanged.disconnect()
+
+        unit_value = remove_non_digit(self.ui.unit_value_price_unit_input.text().strip()) if remove_non_digit(self.ui.unit_value_price_unit_input.text().strip()) != '' else '0'
+        price = remove_non_digit(self.ui.price_price_unit_input.text()) if remove_non_digit(self.ui.price_price_unit_input.text()) != '' else '0'
+
+        self.ui.unit_value_price_unit_input.setText(format_number(str(int(unit_value))))
+        self.ui.price_price_unit_input.setText(add_prefix(format_number(str(int(price)))))
+
+        self.ui.unit_value_price_unit_input.textChanged.connect(self.on_number_input_changed)
+        self.ui.price_price_unit_input.textChanged.connect(self.on_number_input_changed)
 
 
     # Clears

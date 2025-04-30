@@ -5,7 +5,8 @@ from generals.translate import EN_TRANSLATIONS, ID_TRANSLATIONS
 
 class LanguageManager:
     _instance = None
-    
+    always_caps = ['sku', 'bo', 'so #']
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
@@ -67,15 +68,19 @@ class LanguageManager:
     def translate_widget_text(self, widget):
         """Translate text in a widget (label, button, etc.)"""
  
-        if isinstance(widget, QtWidgets.QDateEdit):
+        # Skip translating values in input fields
+        if isinstance(widget, (QtWidgets.QDateEdit, QtWidgets.QSpinBox, QtWidgets.QLineEdit, QtWidgets.QPlainTextEdit, QtWidgets.QTextEdit)):
             return 
         
-        
+        # Translate text in a widget (label, button, etc.)
         if hasattr(widget, 'text') and callable(getattr(widget, 'text')):
             current_text = widget.text()
             if current_text:
                 translated_text = self.translate(current_text.lower())
-                widget.setText(translated_text.title())
+                if translated_text.lower().strip().replace(' :','') in self.always_caps:
+                    widget.setText(translated_text.upper())
+                else:
+                    widget.setText(translated_text.title())
         
 
         # Special case for window titles
@@ -83,45 +88,11 @@ class LanguageManager:
             title = widget.windowTitle()
             if title:
                 translated_title = self.translate(title)
-                widget.setWindowTitle(translated_title.title())
+                if translated_title.lower().strip() == 'pos':
+                    widget.setWindowTitle(translated_title.upper())
+                else:
+                    widget.setWindowTitle(translated_title.title())
         
-        # Handle table widgets and their headers
-        if isinstance(widget, QtWidgets.QTableWidget):
-            # Translate horizontal headers if they exist
-            if widget.horizontalHeader():
-                for col in range(widget.columnCount()):
-                    header_item = widget.horizontalHeaderItem(col)
-                    if header_item and header_item.text():
-                        header_text = header_item.text()
-                        translated_header = self.translate(header_text.lower())
-                        header_item.setText(translated_header.title())
-            
-            # Translate vertical headers if they exist
-            if widget.verticalHeader():
-                for row in range(widget.rowCount()):
-                    header_item = widget.verticalHeaderItem(row)
-                    if header_item and header_item.text():
-                        header_text = header_item.text()
-                        translated_header = self.translate(header_text.lower())
-                        header_item.setText(translated_header.title())
-                        
-        # Handle table views (QTableView)
-        if isinstance(widget, QtWidgets.QTableView) and widget.model():
-            model = widget.model()
-            # Translate horizontal headers
-            for col in range(model.columnCount()):
-                header_data = model.headerData(col, QtCore.Qt.Orientation.Horizontal)
-                if header_data and isinstance(header_data, str):
-                    translated_header = self.translate(header_data.lower())
-                    model.setHeaderData(col, QtCore.Qt.Orientation.Horizontal, translated_header.title())
-            
-            # Translate vertical headers
-            for row in range(model.rowCount()):
-                header_data = model.headerData(row, QtCore.Qt.Orientation.Vertical)
-                if header_data and isinstance(header_data, str):
-                    translated_header = self.translate(header_data.lower())
-                    model.setHeaderData(row, QtCore.Qt.Orientation.Vertical, translated_header.title())
-                
         # Process all child widgets
         for child in widget.findChildren(QtWidgets.QWidget):
             self.translate_widget_text(child)
@@ -152,7 +123,10 @@ class LanguageManager:
                 table_widget.setHorizontalHeaderItem(col, item)
             
             # Set translated text
-            item.setText(translated_header.title())
+            if translated_header in self.always_caps:
+                item.setText(translated_header.upper())
+            else:
+                item.setText(translated_header.title())
 
 
 # Helper function for easy translation

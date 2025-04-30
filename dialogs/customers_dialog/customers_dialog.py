@@ -181,3 +181,21 @@ class CustomersDialogWindow(QtWidgets.QWidget):
                     break
             self.customers_dialog_table.setRowHidden(row, not match_found)
 
+
+    # Events Listeners
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.customers_dialog_table.rowCount() > 0 and not self.customers_dialog_table.selectedItems():
+                self.customers_dialog_table.selectRow(0)
+                self.customers_dialog_table.setFocus()
+                event.accept()
+                return
+
+        elif event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            if self.customers_dialog_table.selectedItems():
+                self.send_customer_data()
+                event.accept()
+                return
+            
+        super().keyPressEvent(event)

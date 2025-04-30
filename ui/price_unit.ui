@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Price Unit</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../assets/cash-flow.png</normaloff>../assets/cash-flow.png</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">QLineEdit{
 	border: 1px solid #d1d5db;      /* Light gray border */
@@ -825,7 +829,7 @@ QPushButton:disabled {
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QSpinBox" name="unit_value_price_unit_input">
+             <widget class="QLineEdit" name="unit_value_price_unit_input">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -840,17 +844,8 @@ QPushButton:disabled {
                 <pointsize>12</pointsize>
                </font>
               </property>
-              <property name="buttonSymbols">
-               <enum>QAbstractSpinBox::NoButtons</enum>
-              </property>
-              <property name="minimum">
-               <number>2</number>
-              </property>
-              <property name="maximum">
-               <number>999999999</number>
-              </property>
-              <property name="value">
-               <number>2</number>
+              <property name="text">
+               <string>2</string>
               </property>
              </widget>
             </item>
@@ -876,7 +871,7 @@ QPushButton:disabled {
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="QSpinBox" name="price_price_unit_input">
+             <widget class="QLineEdit" name="price_price_unit_input">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -891,20 +886,8 @@ QPushButton:disabled {
                 <pointsize>12</pointsize>
                </font>
               </property>
-              <property name="buttonSymbols">
-               <enum>QAbstractSpinBox::NoButtons</enum>
-              </property>
-              <property name="prefix">
-               <string>Rp. </string>
-              </property>
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>999999999</number>
-              </property>
-              <property name="value">
-               <number>0</number>
+              <property name="text">
+               <string>Rp. 0</string>
               </property>
              </widget>
             </item>

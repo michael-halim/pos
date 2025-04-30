@@ -5,6 +5,7 @@ from dialogs.stock_card_dialog.models.stock_card_dialog_models import StockCardT
 
 from response.response_message import ResponseMessage
 
+
 class StockCardDialogRepository:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()

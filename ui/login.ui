@@ -390,6 +390,9 @@ QMessageBox#info-box {
                 <pointsize>12</pointsize>
                </font>
               </property>
+              <property name="text">
+               <string>admin</string>
+              </property>
              </widget>
             </item>
             <item row="1" column="0">
@@ -428,6 +431,9 @@ QMessageBox#info-box {
               </property>
               <property name="inputMethodHints">
                <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
+              </property>
+              <property name="text">
+               <string>admin</string>
               </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>

@@ -327,7 +327,7 @@ QMessageBox#info-box {
 }
 </string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <widget class="QFrame" name="frame">
      <property name="frameShape">
@@ -336,7 +336,7 @@ QMessageBox#info-box {
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
+     <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_15">
         <item>
@@ -734,13 +734,7 @@ QPushButton:disabled {
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="price_master_stock_input">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
+               <widget class="QLineEdit" name="price_master_stock_input">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -752,14 +746,8 @@ QPushButton:disabled {
                   <pointsize>12</pointsize>
                  </font>
                 </property>
-                <property name="buttonSymbols">
-                 <enum>QAbstractSpinBox::NoButtons</enum>
-                </property>
-                <property name="prefix">
-                 <string>Rp. </string>
-                </property>
-                <property name="maximum">
-                 <number>999999999</number>
+                <property name="text">
+                 <string>Rp. 0</string>
                 </property>
                </widget>
               </item>
@@ -802,13 +790,7 @@ QPushButton:disabled {
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="stock_master_stock_input">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
+               <widget class="QLineEdit" name="stock_master_stock_input">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -820,11 +802,8 @@ QPushButton:disabled {
                   <pointsize>12</pointsize>
                  </font>
                 </property>
-                <property name="buttonSymbols">
-                 <enum>QAbstractSpinBox::NoButtons</enum>
-                </property>
-                <property name="maximum">
-                 <number>999999999</number>
+                <property name="text">
+                 <string>0</string>
                 </property>
                </widget>
               </item>
@@ -1089,13 +1068,7 @@ QPushButton:disabled {
                </widget>
               </item>
               <item>
-               <widget class="QSpinBox" name="cost_price_master_stock_input">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
+               <widget class="QLineEdit" name="cost_price_master_stock_input">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -1107,14 +1080,8 @@ QPushButton:disabled {
                   <pointsize>12</pointsize>
                  </font>
                 </property>
-                <property name="buttonSymbols">
-                 <enum>QAbstractSpinBox::NoButtons</enum>
-                </property>
-                <property name="prefix">
-                 <string>Rp. </string>
-                </property>
-                <property name="maximum">
-                 <number>999999999</number>
+                <property name="text">
+                 <string>Rp. 0</string>
                 </property>
                </widget>
               </item>

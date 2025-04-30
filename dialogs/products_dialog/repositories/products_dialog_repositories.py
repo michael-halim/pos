@@ -9,6 +9,7 @@ class ProductsDialogRepository:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         
+        
     def get_products(self, search_text: str = None):
         try:
             products_result = []

@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 from datetime import datetime
 
 from dialogs.products_dialog.products_dialog import ProductsDialogWindow
@@ -46,8 +46,6 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Init Language Manager
         self.language_manager = LanguageManager()
         self.language_manager.add_translations(PURCHASING_TRANSLATIONS)
-
-        
 
         # Init Dialog
         self.products_dialog = ProductsDialogWindow()
@@ -100,6 +98,9 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Connect discount radio button to update discount rp input
         self.ui.discount_pct_purchasing_radio_button.toggled.connect(self.on_discount_pct_purchasing_radio_button_toggled)
 
+        # Connect price input event listener
+        self.ui.price_purchasing_input.textChanged.connect(self.on_input_number_changed)
+
         # Listen to discount pct input, price input, and qty input to update discount rp input
         self.ui.discount_pct_purchasing_input.textChanged.connect(self.on_calculate_discount_rp)
         self.ui.price_purchasing_input.textChanged.connect(self.on_calculate_discount_rp)
@@ -109,6 +110,24 @@ class PurchasingWindow(QtWidgets.QWidget):
         self.ui.purchasing_date_input.setDate(datetime.now())
         self.ui.invoice_date_purchasing_input.setDate(datetime.now())
         self.ui.invoice_expired_date_purchasing_input.setDate(datetime.now())
+
+        # UX For Shortcut
+        # =================
+
+        # Set focus to invoice number input
+        self.ui.invoice_number_purchasing_input.setFocus()
+
+        # Set event filter to invoice number input
+        self.ui.invoice_number_purchasing_input.installEventFilter(self)
+
+        # Set event filter to price input
+        self.ui.price_purchasing_input.installEventFilter(self)
+
+        # Set event filter to qty input
+        self.ui.qty_purchasing_input.installEventFilter(self)
+
+        # Connect combobox activated signal
+        self.ui.qty_purchasing_combobox.activated.connect(self.on_unit_selected)
 
         self.ui.purchasing_date_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
         self.ui.invoice_date_purchasing_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)
@@ -359,6 +378,9 @@ class PurchasingWindow(QtWidgets.QWidget):
             
             # Clear the purchasing table and total
             self.clear_purchasing()
+
+            # Set focus to invoice number input
+            self.ui.invoice_number_purchasing_input.setFocus()
 
         else:
             POSMessageBox.error(self, title=ERR, message=result.message)
@@ -734,6 +756,9 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Show purchasing history
             self.show_purchasing_history()
 
+            # Set focus to price input
+            self.ui.price_purchasing_input.setFocus()
+
             # Enable price unit button
             self.ui.price_unit_purchasing_button.setEnabled(True)
 
@@ -748,6 +773,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.ui.supplier_in_purchasing_input.setText(supplier_id)
             self.ui.supplier_name_in_purchasing_input.setText(supplier_result.data.supplier_name)
 
+        self.ui.sku_purchasing_input.setFocus()
 
     # Calculate
     # ===============
@@ -878,6 +904,9 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Product found - fill the form
             self.handle_product_selected({'sku' : sku})
             
+            # Set focus to price input
+            self.ui.price_purchasing_input.setFocus()
+
         else:
             # Product not found - show dialog with filter
             self.products_dialog.set_filter(sku)
@@ -935,6 +964,9 @@ class PurchasingWindow(QtWidgets.QWidget):
             # Supplier found - fill the form
             self.handle_supplier_selected({'supplier_id' : supplier_text})
             
+            # Set focus to sku input
+            self.ui.sku_purchasing_input.setFocus()
+
         else:
             # Supplier not found - show dialog with filter
             self.suppliers_dialog.set_filter(supplier_text)
@@ -968,3 +1000,59 @@ class PurchasingWindow(QtWidgets.QWidget):
         # Calculate Discount Rp
         discount_rp: int = int((int(price) * int(qty) * int(discount_pct)) / 100)
         self.ui.discount_rp_purchasing_input.setText(add_prefix(format_number(str(discount_rp))))
+
+
+    def on_input_number_changed(self):
+        # Disconnect price input event listener
+        self.ui.price_purchasing_input.textChanged.disconnect()
+
+        # Update price input
+        price = remove_non_digit(self.ui.price_purchasing_input.text().strip()) if remove_non_digit(self.ui.price_purchasing_input.text().strip()) != '' else '0'
+        self.ui.price_purchasing_input.setText(add_prefix(format_number(str(int(price)))))
+
+        # Reconnect price input event listener
+        self.ui.price_purchasing_input.textChanged.connect(self.on_input_number_changed)
+
+
+    # Event Filters
+    # ===============
+    def eventFilter(self, obj, event):
+        # If Invoice Number Input is focused and key pressed is Enter it focus to supplier input
+        if obj == self.ui.invoice_number_purchasing_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.supplier_in_purchasing_input.setFocus()
+
+
+        # If Price Input is focused and key pressed is Enter it focus to qty input
+        if obj == self.ui.price_purchasing_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.qty_purchasing_input.setFocus()
+
+
+        # If Qty Input is focused and key pressed is Enter it focus to unit combobox
+        if obj == self.ui.qty_purchasing_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                text = self.ui.qty_purchasing_input.text()
+                if text.isdigit():
+                    self.ui.qty_purchasing_combobox.showPopup()
+                else:
+                    self.ui.qty_purchasing_input.clear()
+
+
+        return super().eventFilter(obj, event)
+
+
+    def keyPressEvent(self, event):
+        if (event.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier) and event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            self.submit_purchasing()
+            return
+            
+        super().keyPressEvent(event)
+
+
+    def on_unit_selected(self):
+        qty_text = self.ui.qty_purchasing_input.text()
+        # Only proceed if qty is a valid number and not empty
+        if qty_text.isdigit() and int(qty_text) > 0:
+            self.add_detail_purchasing()
+            self.ui.sku_purchasing_input.setFocus()

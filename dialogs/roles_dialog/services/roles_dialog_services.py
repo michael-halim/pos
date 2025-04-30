@@ -20,13 +20,13 @@ class RolesDialogService:
 
     def get_permissions(self):
         if not self.permission_manager.has_permission(PERM_R_ROLES):
-            return ResponseMessage(success=False, message=ERR_PERM_R_ROLES)
+            return ResponseMessage.fail(message=ERR_PERM_R_ROLES)
 
         return self.repository.get_permissions()
 
 
     def get_permissions_by_role_id(self, role_id: int):
         if not self.permission_manager.has_permission(PERM_R_ROLES):
-            return ResponseMessage(success=False, message=ERR_PERM_R_ROLES)
+            return ResponseMessage.fail(message=ERR_PERM_R_ROLES)
 
         return self.repository.get_permissions_by_role_id(role_id)

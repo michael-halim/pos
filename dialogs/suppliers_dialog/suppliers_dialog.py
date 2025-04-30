@@ -4,9 +4,17 @@ from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierMode
 from dialogs.suppliers_dialog.services.suppliers_dialog_services import SuppliersDialogService
 
 from generals.fonts import POSFonts
-from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from generals.build import resource_path
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS,
+    PERM_R_SUPPLIERS
+)
+from generals.messages import (
+    ERR_PERM_R_SUPPLIERS, PERM_DENIED
+)
 from dialogs.suppliers_dialog.translations import SUPPLIERS_DIALOG_TRANSLATIONS
+from generals.permission_manager import PermissionManager
 from generals.language_manager import LanguageManager
 
 
@@ -17,6 +25,10 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
+            return
+        
         self.ui = uic.loadUi(resource_path('ui/suppliers_dialog.ui'), self)
 
         # Init Services
@@ -51,9 +63,16 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
         self.show_suppliers_data()
 
 
+    # Overrides
+    # ===============
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+
+        if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_SUPPLIERS)
+            self.close()
+            return
 
         self.language_manager.translate_widget_text(self)
 
@@ -86,24 +105,26 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_suppliers_data()
 
-
+    
+    # Shows
+    # ===============
     def show_suppliers_data(self):
         # Temporarily disable sorting
         self.suppliers_table.setSortingEnabled(False)
         
         # Get search text if any    
         search_text: str = self.ui.filter_suppliers_dialog_input.text().strip()
+        search_text = search_text.lower() if search_text else None
 
         # Get suppliers
         suppliers_result = self.suppliers_dialog_service.get_suppliers(search_text)
         
         # Set Suppliers to table
         self.set_suppliers_table_data(suppliers_result.data)
+        
 
-        # Enable sorting
-        self.suppliers_table.setSortingEnabled(True)
-
-
+    # Setters
+    # ===============
     def set_suppliers_table_data(self, data: list[SupplierModel]):
         # Clear the table
         self.suppliers_table.setRowCount(0)
@@ -124,6 +145,8 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
             for col, item in enumerate(table_items):
                 item.setFont(POSFonts.get_font(size=12))
                 self.suppliers_table.setItem(current_row, col, item)
+        
+        self.suppliers_table.setSortingEnabled(True)
 
 
     def send_supplier_data(self):
@@ -147,3 +170,26 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
 
         # Optionally trigger the filter
         self.show_suppliers_data()
+
+
+    # Events Listeners
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            # If no row is selected, select the first row if available
+            if self.suppliers_table.rowCount() > 0 and not self.suppliers_table.selectedItems():
+                self.suppliers_table.selectRow(0)
+                self.suppliers_table.setFocus()
+                event.accept()
+                return
+
+        elif event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            # If a row is selected, trigger send_supplier_data
+            if self.suppliers_table.selectedItems():
+                self.send_supplier_data()
+                event.accept()
+                return
+
+        # For all other cases, or if a row is already selected, use default behavior
+        super().keyPressEvent(event)
+        

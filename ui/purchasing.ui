@@ -1447,6 +1447,9 @@ QPushButton:disabled {
                     <pointsize>12</pointsize>
                    </font>
                   </property>
+                  <property name="text">
+                   <string>Rp. 0</string>
+                  </property>
                   <property name="clearButtonEnabled">
                    <bool>true</bool>
                   </property>

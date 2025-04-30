@@ -53,6 +53,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.purchasing_history_in_master_stock_table = self.ui.purchasing_history_in_master_stock_table
 
         # Connect the product_selected signal to handle_product_selected method
+        self.products_dialog.product_selected.connect(self.handle_product_selected)
         self.suppliers_dialog.supplier_selected.connect(self.handle_supplier_selected)
         self.categories_dialog.category_selected.connect(self.handle_category_selected)
 
@@ -74,6 +75,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.category_master_stock_input.returnPressed.connect(self.on_handle_category_enter)        
         self.ui.supplier_master_stock_input.returnPressed.connect(self.on_handle_supplier_enter)        
 
+        self.ui.cost_price_master_stock_input.textChanged.connect(self.on_number_input_changed)
+        self.ui.price_master_stock_input.textChanged.connect(self.on_number_input_changed)
+        self.ui.stock_master_stock_input.textChanged.connect(self.on_number_input_changed)
+
         # Set selection behavior to select entire rows
         self.purchasing_history_in_master_stock_table.setSelectionBehavior(SELECT_ROWS)
         self.purchasing_history_in_master_stock_table.setSelectionMode(SINGLE_SELECTION)
@@ -83,6 +88,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         # Set table properties
         self.purchasing_history_in_master_stock_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.purchasing_history_in_master_stock_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+
 
 
     # Overrides
@@ -102,10 +108,20 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
 
         self.language_manager.translate_table_headers(self.ui.purchasing_history_in_master_stock_table, self.purchasing_history_headers)
 
+
+
+    def handle_product_selected(self, product_data: dict):
+        product_result = self.master_stock_dialog_service.get_product_by_sku(product_data['sku'])
+        if product_result.success and product_result.data:
+            self.set_master_stock_form_data(product_result.data)
+
+
+
     def handle_supplier_selected(self, supplier_data: dict):
         supplier_result = self.master_stock_dialog_service.get_supplier_by_id(supplier_data['supplier_id'])
         if supplier_result.success and supplier_result.data:
             self.set_suppliers_form_data(supplier_result.data)
+
 
 
     def handle_category_selected(self, category_data: dict):
@@ -244,9 +260,9 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.supplier_master_stock_input.setText(str(data.supplier_id))
         self.ui.supplier_name_master_stock_input.setText(data.supplier_name)
         self.ui.unit_master_stock_input.setText(data.unit)
-        self.ui.cost_price_master_stock_input.setValue(int(data.cost_price))
-        self.ui.price_master_stock_input.setValue(int(data.price))
-        self.ui.stock_master_stock_input.setValue(int(data.stock))
+        self.ui.cost_price_master_stock_input.setText(add_prefix(format_number(str(data.cost_price))))
+        self.ui.price_master_stock_input.setText(add_prefix(format_number(str(data.price))))
+        self.ui.stock_master_stock_input.setText(format_number(str(data.stock)))
         self.ui.remarks_master_stock_input.setText(data.remarks)
         self.ui.last_price_master_stock_input.setText(add_prefix(format_number(str(int(data.last_price)))))
         self.ui.average_price_master_stock_input.setText(add_prefix(format_number(str(int(data.average_price)))))
@@ -398,3 +414,22 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
             # Supplier not found - show dialog with filter
             self.suppliers_dialog.set_filter(supplier_id)
             self.suppliers_dialog.show()
+
+
+    def on_number_input_changed(self):
+        self.ui.cost_price_master_stock_input.textChanged.disconnect()
+        self.ui.price_master_stock_input.textChanged.disconnect()
+        self.ui.stock_master_stock_input.textChanged.disconnect()
+
+        cost_price = remove_non_digit(self.ui.cost_price_master_stock_input.text().strip()) if remove_non_digit(self.ui.cost_price_master_stock_input.text().strip()) != '' else '0'
+        price = remove_non_digit(self.ui.price_master_stock_input.text().strip()) if remove_non_digit(self.ui.price_master_stock_input.text().strip()) != '' else '0'
+        stock = remove_non_digit(self.ui.stock_master_stock_input.text().strip()) if remove_non_digit(self.ui.stock_master_stock_input.text().strip()) != '' else '0'
+
+        self.ui.cost_price_master_stock_input.setText(add_prefix(format_number(str(int(cost_price)))))
+        self.ui.price_master_stock_input.setText(add_prefix(format_number(str(int(price)))))
+        self.ui.stock_master_stock_input.setText(format_number(str(int(stock))))
+
+        self.ui.cost_price_master_stock_input.textChanged.connect(self.on_number_input_changed)
+        self.ui.price_master_stock_input.textChanged.connect(self.on_number_input_changed)
+        self.ui.stock_master_stock_input.textChanged.connect(self.on_number_input_changed)
+
