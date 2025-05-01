@@ -2,11 +2,17 @@ from connect_db import DatabaseConnection
 import hashlib
 import random
 import string
+import sys
 
 class SeedData:
     def __init__(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
+        self.should_insert_data = True  # Default to True
+
+
+    def set_insert_data(self, should_insert: bool):
+        self.should_insert_data = should_insert
 
 
     def create_stock_opname_table(self):
@@ -26,14 +32,14 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO stock_opname (sku, product_name, price, original_stock, opname_stock, final_stock, created_at, created_by, updated_at, updated_by)
-                        VALUES 
-                        ('SKU001', 'Product One', 1000, 100, 100, 100, CURRENT_TIMESTAMP, 1, NULL, NULL),
-                        ('SKU002', 'Product Two', 2000, 200, 200, 200, CURRENT_TIMESTAMP, 1, NULL, NULL),
-                        ('SKU003', 'Product Three', 3000, 300, 300, 300, CURRENT_TIMESTAMP, 1, NULL, NULL);'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO stock_opname (sku, product_name, price, original_stock, opname_stock, final_stock, created_at, created_by, updated_at, updated_by)
+                            VALUES 
+                            ('SKU001', 'Product One', 1000, 100, 100, 100, CURRENT_TIMESTAMP, 1, NULL, NULL),
+                            ('SKU002', 'Product Two', 2000, 200, 200, 200, CURRENT_TIMESTAMP, 1, NULL, NULL),
+                            ('SKU003', 'Product Three', 3000, 300, 300, 300, CURRENT_TIMESTAMP, 1, NULL, NULL);'''
 
-
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
 
 
     def create_stock_card_table(self):
@@ -50,14 +56,15 @@ class SeedData:
 
         self.cursor.execute(sql)
         
-        sql_insert = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, stock_out, running_balance, remarks)
-                        VALUES 
-                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 50, NULL, 50, 'By Administrator'),
-                        ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40, 'By Manager'),
-                        ('SKU002', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 10, NULL, 10, 'By Manager'),
-                        ('SKU003', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 15, NULL, 15, 'By Admin');'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, stock_out, running_balance, remarks)
+                            VALUES 
+                            ('SKU001', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 50, NULL, 50, 'By Administrator'),
+                            ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40, 'By Manager'),
+                            ('SKU002', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 10, NULL, 10, 'By Manager'),
+                            ('SKU003', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 15, NULL, 15, 'By Admin');'''
 
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
 
 
     def create_roles_table(self):
@@ -159,13 +166,14 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO logs (log_name, log_description, log_type, old_data, new_data, created_at, created_by) 
-                        VALUES 
-                        ('Log One', 'Log One Description', 'C', '', 'Create Data', CURRENT_TIMESTAMP, 1),
-                        ('Log Two', 'Log Two Description', 'U', 'Old Data Two', 'New Data Two', CURRENT_TIMESTAMP, 1),
-                        ('Log Three', 'Log Three Description', 'D', 'Old Data Three', '', CURRENT_TIMESTAMP, 1);'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO logs (log_name, log_description, log_type, old_data, new_data, created_at, created_by) 
+                            VALUES 
+                            ('Log One', 'Log One Description', 'C', '', 'Create Data', CURRENT_TIMESTAMP, 1),
+                            ('Log Two', 'Log Two Description', 'U', 'Old Data Two', 'New Data Two', CURRENT_TIMESTAMP, 1),
+                            ('Log Three', 'Log Three Description', 'D', 'Old Data Three', '', CURRENT_TIMESTAMP, 1);'''
 
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
 
 
     def create_users_table(self):
@@ -211,13 +219,14 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value, created_at, updated_at, updated_by) 
-                        VALUES 
-                        ('CUSTOMER ONE', '081234567890', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL),
-                        ('CUSTOMER TWO', '081234567891', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL),
-                        ('CUSTOMER THREE', '081234567892', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL);'''
-        
-        self.cursor.execute(sql_insert)
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO customers (customer_name, customer_phone, customer_points, number_of_transactions, transaction_value, created_at, updated_at, updated_by) 
+                            VALUES 
+                            ('CUSTOMER ONE', '081234567890', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL),
+                            ('CUSTOMER TWO', '081234567891', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL),
+                            ('CUSTOMER THREE', '081234567892', 0, 0, 0, CURRENT_TIMESTAMP, NULL, NULL);'''
+            
+            self.cursor.execute(sql_insert)
 
 
     def create_purchasing_history_table(self):
@@ -238,11 +247,12 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, invoice_expired_date, total_amount, total_discount, created_at, created_by, purchasing_remarks) 
-                        VALUES 
-                        ('PO202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 75000, 0, CURRENT_TIMESTAMP, 1, 'Remarks Purchasing One');'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO purchasing_history (purchasing_id, supplier_id, invoice_date, invoice_number, invoice_expired_date, total_amount, total_discount, created_at, created_by, purchasing_remarks) 
+                            VALUES 
+                            ('PO202502010001', 1, CURRENT_TIMESTAMP, 'INV001', CURRENT_TIMESTAMP, 75000, 0, CURRENT_TIMESTAMP, 1, 'Remarks Purchasing One');'''
 
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
 
 
     def create_detail_purchasing_history_table(self):
@@ -260,13 +270,14 @@ class SeedData:
 
         self.cursor.execute(sql)
         
-        sql_insert = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal) 
-                        VALUES 
-                        ('PO202502010001', 'SKU001', 'PCS', 1, 50, 1000, 0, 0, 50000),
-                        ('PO202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 10000),
-                        ('PO202502010001', 'SKU003', 'PCS', 1, 15, 1000, 0, 0, 15000);'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO detail_purchasing_history (purchasing_id, sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal) 
+                            VALUES 
+                            ('PO202502010001', 'SKU001', 'PCS', 1, 50, 1000, 0, 0, 50000),
+                            ('PO202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 10000),
+                            ('PO202502010001', 'SKU003', 'PCS', 1, 15, 1000, 0, 0, 15000);'''
 
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
 
 
     def create_detail_transactions_table(self):
@@ -288,14 +299,16 @@ class SeedData:
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_detail_transactions_id ON detail_transactions(transaction_id);')
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_detail_transactions_sku ON detail_transactions(sku);')
 
-        sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
-                        VALUES 
-                        ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                        ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                        ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000);'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
+                            VALUES 
+                            ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                            ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                            ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000);'''
+            
+            self.cursor.execute(sql_insert)
         
-        self.cursor.execute(sql_insert)
-        
+
         sql = '''CREATE TABLE IF NOT EXISTS pending_detail_transactions (
             transaction_id VARCHAR(20) NOT NULL,
             sku VARCHAR(20) NOT NULL,
@@ -314,16 +327,17 @@ class SeedData:
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_pending_detail_transactions_id ON pending_detail_transactions(transaction_id);')
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_pending_detail_transactions_sku ON pending_detail_transactions(sku);')
 
-        sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
-                        VALUES 
-                        ('P202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                        ('P202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                        ('P202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                        ('P202502010002', 'SKU001', 'KODI', 20, 1, 1000, 0, 0, 0, 10000),
-                        ('P202502010002', 'SKU001', 'DUS', 10, 1, 1000, 0, 0, 0, 10000);'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO pending_detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
+                            VALUES 
+                            ('P202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                            ('P202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                            ('P202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
+                            ('P202502010002', 'SKU001', 'KODI', 20, 1, 1000, 0, 0, 0, 10000),
+                            ('P202502010002', 'SKU001', 'DUS', 10, 1, 1000, 0, 0, 0, 10000);'''
 
-        
-        self.cursor.execute(sql_insert)
+            
+            self.cursor.execute(sql_insert)
 
 
     def create_transactions_table(self):
@@ -347,15 +361,17 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
-                                                    discount_transaction_id, discount_amount, tax_pct, tax_amount, 
-                                                    created_at, created_by, payment_remarks, updated_at, updated_by) 
-                        VALUES 
-                        ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks One', NULL, NULL),
-                        ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Two', NULL, NULL),
-                        ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Three', NULL, NULL);'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
+                                                        discount_transaction_id, discount_amount, tax_pct, tax_amount, 
+                                                        created_at, created_by, payment_remarks, updated_at, updated_by) 
+                            VALUES 
+                            ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks One', NULL, NULL),
+                            ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Two', NULL, NULL),
+                            ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Three', NULL, NULL);'''
 
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
+
 
         sql = '''CREATE TABLE IF NOT EXISTS pending_transactions (
             transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
@@ -369,14 +385,15 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO pending_transactions (transaction_id, customer_id, total_amount, created_at, payment_remarks) 
-                        VALUES 
-                        ('P202502010001', '1', 40000, CURRENT_TIMESTAMP, 'Remarks One'),
-                        ('P202502010002', '1', 30000, CURRENT_TIMESTAMP, 'Remarks Two'),
-                        ('P202502010003', '1', 30000, CURRENT_TIMESTAMP, 'Remarks Three');'''
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO pending_transactions (transaction_id, customer_id, total_amount, created_at, payment_remarks) 
+                            VALUES 
+                            ('P202502010001', '1', 40000, CURRENT_TIMESTAMP, 'Remarks One'),
+                            ('P202502010002', '1', 30000, CURRENT_TIMESTAMP, 'Remarks Two'),
+                            ('P202502010003', '1', 30000, CURRENT_TIMESTAMP, 'Remarks Three');'''
 
 
-        self.cursor.execute(sql_insert)
+            self.cursor.execute(sql_insert)
 
 
     def create_suppliers_table(self):
@@ -390,13 +407,14 @@ class SeedData:
 
         self.cursor.execute(sql)
 
-        sql_insert = '''INSERT INTO suppliers (supplier_name, supplier_address, supplier_city, supplier_phone, supplier_remarks) 
-                        VALUES 
-                        ('SUPPLIER ONE', 'ADDRESS ONE', 'CITY ONE', '081234567890', 'Remarks One'),
-                        ('SUPPLIER TWO', 'ADDRESS TWO', 'CITY TWO', '081234567891', 'Remarks Two'),
-                        ('SUPPLIER THREE', 'ADDRESS THREE', 'CITY THREE', '081234567892', 'Remarks Three');'''
-        
-        self.cursor.execute(sql_insert)
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO suppliers (supplier_name, supplier_address, supplier_city, supplier_phone, supplier_remarks) 
+                            VALUES 
+                            ('SUPPLIER ONE', 'ADDRESS ONE', 'CITY ONE', '081234567890', 'Remarks One'),
+                            ('SUPPLIER TWO', 'ADDRESS TWO', 'CITY TWO', '081234567891', 'Remarks Two'),
+                            ('SUPPLIER THREE', 'ADDRESS THREE', 'CITY THREE', '081234567892', 'Remarks Three');'''
+            
+            self.cursor.execute(sql_insert)
 
 
     def create_products_table(self):
@@ -426,13 +444,15 @@ class SeedData:
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_products_category_id ON products(category_id);')
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_products_supplier_id ON products(supplier_id);')
         
-        sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
-                    VALUES 
-                    ('SKU001', 'PRODUCT ONE', 'barcode', 1, 1, 1000, 1500, 'Best seller', 40, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
-                    ('SKU002', 'PRODUCT TWO', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 10, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
-                    ('SKU003', 'PRODUCT THREE', 'barcode', 3, 3, 3000, 20, 'New arrival', 15, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
-        
-        self.cursor.execute(sql_insert)
+
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
+                        VALUES 
+                        ('SKU001', 'PRODUCT ONE', 'barcode', 1, 1, 1000, 1500, 'Best seller', 40, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
+                        ('SKU002', 'PRODUCT TWO', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 10, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
+                        ('SKU003', 'PRODUCT THREE', 'barcode', 3, 3, 3000, 20, 'New arrival', 15, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
+            
+            self.cursor.execute(sql_insert)
     
 
     def create_units_table(self):
@@ -451,12 +471,13 @@ class SeedData:
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_units_sku ON units(sku);')
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_units_barcode ON units(barcode);')
 
-        sql_insert = '''INSERT INTO units (sku, barcode, unit, unit_value, price) 
-                        VALUES 
-                        ('SKU001', 'barcode', 'KODI', 20, 28000),
-                        ('SKU001', 'barcode', 'DUS', 10, 20000); '''
-        
-        self.cursor.execute(sql_insert)
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO units (sku, barcode, unit, unit_value, price) 
+                            VALUES 
+                            ('SKU001', 'barcode', 'KODI', 20, 28000),
+                            ('SKU001', 'barcode', 'DUS', 10, 20000); '''
+            
+            self.cursor.execute(sql_insert)
 
 
     def create_categories_table(self):
@@ -470,13 +491,14 @@ class SeedData:
         # Add index for category name searches
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_categories_name ON categories(category_name);')
 
-        sql_insert = '''INSERT INTO categories (category_name) 
-                            VALUES 
-                            ('ELECTRONICS'),
-                            ('CLOTHING'),
-                            ('HOME APPLIANCES');'''
-        
-        self.cursor.execute(sql_insert)
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO categories (category_name) 
+                                VALUES 
+                                ('ELECTRONICS'),
+                                ('CLOTHING'),
+                                ('HOME APPLIANCES');'''
+            
+            self.cursor.execute(sql_insert)
         
 
     def create_product_categories_detail_table(self):
@@ -492,13 +514,14 @@ class SeedData:
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_product_categories_category_id ON product_categories_detail(category_id);')
         self.cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_product_categories_unique ON product_categories_detail(sku, category_id);')
 
-        sql_insert = '''INSERT INTO product_categories_detail (sku, category_id) 
-                        VALUES 
-                        ('SKU001', 1),
-                        ('SKU002', 2),
-                        ('SKU003', 3);'''
-        
-        self.cursor.execute(sql_insert)
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO product_categories_detail (sku, category_id) 
+                            VALUES 
+                            ('SKU001', 1),
+                            ('SKU002', 2),
+                            ('SKU003', 3);'''
+            
+            self.cursor.execute(sql_insert)
 
 
     def drop_all_tables(self):
@@ -549,8 +572,6 @@ class SeedData:
         """Run all seed functions in order."""
         self.cursor.execute('BEGIN TRANSACTION')
 
-        # self.truncate_all_tables()
-
         self.drop_all_tables()
 
         self.create_stock_opname_table()
@@ -577,4 +598,12 @@ class SeedData:
 
 if __name__ == "__main__":
     seeder = SeedData()
+    
+    # Check command line arguments
+    if len(sys.argv) > 1 and sys.argv[1].lower() == 'empty':
+        seeder.set_insert_data(False)
+        print("Running seed with empty tables (no data insertion)")
+    else:
+        print("Running seed with sample data")
+    
     seeder.seed_all()

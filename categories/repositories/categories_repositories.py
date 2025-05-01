@@ -245,7 +245,7 @@ class CategoriesRepository:
             self.cursor.execute('BEGIN TRANSACTION')
 
             # Get old category data
-            sql = '''SELECT category_id, category_name, pc.sku
+            sql = '''SELECT c.category_id, c.category_name, pc.sku
                     FROM categories c
                     LEFT JOIN product_categories_detail pc ON c.category_id = pc.category_id
                     WHERE c.category_id = ?'''
