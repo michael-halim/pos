@@ -13,7 +13,7 @@ from generals.constants import (
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
     PERM_R_CUSTOMERS
 ) 
-from generals.messages import ERR_PERM_R_CUSTOMERS,PERM_DENIED
+from generals.messages import ERR, ERR_PERM_R_CUSTOMERS, PERM_DENIED
 from dialogs.customers_dialog.translations import CUSTOMERS_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
 
@@ -117,6 +117,10 @@ class CustomersDialogWindow(QtWidgets.QWidget):
         search_text = search_text.lower() if search_text else None
 
         customers_result = self.customer_dialog_service.get_customers(search_text)
+
+        if not customers_result.success:
+            POSMessageBox.error(self, title=ERR, message=customers_result.message)
+            return
 
         self.set_customers_table_data(customers_result.data)
 

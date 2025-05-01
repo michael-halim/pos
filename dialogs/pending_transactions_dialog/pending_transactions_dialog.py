@@ -15,7 +15,7 @@ from generals.constants import (
     PERM_R_PENDING_TRANSACTIONS
 ) 
 from generals.messages import ( 
-    ERR_PERM_R_PENDING_TRANSACTIONS, PERM_DENIED
+    ERR, ERR_PERM_R_PENDING_TRANSACTIONS, PERM_DENIED
 )
 from generals.permission_manager import PermissionManager
 from dialogs.pending_transactions_dialog.translations import PENDING_TRANSACTIONS_DIALOG_TRANSLATIONS
@@ -159,6 +159,10 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         search_text = search_text.lower() if search_text else None
         
         pending_transactions_result = self.pending_transactions_dialog_service.get_pending_transactions(search_text)
+
+        if not pending_transactions_result.success:
+            POSMessageBox.error(self, title=ERR, message=pending_transactions_result.message)
+            return
 
         self.set_pending_transactions_table_data(pending_transactions_result.data)
 

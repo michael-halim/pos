@@ -523,9 +523,33 @@ class SeedData:
         self.cursor.execute('DROP TABLE IF EXISTS categories')
 
 
+    def truncate_all_tables(self):
+        self.cursor.execute('DELETE FROM stock_opname')
+        self.cursor.execute('DELETE FROM stock_card')
+        self.cursor.execute('DELETE FROM roles')
+        self.cursor.execute('DELETE FROM permissions')
+        self.cursor.execute('DELETE FROM role_permissions')
+        self.cursor.execute('DELETE FROM logs')
+        self.cursor.execute('DELETE FROM users')
+        self.cursor.execute('DELETE FROM customers')
+        self.cursor.execute('DELETE FROM detail_transactions')
+        self.cursor.execute('DELETE FROM pending_detail_transactions')
+        self.cursor.execute('DELETE FROM transactions')
+        self.cursor.execute('DELETE FROM pending_transactions')
+        self.cursor.execute('DELETE FROM suppliers')
+        self.cursor.execute('DELETE FROM detail_purchasing_history')
+        self.cursor.execute('DELETE FROM purchasing_history')
+        self.cursor.execute('DELETE FROM product_categories_detail')
+        self.cursor.execute('DELETE FROM units')
+        self.cursor.execute('DELETE FROM products')
+        self.cursor.execute('DELETE FROM categories') 
+
+
     def seed_all(self):
         """Run all seed functions in order."""
         self.cursor.execute('BEGIN TRANSACTION')
+
+        # self.truncate_all_tables()
 
         self.drop_all_tables()
 

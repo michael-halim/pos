@@ -11,7 +11,7 @@ from generals.constants import (
     NO_EDIT_TRIGGERS, RESIZE_MODE_INTERACTIVE,
     PERM_R_CATEGORIES
 ) 
-from generals.messages import ERR_PERM_R_CATEGORIES, PERM_DENIED
+from generals.messages import ERR, ERR_PERM_R_CATEGORIES, PERM_DENIED
 from dialogs.categories_dialog.translations import CATEGORIES_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
 from generals.permission_manager import PermissionManager
@@ -120,6 +120,10 @@ class CategoriesDialogWindow(QtWidgets.QDialog):
         search_text = search_text.lower() if search_text else None
 
         categories_dialog_result = self.categories_dialog_service.get_categories(search_text)
+
+        if not categories_dialog_result.success:
+            POSMessageBox.error(self, title=ERR, message=categories_dialog_result.message)
+            return
 
         self.set_categories_table_data(categories_dialog_result.data)
 
