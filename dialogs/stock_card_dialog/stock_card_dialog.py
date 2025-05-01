@@ -13,7 +13,7 @@ from generals.constants import (
     PERM_R_STOCK_CARD
 )
 from generals.messages import (
-    ERR_PERM_R_STOCK_CARD, PERM_DENIED
+    ERR, ERR_PERM_R_STOCK_CARD, PERM_DENIED
 )
 from generals.build import resource_path
 from dialogs.stock_card_dialog.translations import STOCK_CARD_DIALOG_TRANSLATIONS
@@ -173,6 +173,10 @@ class StockCardDialogWindow(QtWidgets.QWidget):
             end_date = datetime.strptime(self.ui.end_date_stock_card_dialog_input.date().toString(DATE_FORMAT_DDMMYYYY), '%d/%m/%Y')
 
         stock_card_result = self.stock_card_dialog_service.get_stock_card(sku, start_date, end_date)
+
+        if not stock_card_result.success:
+            POSMessageBox.error(self, title=ERR, message=stock_card_result.message)
+            return
 
         self.ui.sku_stock_card_dialog_input.setText(str(self.saved_sku))
 

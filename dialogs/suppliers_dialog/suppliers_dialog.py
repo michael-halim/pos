@@ -11,7 +11,7 @@ from generals.constants import (
     PERM_R_SUPPLIERS
 )
 from generals.messages import (
-    ERR_PERM_R_SUPPLIERS, PERM_DENIED
+    ERR, ERR_PERM_R_SUPPLIERS, PERM_DENIED
 )
 from dialogs.suppliers_dialog.translations import SUPPLIERS_DIALOG_TRANSLATIONS
 from generals.permission_manager import PermissionManager
@@ -118,10 +118,14 @@ class SuppliersDialogWindow(QtWidgets.QWidget):
 
         # Get suppliers
         suppliers_result = self.suppliers_dialog_service.get_suppliers(search_text)
+
+        if not suppliers_result.success:
+            POSMessageBox.error(self, title=ERR, message=suppliers_result.message)
+            return
         
         # Set Suppliers to table
         self.set_suppliers_table_data(suppliers_result.data)
-        
+
 
     # Setters
     # ===============

@@ -6,9 +6,11 @@ from dialogs.products_dialog.services.products_dialog_services import ProductsDi
 
 from helper import format_number, add_prefix
 from generals.fonts import POSFonts
+from generals.message_box import POSMessageBox
 from generals.build import resource_path
 from generals.constants import RESIZE_TO_CONTENTS, SELECT_ROWS, SINGLE_SELECTION, NO_EDIT_TRIGGERS
 from dialogs.products_dialog.translations import PRODUCTS_DIALOG_TRANSLATIONS
+from generals.messages import ERR
 from generals.language_manager import LanguageManager
 
 
@@ -61,6 +63,10 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         search_text = search_text.lower() if search_text else None
 
         products_dialog_result = self.products_dialog_service.get_products(search_text)
+
+        if not products_dialog_result.success:
+            POSMessageBox.error(self, title=ERR, message=products_dialog_result.message)
+            return
 
         self.set_products_table_data(products_dialog_result.data)
 

@@ -254,6 +254,7 @@ class MasterStockDialogRepository:
             result = self.cursor.fetchone()
 
             if not result:
+                self.db.rollback()
                 return ResponseMessage.fail(message="Can't Update Master Stock, SKU not found!")
 
             old_data = {

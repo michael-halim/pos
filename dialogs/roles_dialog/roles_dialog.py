@@ -12,7 +12,7 @@ from generals.constants import (
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
     PERM_R_ROLES
 ) 
-from generals.messages import ERR_PERM_R_ROLES, PERM_DENIED
+from generals.messages import ERR, ERR_PERM_R_ROLES, PERM_DENIED
 from generals.permission_manager import PermissionManager
 from dialogs.roles_dialog.translations import ROLES_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
@@ -216,6 +216,10 @@ class RolesDialogWindow(QtWidgets.QWidget):
         search_text = search_text.lower() if search_text else None
 
         roles_result = self.roles_dialog_service.get_roles(search_text)
+
+        if not roles_result.success:
+            POSMessageBox.error(self, title=ERR, message=roles_result.message)
+            return
 
         self.set_roles_table_data(roles_result.data)
 

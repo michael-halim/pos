@@ -104,6 +104,7 @@ class PriceUnitDialogRepository:
             # Check price unit
             check_price_unit_result = self.check_price_unit(price_unit_data.sku, price_unit_data.unit, price_unit_data.unit_value)
             if not check_price_unit_result.success:
+                self.db.rollback()
                 return check_price_unit_result
 
             # Insert price unit
@@ -149,24 +150,19 @@ class PriceUnitDialogRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
             
-            # Check price unit
-            check_price_unit_result = self.check_price_unit(price_unit_data.sku, price_unit_data.unit, price_unit_data.unit_value)
-            if not check_price_unit_result.success:
-                return check_price_unit_result
-            
             # Get price unit data
             sql = 'SELECT sku, barcode, unit, unit_value, price FROM units WHERE sku = ? AND unit = ? LIMIT 1'
             self.cursor.execute(sql, (price_unit_data.sku, price_unit_data.unit))
 
-            price_unit_data = self.cursor.fetchone()
+            old_price_unit_data_result = self.cursor.fetchone()
             old_data = {}
-            if price_unit_data:
+            if old_price_unit_data_result:
                 old_data = {
-                    'sku': price_unit_data[0],
-                    'barcode': price_unit_data[1],
-                    'unit': price_unit_data[2],
-                    'unit_value': price_unit_data[3],
-                    'price': price_unit_data[4]
+                    'sku': old_price_unit_data_result[0],
+                    'barcode': old_price_unit_data_result[1],
+                    'unit': old_price_unit_data_result[2],
+                    'unit_value': old_price_unit_data_result[3],
+                    'price': old_price_unit_data_result[4]
                 }
 
             new_data = {
