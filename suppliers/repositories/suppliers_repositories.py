@@ -92,24 +92,6 @@ class SuppliersRepository:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
 
-            # Get old supplier data
-            sql = '''SELECT supplier_id, supplier_name, supplier_address, supplier_phone, 
-                            supplier_city, supplier_remarks 
-                    FROM suppliers 
-                    WHERE supplier_id = ?
-                    LIMIT 1'''
-            self.cursor.execute(sql, (supplier_data.supplier_id,))
-            result = self.cursor.fetchone()
-            old_data = {
-                'supplier_id': result[0],
-                'supplier_name': result[1],
-                'supplier_address': result[2],
-                'supplier_phone': result[3],
-                'supplier_city': result[4],
-                'supplier_remarks': result[5]
-            
-            }
-            
             # Insert master stock
             sql = '''INSERT INTO suppliers (supplier_name, supplier_address, supplier_phone, 
                                             supplier_city, supplier_remarks) 
@@ -132,8 +114,9 @@ class SuppliersRepository:
             sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
                                         new_data, created_at, created_by) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            
             self.cursor.execute(sql, (f'Supplier {supplier_data.supplier_name} created', f'Supplier {supplier_data.supplier_name} created successfully!', 'C', 
-                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
 
             # Commit Transaction
             self.db.commit()

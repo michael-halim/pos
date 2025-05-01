@@ -93,7 +93,7 @@ class PriceUnitDialogRepository:
             return ResponseMessage.fail(message=f"Error: {str(e)}")
 
 
-    def submit_price_unit(self, price_unit_data: PriceUnitTableItemModel):
+    def submit_price_unit(self, price_unit_data: PriceUnitsModel):
         if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
             return ResponseMessage.fail(message=ERR_PERM_C_PRODUCTS)
 
@@ -106,14 +106,12 @@ class PriceUnitDialogRepository:
             if not check_price_unit_result.success:
                 return check_price_unit_result
 
-
             # Insert price unit
             sql = '''INSERT INTO units (sku, unit, barcode, unit_value, price) VALUES (?, ?, ?, ?, ?)'''
             
             self.cursor.execute(sql, (price_unit_data.sku, price_unit_data.unit, price_unit_data.barcode, 
                                       price_unit_data.unit_value, price_unit_data.price))
             
-
             # Insert Log
             today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             new_data = {    
@@ -129,7 +127,6 @@ class PriceUnitDialogRepository:
                     VALUES (?, ?, ?, ?, ?, ?, ?)'''
             self.cursor.execute(sql, (f'Price Unit {price_unit_data.unit} created', f'Price Unit {price_unit_data.unit} created successfully!', 'C', 
                                         None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
-                                        
 
             # If everything successful, commit the transaction
             self.db.commit()
@@ -275,7 +272,7 @@ class PriceUnitDialogRepository:
                 return ResponseMessage.fail(message='Price unit already exists')
 
             # Check if price unit < 1
-            if unit_value < 1:
+            if int(unit_value) < 1:
                 return ResponseMessage.fail(message='Unit value cannot be less than 1')
 
             return ResponseMessage.ok(

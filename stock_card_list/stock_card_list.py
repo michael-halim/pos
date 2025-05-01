@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic, QtGui
+from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from PyQt6.QtCore import Qt
 from datetime import datetime, timedelta
 
@@ -282,3 +282,17 @@ class StockCardListWindow(QtWidgets.QWidget):
 
             else:
                 POSMessageBox.error(self, title=ERR, message=stock_card_results.message)
+
+
+    # Event Filters
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.products_table.rowCount() > 0 and not self.products_table.selectedItems():
+                self.products_table.selectRow(0)
+                self.products_table.setFocus()
+                event.accept()
+                return
+        
+        # Let the parent class handle other keys
+        super().keyPressEvent(event)

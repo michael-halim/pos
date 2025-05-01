@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic, QtGui
+from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from datetime import datetime
 
 from dialogs.roles_dialog.roles_dialog import RolesDialogWindow
@@ -76,6 +76,11 @@ class UsersWindow(QtWidgets.QWidget):
 
         # Connect on enter key press on roles input
         self.ui.role_id_users_input.returnPressed.connect(self.on_handle_role_enter)
+
+        # Event Filters
+        self.ui.username_users_input.installEventFilter(self)
+        self.ui.password_users_input.installEventFilter(self)
+        self.ui.role_id_users_input.installEventFilter(self)
 
         # Set selection behavior to select entire rows
         self.users_table.setSelectionBehavior(SELECT_ROWS)
@@ -164,7 +169,7 @@ class UsersWindow(QtWidgets.QWidget):
         self.set_enabled_users_form_group(True)
         self.ui.change_password_users_button.setEnabled(False)
         self.ui.user_id_users_input.setEnabled(False)
-        self.ui.user_id_users_input.setFocus()
+        self.ui.username_users_input.setFocus()
 
 
     def edit_users(self):
@@ -266,6 +271,28 @@ class UsersWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_C_USERS):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_USERS)
             return
+
+
+        # If Username Input is empty, show error message
+        if self.ui.username_users_input.text().strip() == '':
+            POSMessageBox.error(self, title=ERR, message="Please enter a username")
+            self.ui.username_users_input.setFocus()
+            return
+
+
+        # If Password Input is empty, show error message
+        if self.ui.password_users_input.text().strip() == '':
+            POSMessageBox.error(self, title=ERR, message="Please enter a password")
+            self.ui.password_users_input.setFocus()
+            return
+        
+
+        # If Role Id Input is empty, show error message
+        if self.ui.role_id_users_input.text().strip() == '':
+            POSMessageBox.error(self, title=ERR, message="Please enter a role id")
+            self.ui.role_id_users_input.setFocus()
+            return
+
 
         # Disable Sorting to prevent data from being sorted
         self.users_table.setSortingEnabled(False)
@@ -448,3 +475,39 @@ class UsersWindow(QtWidgets.QWidget):
         self.ui.delete_users_button.setVisible(
             self.permission_manager.has_permission(PERM_D_USERS)
         )
+
+
+    # Event Filters
+    # ===============
+    def eventFilter(self, obj, event):
+        # If Username Input is focused and key pressed is Enter it focus to password input
+        if obj == self.ui.username_users_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.password_users_input.setFocus()
+
+
+        # If Password Input is focused and key pressed is Enter it focus to role id input
+        if obj == self.ui.password_users_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.role_id_users_input.setFocus()
+
+
+        # If Role Id Input is focused and key pressed is Enter it submit the form   
+        if obj == self.ui.role_id_users_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.submit_users()
+
+
+        return super().eventFilter(obj, event)
+
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.users_table.rowCount() > 0 and not self.users_table.selectedItems():
+                self.users_table.selectRow(0)
+                self.users_table.setFocus()
+                event.accept()
+                return
+        
+        # Let the parent class handle other keys
+        super().keyPressEvent(event)

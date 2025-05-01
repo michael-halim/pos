@@ -688,6 +688,9 @@ QPushButton:disabled {
             </item>
             <item row="0" column="1">
              <widget class="QLineEdit" name="total_purchasing_input">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -698,6 +701,12 @@ QPushButton:disabled {
                <font>
                 <pointsize>12</pointsize>
                </font>
+              </property>
+              <property name="text">
+               <string>Rp. 0</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

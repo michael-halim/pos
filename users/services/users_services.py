@@ -39,6 +39,15 @@ class UsersService:
         if not self.permission_manager.has_permission(PERM_C_USERS):
             return ResponseMessage.fail(message=ERR_PERM_C_USERS)
 
+        if user_data.username.strip() == '':
+            return ResponseMessage.fail(message="Username cannot be empty")
+        
+        if user_data.password.strip() == '':
+            return ResponseMessage.fail(message="Password cannot be empty")
+
+        if user_data.role_id.strip() == '':
+            return ResponseMessage.fail(message="Role id cannot be empty")
+
         return self.repository.submit_user(user_data)
 
 

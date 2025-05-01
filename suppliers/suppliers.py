@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 from generals.build import resource_path
 
 from suppliers.services.suppliers_services import SuppliersService  
@@ -51,6 +51,13 @@ class SuppliersWindow(QtWidgets.QWidget):
         # Connect search input to filter function
         self.ui.supplier_filter_input.textChanged.connect(self.show_suppliers_data)
         
+        # Event Filter
+        self.ui.supplier_name_input.installEventFilter(self)
+        self.ui.supplier_address_input.installEventFilter(self)
+        self.ui.supplier_city_input.installEventFilter(self)
+        self.ui.supplier_phone_number_input.installEventFilter(self)
+        self.ui.supplier_remarks_input.installEventFilter(self)
+
         # Set table properties
         self.ui.suppliers_table.setSelectionBehavior(SELECT_ROWS)
         self.ui.suppliers_table.setSelectionMode(SINGLE_SELECTION)
@@ -117,6 +124,7 @@ class SuppliersWindow(QtWidgets.QWidget):
         self.ui.submit_supplier_button.clicked.disconnect()
         self.ui.submit_supplier_button.clicked.connect(self.submit_supplier)
         self.toggle_suppliers_form(True)
+        self.ui.supplier_name_input.setFocus()
 
 
     def submit_supplier(self):
@@ -124,17 +132,21 @@ class SuppliersWindow(QtWidgets.QWidget):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_SUPPLIERS)
             return
 
+
         supplier_form_data: SuppliersModel = self.get_supplier_form_data()
         if not supplier_form_data.supplier_name:
             POSMessageBox.error(self, title=ERR, message="Please fill all required fields")
             return
         
+
         result = self.suppliers_service.submit_supplier(supplier_form_data)
         if result.success:
             POSMessageBox.info(self, title=OK, message=result.message)
             
             self.clear_supplier_form_data()
             self.show_suppliers_data()
+            self.ui.supplier_name_input.setFocus()
+
             
         else:
             POSMessageBox.error(self, title=ERR, message=result.message)
@@ -328,3 +340,49 @@ class SuppliersWindow(QtWidgets.QWidget):
         self.ui.edit_supplier_button.setVisible(self.permission_manager.has_permission(PERM_U_SUPPLIERS))
         self.ui.delete_supplier_button.setVisible(self.permission_manager.has_permission(PERM_D_SUPPLIERS))
 
+
+    # Event Filters
+    # ===============
+    def eventFilter(self, obj, event):
+        # If supplier name input is focused and key pressed is Enter it focus to supplier address input
+        if obj == self.ui.supplier_name_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.supplier_address_input.setFocus()
+
+
+        # If supplier address input is focused and key pressed is Enter it focus to supplier phone number input
+        if obj == self.ui.supplier_address_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.supplier_city_input.setFocus()
+
+
+        # If supplier phone number input is focused and key pressed is Enter it focus to supplier city input
+        if obj == self.ui.supplier_city_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.supplier_phone_number_input.setFocus()
+
+
+        # If supplier city input is focused and key pressed is Enter it focus to supplier remarks input
+        if obj == self.ui.supplier_phone_number_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.supplier_remarks_input.setFocus()
+
+
+        # If supplier remarks input is focused and key pressed is Enter it submit the form
+        if obj == self.ui.supplier_remarks_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.submit_supplier()
+
+
+        return super().eventFilter(obj, event)
+
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.ui.suppliers_table.rowCount() > 0 and not self.ui.suppliers_table.selectedItems():
+                self.ui.suppliers_table.selectRow(0)
+                self.ui.suppliers_table.setFocus()
+                event.accept()
+                return
+        
+        super().keyPressEvent(event)    

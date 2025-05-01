@@ -50,9 +50,6 @@ class RolesDialogWindow(QtWidgets.QWidget):
         self.ui.filter_roles_input.textChanged.connect(self.show_roles_data)
         self.ui.filter_permissions_input.textChanged.connect(self.show_permissions_data)
 
-        # Simple key press event for the entire dialog
-        self.keyPressEvent = self.handle_key_press
-        
         # Set selection behavior to select entire rows
         self.roles_table.setSelectionBehavior(SELECT_ROWS)
         self.roles_table.setSelectionMode(SINGLE_SELECTION)
@@ -285,7 +282,19 @@ class RolesDialogWindow(QtWidgets.QWidget):
             self.roles_table.setRowHidden(row, not match_found)
 
 
-    def handle_key_press(self, event):
+
+    # Event Filters
+    # ===============
+    def keyPressEvent(self, event):
+        # If no row is selected, select the first row if available
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.roles_table.rowCount() > 0 and not self.roles_table.selectedItems():
+                self.roles_table.selectRow(0)
+                self.roles_table.setFocus()
+                event.accept()
+                return
+            
+
         # Check for Enter key
         if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
             # Don't handle Enter if we're in a text field
@@ -296,6 +305,7 @@ class RolesDialogWindow(QtWidgets.QWidget):
                         self.roles_table.selectRow(0)
                     self.send_role_data()
                     return
+        
         
         # Let the parent class handle other keys
         super().keyPressEvent(event)

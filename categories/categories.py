@@ -271,6 +271,7 @@ class CategoriesWindow(QtWidgets.QWidget):
         self.clear_category()
         self.ui.submit_category_button.setText("Submit")
         self.toggle_add_edit_categories_and_products(True)
+        self.ui.category_name_input.setFocus()
     
     
     # Setters

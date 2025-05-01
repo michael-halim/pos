@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 from datetime import datetime
 
 from dialogs.suppliers_dialog.suppliers_dialog import SuppliersDialogWindow
@@ -18,7 +18,7 @@ from generals.constants import (
     PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS,
 )
 from generals.messages import ( 
-    ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
+    ERR, OK, WARNING, CONFIRM, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
     PERM_DENIED
 )
 from dialogs.master_stock_dialog.translations import MASTER_STOCK_DIALOG_TRANSLATIONS
@@ -70,6 +70,16 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         
         self.ui.close_master_stock_button.clicked.connect(lambda: self.close())
 
+        # Event Filters
+        self.ui.sku_master_stock_input.installEventFilter(self)
+        self.ui.category_master_stock_input.installEventFilter(self)
+        self.ui.supplier_master_stock_input.installEventFilter(self)
+        self.ui.unit_master_stock_input.installEventFilter(self)
+        self.ui.cost_price_master_stock_input.installEventFilter(self)
+        self.ui.price_master_stock_input.installEventFilter(self)
+        self.ui.stock_master_stock_input.installEventFilter(self)
+
+
         # Connect return pressed signal
         self.ui.sku_master_stock_input.returnPressed.connect(self.on_handle_sku_enter)
         self.ui.category_master_stock_input.returnPressed.connect(self.on_handle_category_enter)        
@@ -114,13 +124,14 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         product_result = self.master_stock_dialog_service.get_product_by_sku(product_data['sku'])
         if product_result.success and product_result.data:
             self.set_master_stock_form_data(product_result.data)
-
+            self.ui.category_master_stock_input.setFocus()
 
 
     def handle_supplier_selected(self, supplier_data: dict):
         supplier_result = self.master_stock_dialog_service.get_supplier_by_id(supplier_data['supplier_id'])
         if supplier_result.success and supplier_result.data:
             self.set_suppliers_form_data(supplier_result.data)
+            self.ui.unit_master_stock_input.setFocus()
 
 
 
@@ -128,6 +139,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         category_result = self.master_stock_dialog_service.get_category_by_id(category_data['category_id'])
         if category_result.success and category_result.data:
             self.set_categories_form_data(category_result.data)
+            self.ui.supplier_master_stock_input.setFocus()
 
 
     def create_new_master_stock(self):
@@ -144,18 +156,18 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         if not master_stock_form_data.sku or not master_stock_form_data.product_name \
             or not master_stock_form_data.unit or not master_stock_form_data.price \
             or not master_stock_form_data.stock:
-            POSMessageBox.error(self, title='Error', message="Please fill all required fields")
+            POSMessageBox.error(self, title=ERR, message="Please fill all required fields")
             return
         
         result = self.master_stock_dialog_service.submit_master_stock(master_stock_form_data)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
             
             self.clear_master_stock_form()
             self.purchasing_history_in_master_stock_table.setRowCount(0)
             
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
     
 
     def update_master_stock(self):
@@ -168,18 +180,18 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         master_stock_form_data.sku = sku
 
         if not master_stock_form_data.sku:
-            POSMessageBox.error(self, title='Error', message="SKU is required")
+            POSMessageBox.error(self, title=ERR, message="SKU is required")
             return
         
         result = self.master_stock_dialog_service.update_master_stock(master_stock_form_data)
         if result.success:
-            POSMessageBox.info(self, title='Success', message=result.message)
+            POSMessageBox.info(self, title=OK, message=result.message)
 
             self.purchasing_history_in_master_stock_table.setRowCount(0)
             self.clear_master_stock_form()
 
         else:
-            POSMessageBox.error(self, title='Error', message=result.message)
+            POSMessageBox.error(self, title=ERR, message=result.message)
 
 
     def delete_master_stock(self):
@@ -190,31 +202,31 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         sku = self.ui.sku_master_stock_input.text().strip()
 
         if not sku:
-            POSMessageBox.error(self, title='Error', message="Please select a product to delete")
+            POSMessageBox.error(self, title=ERR, message="Please select a product to delete")
             return
 
         
         confirm = POSMessageBox.confirm(
-                        self, title='Confirm Deletion', 
+                        self, title=CONFIRM, 
                         message=f'Are you sure you want to delete {sku} ?')
 
         if confirm:
             result = self.master_stock_dialog_service.delete_master_stock_by_sku(sku)
             if result.success:
-                POSMessageBox.info(self, title='Success', message=result.message)
+                POSMessageBox.info(self, title=OK, message=result.message)
 
                 self.purchasing_history_in_master_stock_table.setRowCount(0)
                 self.clear_master_stock_form()
 
             else:
-                POSMessageBox.error(self, title='Error', message=result.message)
+                POSMessageBox.error(self, title=ERR, message=result.message)
 
     # Shows
     # ===============
     def show_price_unit_dialog(self):
         sku = self.ui.sku_master_stock_input.text().strip()
         if not sku:
-            POSMessageBox.error(self, title='Error', message="Please select a product to set price unit")
+            POSMessageBox.error(self, title=ERR, message="Please select a product to set price unit")
             return
         
         self.price_unit_dialog.set_price_unit_form_by_sku(sku)
@@ -255,9 +267,9 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.sku_master_stock_input.setText(data.sku)
         self.ui.product_name_master_stock_input.setText(data.product_name)
         self.ui.barcode_master_stock_input.setText(data.barcode)
-        self.ui.category_master_stock_input.setText(str(data.category_id))
+        self.ui.category_master_stock_input.setText(str(data.category_id) if data.category_id else '')
         self.ui.category_name_master_stock_input.setText(data.category_name)
-        self.ui.supplier_master_stock_input.setText(str(data.supplier_id))
+        self.ui.supplier_master_stock_input.setText(str(data.supplier_id) if data.supplier_id else '')
         self.ui.supplier_name_master_stock_input.setText(data.supplier_name)
         self.ui.unit_master_stock_input.setText(data.unit)
         self.ui.cost_price_master_stock_input.setText(add_prefix(format_number(str(data.cost_price))))
@@ -281,9 +293,11 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
             purchasing_history_result = self.master_stock_dialog_service.get_purchasing_history_by_sku(sku)
             if purchasing_history_result.success and purchasing_history_result.data:
                 self.set_purchasing_history_table_data(purchasing_history_result.data)
-                self.ui.submit_master_stock_button.setText('Update')
-                self.ui.submit_master_stock_button.clicked.disconnect()
-                self.ui.submit_master_stock_button.clicked.connect(self.update_master_stock)
+                
+            self.ui.submit_master_stock_button.setText('Update')
+            self.ui.submit_master_stock_button.clicked.disconnect()
+            self.ui.submit_master_stock_button.clicked.connect(self.update_master_stock)
+            self.ui.sku_master_stock_input.setFocus()
 
 
     def set_purchasing_history_table_data(self, data: list[PurchasingHistoryTableItemModel]):
@@ -375,7 +389,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         if result.success and result.data:
             # Product found - fill the form
             self.set_master_stock_form_by_sku(sku)
-            
+
+            # Focus to category input
+            self.ui.category_master_stock_input.setFocus()
+
         else:
             # Product not found - show dialog with filter
             self.products_dialog.set_filter(sku)
@@ -393,6 +410,9 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
             # Category found - fill the form
             self.handle_category_selected({'category_id': result.data.category_id})
 
+            # Focus to supplier input
+            self.ui.supplier_master_stock_input.setFocus()
+
         else:
             # Category not found - show dialog with filter
             self.categories_dialog.set_filter(category_id)
@@ -409,6 +429,9 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         if result.success and result.data:
             # Supplier found - fill the form
             self.handle_supplier_selected({'supplier_id': result.data.supplier_id})
+
+            # Focus to unit input
+            self.ui.unit_master_stock_input.setFocus()
 
         else:
             # Supplier not found - show dialog with filter
@@ -433,3 +456,44 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         self.ui.price_master_stock_input.textChanged.connect(self.on_number_input_changed)
         self.ui.stock_master_stock_input.textChanged.connect(self.on_number_input_changed)
 
+
+    # Event Filters
+    # ===============
+    def eventFilter(self, obj, event):
+        # If sku input is focused and key pressed is Enter it focus to category input
+        if obj == self.ui.sku_master_stock_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.on_handle_sku_enter()
+
+
+        # If category input is focused and key pressed is Enter it focus to supplier input
+        if obj == self.ui.category_master_stock_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.on_handle_category_enter()
+
+
+        # If supplier input is focused and key pressed is Enter it focus to unit input
+        if obj == self.ui.supplier_master_stock_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.on_handle_supplier_enter()
+
+
+        # If unit input is focused and key pressed is Enter it focus to cost price input
+        if obj == self.ui.unit_master_stock_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.cost_price_master_stock_input.setFocus()
+
+
+        # If cost price input is focused and key pressed is Enter it focus to price input
+        if obj == self.ui.cost_price_master_stock_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.price_master_stock_input.setFocus()
+
+
+        # If price input is focused and key pressed is Enter it focus to stock input
+        if obj == self.ui.price_master_stock_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.stock_master_stock_input.setFocus()
+
+
+        return super().eventFilter(obj, event)

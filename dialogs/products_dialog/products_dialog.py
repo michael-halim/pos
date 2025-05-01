@@ -38,9 +38,6 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         # Connect search input to filter function
         self.ui.filter_products_dialog_input.textChanged.connect(self.show_products_data)
         
-        # Simple key press event for the entire dialog
-        self.keyPressEvent = self.handle_key_press
-        
         # Set selection behavior to select entire rows
         self.products_dialog_table.setSelectionBehavior(SELECT_ROWS)
         self.products_dialog_table.setSelectionMode(SINGLE_SELECTION)
@@ -175,7 +172,7 @@ class ProductsDialogWindow(QtWidgets.QWidget):
 
     # Event Listeners
     # ===============
-    def handle_key_press(self, event):
+    def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Down:
             if self.products_dialog_table.rowCount() > 0 and not self.products_dialog_table.selectedItems():
                 self.products_dialog_table.selectRow(0)

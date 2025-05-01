@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 
 from dialogs.price_unit_dialog.services.price_unit_dialog_services import PriceUnitDialogService
 from dialogs.price_unit_dialog.models.price_unit_dialog_models import PriceUnitTableItemModel, PriceUnitsModel
@@ -40,7 +40,6 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         # Init Table
         self.price_unit_table = self.ui.price_unit_table
         
-        
         # Init Button
         self.ui.delete_price_unit_button.clicked.connect(self.delete_price_unit)
         self.ui.edit_price_unit_button.clicked.connect(self.edit_price_unit)
@@ -51,6 +50,12 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
 
         self.ui.unit_value_price_unit_input.textChanged.connect(self.on_number_input_changed)
         self.ui.price_price_unit_input.textChanged.connect(self.on_number_input_changed)
+
+        # Event Filters
+        self.ui.unit_price_unit_input.installEventFilter(self)
+        self.ui.barcode_price_unit_input.installEventFilter(self)
+        self.ui.unit_value_price_unit_input.installEventFilter(self)
+        self.ui.price_price_unit_input.installEventFilter(self)
 
         # Set selection behavior to select entire rows
         self.price_unit_table.setSelectionBehavior(SELECT_ROWS)
@@ -372,3 +377,33 @@ class PriceUnitDialogWindow(QtWidgets.QWidget):
         self.ui.submit_price_unit_button.setText('Submit')
         self.ui.submit_price_unit_button.disconnect()
         self.ui.submit_price_unit_button.clicked.connect(self.submit_price_unit)
+
+
+    # Event Filters
+    # ===============
+    def eventFilter(self, obj, event):
+        # If unit input is focused and key pressed is Enter it focus to barcode input
+        if obj == self.ui.unit_price_unit_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.barcode_price_unit_input.setFocus()
+
+
+        # If barcode input is focused and key pressed is Enter it focus to unit value input
+        if obj == self.ui.barcode_price_unit_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.unit_value_price_unit_input.setFocus()
+
+
+        # If unit value input is focused and key pressed is Enter it focus to price input
+        if obj == self.ui.unit_value_price_unit_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.price_price_unit_input.setFocus()
+
+
+        # If price input is focused and key pressed is Enter it submit the price unit
+        if obj == self.ui.price_price_unit_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.submit_price_unit()
+
+
+        return super().eventFilter(obj, event)

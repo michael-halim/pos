@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic, QtGui
+from PyQt6 import QtWidgets, uic, QtGui, QtCore
 
 from products.services.products_services import ProductsService
 from products.models.products_models import ProductsModel
@@ -214,6 +214,7 @@ class ProductsWindow(QtWidgets.QWidget):
             sku = self.products_table.item(row, 0).text()
             self.master_stock_dialog.set_master_stock_form_by_sku(sku)
             self.master_stock_dialog.show()
+
             # Set data_loaded to False so it will refresh when this window is shown again
             self.data_loaded = False
         else:
@@ -285,3 +286,18 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.import_products_button.setVisible(
             self.permission_manager.has_permission(PERM_I_PRODUCTS)
         )
+
+
+    # Event Filters
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.products_table.rowCount() > 0 and not self.products_table.selectedItems():
+                self.products_table.selectRow(0)
+                self.products_table.setFocus()
+                event.accept()
+                return
+            
+
+        # Let the parent class handle other keys
+        super().keyPressEvent(event)

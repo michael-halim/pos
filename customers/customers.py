@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 
 from customers.services.customers_services import CustomersService
 from customers.models.customers_models import CustomersModel
@@ -32,6 +32,9 @@ class CustomersWindow(QtWidgets.QWidget):
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/customers.ui'), self)
 
+        # Setup permissions
+        self.setup_permissions()
+        
         # Init Services
         self.customer_service = CustomersService()
 
@@ -52,6 +55,10 @@ class CustomersWindow(QtWidgets.QWidget):
         self.ui.delete_customer_button.clicked.connect(self.delete_customer)
         self.ui.clear_customer_button.clicked.connect(self.clear_customer)
         self.ui.submit_customer_button.clicked.connect(self.submit_customer)
+
+        # Event Filter
+        self.ui.customer_name_input.installEventFilter(self)
+        self.ui.customer_phone_input.installEventFilter(self)
 
         # Set selection behavior to select entire rows
         self.customers_table.setSelectionBehavior(SELECT_ROWS)
@@ -116,8 +123,14 @@ class CustomersWindow(QtWidgets.QWidget):
             POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_CUSTOMERS)
             return
 
+        # Clear the form
         self.clear_customer()
+
+        # Enable the form
         self.set_enabled_customer_form(True)
+
+        # Set focus to customer name input
+        self.ui.customer_name_input.setFocus()
 
 
     def edit_customer(self):
@@ -331,3 +344,35 @@ class CustomersWindow(QtWidgets.QWidget):
         self.ui.submit_customer_button.setText('Submit')
         self.ui.submit_customer_button.clicked.disconnect()
         self.ui.submit_customer_button.clicked.connect(self.submit_customer)
+
+
+    # Setup Permissions
+    # ===============
+    def setup_permissions(self):
+        self.ui.add_customer_button.setVisible(
+            self.permission_manager.has_permission(PERM_C_CUSTOMERS)
+        )
+        self.ui.edit_customer_button.setVisible(
+            self.permission_manager.has_permission(PERM_U_CUSTOMERS)
+        )
+        self.ui.delete_customer_button.setVisible(
+            self.permission_manager.has_permission(PERM_D_CUSTOMERS))
+    
+
+
+    # Event Filters
+    # ===============
+    def eventFilter(self, obj, event):
+        # If customer name input is focused and key pressed is Enter it focus to customer phone input
+        if obj == self.ui.customer_name_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.ui.customer_phone_input.setFocus()
+
+
+        # If customer phone input is focused and key pressed is Enter it submit the form
+        if obj == self.ui.customer_phone_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            if event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                self.submit_customer()
+
+
+        return super().eventFilter(obj, event)

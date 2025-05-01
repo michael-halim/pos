@@ -723,7 +723,7 @@ QPushButton:disabled {
 }</string>
               </property>
               <property name="text">
-               <string>Add</string>
+               <string>Create</string>
               </property>
               <property name="icon">
                <iconset>

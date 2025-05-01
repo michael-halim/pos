@@ -498,3 +498,17 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         self.ui.role_id_role_permissions_input.clear()
         self.ui.role_name_role_permissions_input.clear()
         self.ui.role_description_role_permissions_input.clear()
+
+
+    # Event Filters
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.roles_table.rowCount() > 0 and not self.roles_table.selectedItems():
+                self.roles_table.selectRow(0)
+                self.roles_table.setFocus()
+                event.accept()
+                return
+        
+        # Let the parent class handle other keys
+        super().keyPressEvent(event)

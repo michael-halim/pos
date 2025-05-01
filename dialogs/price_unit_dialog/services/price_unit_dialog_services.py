@@ -31,7 +31,7 @@ class PriceUnitDialogService:
         return self.repository.get_product_units_by_sku(sku)
 
 
-    def submit_price_unit(self, price_unit_data: PriceUnitTableItemModel):
+    def submit_price_unit(self, price_unit_data: PriceUnitsModel):
         if not self.permission_manager.has_permission(PERM_C_PRODUCTS):
             return ResponseMessage.fail(message=ERR_PERM_C_PRODUCTS)
         
