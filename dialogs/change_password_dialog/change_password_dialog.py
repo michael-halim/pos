@@ -27,6 +27,10 @@ class ChangePasswordDialogWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
 
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 

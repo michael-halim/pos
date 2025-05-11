@@ -29,7 +29,17 @@ class ImportProductsDialogWindow(QtWidgets.QWidget):
 
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
-        
+    
+
+    # Overrides
+    # ============
+    def showEvent(self, event):
+        super().showEvent(event)
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
 
     def select_file(self):
         # Open a folder dialog and get the selected file path

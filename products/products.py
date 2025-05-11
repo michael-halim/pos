@@ -1,4 +1,5 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
+from datetime import datetime
 
 from products.services.products_services import ProductsService
 from products.models.products_models import ProductsModel
@@ -15,11 +16,11 @@ from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
     PERM_R_PRODUCTS, PERM_C_PRODUCTS, PERM_U_PRODUCTS, PERM_D_PRODUCTS, PERM_I_PRODUCTS,
-    PERM_R_STOCK_CARD,
+    PERM_R_STOCK_CARD, PERM_E_PRODUCTS
 ) 
 from generals.messages import (
     ERR, OK, ERR_PERM_R_PRODUCTS, ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
-    ERR_PERM_I_PRODUCTS, ERR_PERM_R_STOCK_CARD, PERM_DENIED
+    ERR_PERM_I_PRODUCTS, ERR_PERM_R_STOCK_CARD, ERR_PERM_E_PRODUCTS, PERM_DENIED
 )
 from products.translations import PRODUCTS_TRANSLATIONS
 from generals.permission_manager import PermissionManager
@@ -36,6 +37,9 @@ class ProductsWindow(QtWidgets.QWidget):
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
             return
+        
+        # Set window title
+       
         
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/products.ui'), self)
@@ -60,12 +64,15 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.edit_products_button.clicked.connect(self.edit_products)
         self.ui.delete_products_button.clicked.connect(self.delete_products)
         self.ui.import_products_button.clicked.connect(self.import_products)
+        self.ui.export_products_button.clicked.connect(self.export_excel)
         self.ui.stock_card_products_button.clicked.connect(self.stock_card_products)
+        self.ui.find_products_button.clicked.connect(self.show_products_data)
+        self.ui.refresh_products_button.clicked.connect(self.show_products_data)
 
         self.ui.close_products_button.clicked.connect(lambda: self.close())
-        
+
         # Connect search input to filter function
-        self.ui.filter_products_input.textChanged.connect(self.show_products_data)
+        self.ui.filter_products_input.returnPressed.connect(self.show_products_data)
 
         # Set selection behavior to select entire rows
         self.ui.products_table.setSelectionBehavior(SELECT_ROWS)
@@ -77,7 +84,7 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.products_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.ui.products_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
-
+        
 
     # Overrides
     # ===============
@@ -85,10 +92,15 @@ class ProductsWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PRODUCTS)
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PRODUCTS)
             self.close()
             return
         
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)
         
@@ -109,6 +121,7 @@ class ProductsWindow(QtWidgets.QWidget):
         super().show()
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
             self.close()
+            return
 
 
     def showMaximized(self):
@@ -116,6 +129,7 @@ class ProductsWindow(QtWidgets.QWidget):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
             self.close()
+            return
         
 
 
@@ -198,6 +212,7 @@ class ProductsWindow(QtWidgets.QWidget):
 
         self.master_stock_dialog.clear_master_stock_form()
         self.master_stock_dialog.show()
+
         # Set data_loaded to False so it will refresh when this window is shown again
         self.data_loaded = False
 
@@ -269,6 +284,59 @@ class ProductsWindow(QtWidgets.QWidget):
                 POSMessageBox.error(self, title=ERR, message=result.message)
 
 
+    # Exports
+    # ===============
+    def export_excel(self):
+        """Export products data to Excel"""
+        if not self.permission_manager.has_permission(PERM_E_PRODUCTS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_E_PRODUCTS)
+            return
+
+        # Get save file location from user
+        file_name = f"products_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        file_path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, 
+            "Save Excel File",
+            file_name, 
+            "Excel Files (*.xlsx)"
+        )
+
+        # If User cancelled
+        if not file_path:  
+            return
+            
+        # Add .xlsx extension if not present
+        if not file_path.endswith('.xlsx'):
+            file_path += '.xlsx'
+
+
+        # Export
+        products_result = self.products_service.get_products_for_export(limit=1000)
+        self.products_service.export_excel(products_result.data, file_path, 
+                                           self.on_complete_export_excel, self.on_error_export_excel, self.on_progress_export_excel)
+
+
+
+    # Export Callbacks
+    # ===============
+    def on_complete_export_excel(self, export_result):
+        """Handle the completion of the export"""
+        if not export_result.success:
+            POSMessageBox.error(self, title=ERR, message=export_result.message)
+        else:
+            POSMessageBox.info(self, title=OK, message=export_result.message)
+
+
+    def on_error_export_excel(self, error):
+        """Handle the error of the export"""
+        POSMessageBox.error(self, title=ERR, message=error)
+        
+
+    def on_progress_export_excel(self, progress: int):
+        """Handle the progress of the export"""
+        print(f"Progress: {progress}%")
+
+
     # Setup Permissions
     # ===============
     def setup_permissions(self):
@@ -286,6 +354,9 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.import_products_button.setVisible(
             self.permission_manager.has_permission(PERM_I_PRODUCTS)
         )
+        self.ui.export_products_button.setVisible(
+            self.permission_manager.has_permission(PERM_E_PRODUCTS)
+        )
 
 
     # Event Filters
@@ -301,3 +372,4 @@ class ProductsWindow(QtWidgets.QWidget):
 
         # Let the parent class handle other keys
         super().keyPressEvent(event)
+        

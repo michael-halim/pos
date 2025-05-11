@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>455</width>
+    <width>744</width>
     <height>671</height>
    </rect>
   </property>
@@ -529,7 +529,7 @@ QPushButton:disabled {
           </column>
           <column>
            <property name="text">
-            <string>Profit/Loss Period</string>
+            <string>Revenue</string>
            </property>
            <property name="font">
             <font>
@@ -544,7 +544,37 @@ QPushButton:disabled {
           </column>
           <column>
            <property name="text">
-            <string>Total Profit/Loss</string>
+            <string>Accumulated Revenue</string>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="textAlignment">
+            <set>AlignCenter</set>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Profit</string>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="textAlignment">
+            <set>AlignCenter</set>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Accumulated Profit</string>
            </property>
            <property name="font">
             <font>

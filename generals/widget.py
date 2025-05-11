@@ -1,5 +1,8 @@
 from PyQt6 import QtWidgets, QtCore
+
 from generals.fonts import POSFonts
+from generals.permission_manager import PermissionManager
+
 
 def create_checkbox_item(_id: str, is_editable: bool = False, size: int = 12) -> QtWidgets.QTableWidgetItem:
     checkbox_item = QtWidgets.QTableWidgetItem()
@@ -11,5 +14,3 @@ def create_checkbox_item(_id: str, is_editable: bool = False, size: int = 12) ->
         checkbox_item.setFlags(QtCore.Qt.ItemFlag.ItemIsEditable)
 
     return checkbox_item
-
-

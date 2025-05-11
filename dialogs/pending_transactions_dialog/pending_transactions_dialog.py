@@ -88,31 +88,6 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         self.show_detail_pending_transactions_data()
     
 
-    # Setters
-    # ===============
-    def set_pending_transactions_table_data(self, data: list[PendingTransactionModel]):
-        # Clear the table
-        self.pending_transactions_table.setRowCount(0)
-
-        for pending_transaction in data:
-            current_row = self.pending_transactions_table.rowCount()
-            self.pending_transactions_table.insertRow(current_row)
-            
-            created_at_dt = datetime.strptime(pending_transaction.created_at, '%Y-%m-%d %H:%M:%S')
-            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
-
-            # Set table items
-            table_items = [
-                QtWidgets.QTableWidgetItem(pending_transaction.transaction_id),
-                QtWidgets.QTableWidgetItem(add_prefix(format_number(pending_transaction.total_amount))),
-                QtWidgets.QTableWidgetItem(formatted_date),
-                QtWidgets.QTableWidgetItem(pending_transaction.payment_remarks)
-            ]
-
-            for col, item in enumerate(table_items):
-                item.setFont(POSFonts.get_font(size=12))
-                self.pending_transactions_table.setItem(current_row, col, item)
-
 
     # Overrides
     # ===============
@@ -121,6 +96,10 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         super().showEvent(event)
         # Reset the current selection
         self.current_pending_transaction_id = None
+        
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         self.language_manager.translate_widget_text(self)
 
@@ -146,6 +125,32 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         # Refresh the data
         self.show_pending_transactions_data()
         self.show_detail_pending_transactions_data()
+
+
+    # Setters
+    # ===============
+    def set_pending_transactions_table_data(self, data: list[PendingTransactionModel]):
+        # Clear the table
+        self.pending_transactions_table.setRowCount(0)
+
+        for pending_transaction in data:
+            current_row = self.pending_transactions_table.rowCount()
+            self.pending_transactions_table.insertRow(current_row)
+            
+            created_at_dt = datetime.strptime(pending_transaction.created_at, '%Y-%m-%d %H:%M:%S')
+            formatted_date = created_at_dt.strftime('%d %b %y %H:%M')
+
+            # Set table items
+            table_items = [
+                QtWidgets.QTableWidgetItem(pending_transaction.transaction_id),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(pending_transaction.total_amount))),
+                QtWidgets.QTableWidgetItem(formatted_date),
+                QtWidgets.QTableWidgetItem(pending_transaction.payment_remarks)
+            ]
+
+            for col, item in enumerate(table_items):
+                item.setFont(POSFonts.get_font(size=12))
+                self.pending_transactions_table.setItem(current_row, col, item)
 
     
     # Shows

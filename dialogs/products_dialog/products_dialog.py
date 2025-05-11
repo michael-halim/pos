@@ -53,29 +53,16 @@ class ProductsDialogWindow(QtWidgets.QWidget):
 
         self.show_products_data()
 
-
-    # Shows
-    # ===============
-    def show_products_data(self):
-        self.products_dialog_table.setSortingEnabled(False)
-
-        search_text = self.ui.filter_products_dialog_input.text().strip()
-        search_text = search_text.lower() if search_text else None
-
-        products_dialog_result = self.products_dialog_service.get_products(search_text)
-
-        if not products_dialog_result.success:
-            POSMessageBox.error(self, title=ERR, message=products_dialog_result.message)
-            return
-
-        self.set_products_table_data(products_dialog_result.data)
-
-
+    
     # Overrides
     # ===============
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         self.language_manager.translate_widget_text(self)
 
@@ -103,6 +90,23 @@ class ProductsDialogWindow(QtWidgets.QWidget):
         super().showMaximized()
         # Refresh the data
         self.show_products_data()
+
+
+    # Shows
+    # ===============
+    def show_products_data(self):
+        self.products_dialog_table.setSortingEnabled(False)
+
+        search_text = self.ui.filter_products_dialog_input.text().strip()
+        search_text = search_text.lower() if search_text else None
+
+        products_dialog_result = self.products_dialog_service.get_products(search_text)
+
+        if not products_dialog_result.success:
+            POSMessageBox.error(self, title=ERR, message=products_dialog_result.message)
+            return
+
+        self.set_products_table_data(products_dialog_result.data)
 
 
     # Setters

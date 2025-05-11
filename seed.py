@@ -95,7 +95,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO permissions (permission_id, permission_name) 
                         VALUES 
-                        ('create_products', 'Create Products'), ('read_products', 'Read Products'), ('update_products', 'Update Products'), ('delete_products', 'Delete Products'), ('import_products', 'Import Products'),
+                        ('create_products', 'Create Products'), ('read_products', 'Read Products'), ('update_products', 'Update Products'), ('delete_products', 'Delete Products'), ('import_products', 'Import Products'), ('export_products', 'Export Products'),
                         ('create_categories', 'Create Categories'), ('read_categories', 'Read Categories'), ('update_categories', 'Update Categories'), ('delete_categories', 'Delete Categories'),
                         ('create_suppliers', 'Create Suppliers'), ('read_suppliers', 'Read Suppliers'), ('update_suppliers', 'Update Suppliers'), ('delete_suppliers', 'Delete Suppliers'),
                         ('create_transactions', 'Create Transactions'), ('read_transactions', 'Read Transactions'), ('update_transactions', 'Update Transactions'), ('delete_transactions', 'Delete Transactions'), ('print_transactions', 'Print Transactions'),
@@ -113,7 +113,9 @@ class SeedData:
                         ('read_sales_per_item_report', 'Read Sales Per Item Report'),
                         ('read_daily_sales_report', 'Read Daily Sales Report'),
                         ('read_monthly_sales_report', 'Read Monthly Sales Report'),
-                        ('read_profit_and_loss_report', 'Read Profit and Loss Report');'''
+                        ('read_profit_and_loss_report', 'Read Profit and Loss Report'),
+                        ('backup_database', 'Backup Database'),
+                        ('restore_database', 'Restore Database');'''
 
         self.cursor.execute(sql_insert)
 
@@ -128,7 +130,7 @@ class SeedData:
 
         sql_insert = '''INSERT INTO role_permissions (role_id, permission_id) 
                         VALUES 
-                        (1, 'create_products'), (1, 'read_products'), (1, 'update_products'), (1, 'delete_products'), (1, 'import_products'),
+                        (1, 'create_products'), (1, 'read_products'), (1, 'update_products'), (1, 'delete_products'), (1, 'import_products'), (1, 'export_products'),
                         (1, 'create_categories'), (1, 'read_categories'), (1, 'update_categories'), (1, 'delete_categories'),
                         (1, 'create_suppliers'), (1, 'read_suppliers'), (1, 'update_suppliers'), (1, 'delete_suppliers'),
                         (1, 'create_transactions'), (1, 'read_transactions'), (1, 'update_transactions'), (1, 'delete_transactions'), (1, 'print_transactions'),
@@ -147,6 +149,8 @@ class SeedData:
                         (1, 'read_daily_sales_report'),
                         (1, 'read_monthly_sales_report'),
                         (1, 'read_profit_and_loss_report'),
+                        (1, 'backup_database'),
+                        (1, 'restore_database'),
                         (2, 'create_transactions'), (2, 'print_transactions');'''
         
         self.cursor.execute(sql_insert)
@@ -282,16 +286,18 @@ class SeedData:
 
     def create_detail_transactions_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS detail_transactions (
-            transaction_id VARCHAR(20) NOT NULL,
-            sku VARCHAR(20) NOT NULL,
-            unit VARCHAR(10) NOT NULL,
-            unit_value INT(10) NOT NULL,
-            qty INT(10) NOT NULL,
-            price INT(10) NOT NULL,
-            discount_rp INT(10) NOT NULL DEFAULT 0,
-            discount_rp_per_item INT(10) NOT NULL DEFAULT 0,
-            discount_pct INT(10) NOT NULL DEFAULT 0,
-            sub_total INT(10) NOT NULL);'''
+                    transaction_id VARCHAR(20) NOT NULL,
+                    sku VARCHAR(20) NOT NULL,
+                    unit VARCHAR(10) NOT NULL,
+                    unit_value INT(10) NOT NULL,
+                    qty INT(10) NOT NULL,
+                    price INT(10) NOT NULL,
+                    discount_rp INT(10) NOT NULL DEFAULT 0,
+                    discount_rp_per_item INT(10) NOT NULL DEFAULT 0,
+                    discount_pct INT(10) NOT NULL DEFAULT 0,
+                    sub_total INT(10) NOT NULL,
+                    net_profit INT(10) NOT NULL DEFAULT 0
+                );'''
         
         self.cursor.execute(sql)
         
@@ -300,26 +306,27 @@ class SeedData:
         self.cursor.execute('CREATE INDEX IF NOT EXISTS idx_detail_transactions_sku ON detail_transactions(sku);')
 
         if self.should_insert_data:
-            sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
+            sql_insert = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total, net_profit) 
                             VALUES 
-                            ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                            ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000),
-                            ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000);'''
+                            ('J202502010001', 'SKU001', 'PCS', 1, 10, 1000, 0, 0, 0, 10000, 0),
+                            ('J202502010001', 'SKU002', 'PCS', 1, 10, 1000, 0, 0, 0, 10000, 0),
+                            ('J202502010001', 'SKU003', 'PCS', 1, 10, 1000, 0, 0, 0, 10000, 0);'''
             
             self.cursor.execute(sql_insert)
         
 
         sql = '''CREATE TABLE IF NOT EXISTS pending_detail_transactions (
-            transaction_id VARCHAR(20) NOT NULL,
-            sku VARCHAR(20) NOT NULL,
-            unit VARCHAR(10) NOT NULL,
-            unit_value INT(10) NOT NULL,
-            qty INT(10) NOT NULL,   
-            price INT(10) NOT NULL,
-            discount_rp INT(10) NOT NULL DEFAULT 0,
-            discount_rp_per_item INT(10) NOT NULL DEFAULT 0,
-            discount_pct INT(10) NOT NULL DEFAULT 0,
-            sub_total INT(10) NOT NULL);'''
+                    transaction_id VARCHAR(20) NOT NULL,
+                    sku VARCHAR(20) NOT NULL,
+                    unit VARCHAR(10) NOT NULL,
+                    unit_value INT(10) NOT NULL,
+                    qty INT(10) NOT NULL,   
+                    price INT(10) NOT NULL,
+                    discount_rp INT(10) NOT NULL DEFAULT 0,
+                    discount_rp_per_item INT(10) NOT NULL DEFAULT 0,
+                    discount_pct INT(10) NOT NULL DEFAULT 0,
+                    sub_total INT(10) NOT NULL
+                );'''
         
         self.cursor.execute(sql)
         
@@ -342,33 +349,34 @@ class SeedData:
 
     def create_transactions_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS transactions (
-            transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
-            customer_id VARCHAR(20),
-            total_amount INT(10) NOT NULL,
-            payment_method VARCHAR(10) NOT NULL,
-            payment_rp INT(10) NOT NULL,
-            payment_change INT(10) NOT NULL,
-            discount_transaction_id INT(10),
-            discount_amount INT(10) NOT NULL DEFAULT 0,
-            tax_pct INT(10) NOT NULL DEFAULT 0,
-            tax_amount INT(10) NOT NULL DEFAULT 0,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            created_by INT NOT NULL,
-            payment_remarks TEXT DEFAULT '',
-            updated_at DATETIME NULL DEFAULT NULL,
-            updated_by INT NULL DEFAULT NULL
-        );'''
+                transaction_id VARCHAR(20) PRIMARY KEY NOT NULL,
+                customer_id VARCHAR(20),
+                total_amount INT(10) NOT NULL,
+                payment_method VARCHAR(10) NOT NULL,
+                payment_rp INT(10) NOT NULL,
+                payment_change INT(10) NOT NULL,
+                discount_transaction_id INT(10),
+                discount_amount INT(10) NOT NULL DEFAULT 0,
+                tax_pct INT(10) NOT NULL DEFAULT 0,
+                tax_amount INT(10) NOT NULL DEFAULT 0,
+                total_net_profit INT(10) NOT NULL DEFAULT 0,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_by INT NOT NULL,
+                payment_remarks TEXT DEFAULT '',
+                updated_at DATETIME NULL DEFAULT NULL,
+                updated_by INT NULL DEFAULT NULL
+            );'''
 
         self.cursor.execute(sql)
 
         if self.should_insert_data:
             sql_insert = '''INSERT INTO transactions (transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
-                                                        discount_transaction_id, discount_amount, tax_pct, tax_amount, 
+                                                        discount_transaction_id, discount_amount, tax_pct, tax_amount, total_net_profit,
                                                         created_at, created_by, payment_remarks, updated_at, updated_by) 
                             VALUES 
-                            ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks One', NULL, NULL),
-                            ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Two', NULL, NULL),
-                            ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Three', NULL, NULL);'''
+                            ('J202502010001', '1', 30000, 'Cash', 30000, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks One', NULL, NULL),
+                            ('AB202502010002', '1', 200000, 'Transfer', 200000, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Two', NULL, NULL),
+                            ('AB202502010003', '1', 300000, 'Transfer', 300000, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, 1, 'Remarks Three', NULL, NULL);'''
 
             self.cursor.execute(sql_insert)
 

@@ -98,24 +98,18 @@ class TransactionsListWindow(QtWidgets.QWidget):
 
     # Overrides
     # ==============
-    def show(self):
-        """Override show to refresh data when window is shown"""
-        super().show()
-        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
-            self.close()
-        
-        # Refresh the data
-        self.show_transactions_data()
-
-
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_TRANSACTIONS)
             self.close()
             return
         
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 
@@ -129,7 +123,17 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.language_manager.translate_table_headers(self.ui.detail_transactions_table, self.detail_transaction_headers)
 
 
+        # Refresh the data
+        self.show_transactions_data()
 
+
+    def show(self):
+        """Override show to refresh data when window is shown"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
+            self.close()
+            return
+        
         # Refresh the data
         self.show_transactions_data()
 
@@ -139,6 +143,7 @@ class TransactionsListWindow(QtWidgets.QWidget):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_TRANSACTIONS):
             self.close()
+            return
         
         # Refresh the data
         self.show_transactions_data()

@@ -340,6 +340,18 @@ QMessageBox#info-box {
          </size>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Version 1.0.0</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QComboBox" name="language_combobox">
            <property name="font">

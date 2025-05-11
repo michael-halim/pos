@@ -26,35 +26,41 @@ class ProfitAndLossReportRepository:
                         SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL
                         SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
                     ),
-                    monthly_profit AS (
+                    monthly_data AS (
                         SELECT 
                             CAST(strftime('%m', created_at) AS INTEGER) AS month_num,
-                            SUM(total_amount) AS profit
+                            SUM(total_amount) AS revenue,
+                            SUM(total_net_profit) AS profit
                         FROM transactions
                         WHERE strftime('%Y', created_at) = ?
                         GROUP BY month_num
                     ),
-                    profit_with_accumulation AS (
+                    data_with_accumulation AS (
                         SELECT 
                             am.month AS month,
-                            COALESCE(mp.profit, 0) AS monthly_profit,
-                            SUM(COALESCE(mp.profit, 0)) OVER (ORDER BY am.month) AS accumulated_profit
+                            COALESCE(md.revenue, 0) AS monthly_revenue,
+                            COALESCE(md.profit, 0) AS monthly_profit,
+                            SUM(COALESCE(md.revenue, 0)) OVER (ORDER BY am.month) AS accumulated_revenue,
+                            SUM(COALESCE(md.profit, 0)) OVER (ORDER BY am.month) AS accumulated_profit
                         FROM all_months am
-                        LEFT JOIN monthly_profit mp ON am.month = mp.month_num
+                        LEFT JOIN monthly_data md ON am.month = md.month_num
                     )
 
                     SELECT 
                         month,
+                        monthly_revenue AS revenue,
+                        accumulated_revenue,
                         monthly_profit AS profit,
                         accumulated_profit
-                    FROM profit_with_accumulation
+                    FROM data_with_accumulation
                     ORDER BY month;'''
                                 
             profit_and_loss_result = self.cursor.execute(sql, (year,))
             profit_and_loss_list = [
                 ProfitAndLossReportModel(
-                   period=row[0], profit=row[1],
-                   accumulated_profit=row[2]
+                   period=row[0], revenue=row[1],
+                   accumulated_revenue=row[2], profit=row[3],
+                   accumulated_profit=row[4]
                 )
                 for row in profit_and_loss_result
             ]

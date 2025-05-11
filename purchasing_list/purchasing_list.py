@@ -94,22 +94,15 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
     # Overrides
     # ===============
-    def show(self):
-        super().show()
-        if not self.permission_manager.has_permission(PERM_R_PURCHASING):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
-            self.close()
-            return
-
-        # Refresh the data
-        self.show_purchasing_data() 
-
-
     def showEvent(self, event):
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_PURCHASING):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
             return
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
@@ -129,10 +122,20 @@ class PurchasingListWindow(QtWidgets.QWidget):
         self.show_purchasing_data()
 
 
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_PURCHASING):
+            self.close()
+            return
+
+        # Refresh the data
+        self.show_purchasing_data() 
+
+
     def showMaximized(self):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_PURCHASING):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PURCHASING)
+            self.close()
             return
 
         # Refresh the data

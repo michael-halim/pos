@@ -161,6 +161,11 @@ class PurchasingWindow(QtWidgets.QWidget):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_C_PURCHASING):
             self.close()
+            return
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
 
         # Translate widget text and update table headers

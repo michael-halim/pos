@@ -78,23 +78,17 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
 
     # Overrides
     # ==============
-    def show(self):
-        """Override show to refresh data when window is shown"""
-        super().show()
-        if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_MONTHLY_SALES_REPORT)
-            self.close()
-            return
-        
-        # Refresh the data
-        self.show_monthly_sales_data()
-
-
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_MONTHLY_SALES_REPORT)
             self.close()
+            return
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
@@ -109,11 +103,23 @@ class MonthlySalesReportWindow(QtWidgets.QWidget):
         self.show_monthly_sales_data()
 
 
+    def show(self):
+        """Override show to refresh data when window is shown"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
+            self.close()
+            return
+        
+        # Refresh the data
+        self.show_monthly_sales_data()
+
+
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_MONTHLY_SALES_REPORT):
             self.close()
+            return
         
         # Refresh the data
         self.show_monthly_sales_data()

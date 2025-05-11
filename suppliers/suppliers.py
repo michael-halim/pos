@@ -81,6 +81,10 @@ class SuppliersWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         # Translate the UI
         self.language_manager.translate_widget_text(self.ui)
    
@@ -98,6 +102,7 @@ class SuppliersWindow(QtWidgets.QWidget):
         """Override show to ensure data is refreshed"""
         super().show()
         if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
+            self.close()
             return
 
         # Refresh the data
@@ -108,6 +113,7 @@ class SuppliersWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_SUPPLIERS):
+            self.close()
             return
 
         # Refresh the data

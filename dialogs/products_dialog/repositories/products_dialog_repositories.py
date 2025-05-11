@@ -10,7 +10,7 @@ class ProductsDialogRepository:
         self.cursor = self.db.cursor()
         
         
-    def get_products(self, search_text: str = None):
+    def get_products(self, search_text: str = None, limit: int = 100):
         try:
             products_result = []
             if search_text:
@@ -22,12 +22,24 @@ class ProductsDialogRepository:
                 search_text = f'%{search_text}%'
                 products_result = self.cursor.execute(sql, (search_text, search_text, search_text))
 
+            elif limit:
+                sql = '''SELECT p.sku, p.product_name, p.price, p.stock, p.unit, p.created_at 
+                            FROM products p 
+                            LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit
+                            ORDER BY p.sku
+                            LIMIT ?'''
+
+                products_result = self.cursor.execute(sql, (limit,))
+
             else:
                 sql = '''SELECT p.sku, p.product_name, p.price, p.stock, p.unit, p.created_at 
                             FROM products p 
-                            LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit '''
+                            LEFT JOIN units u ON p.sku = u.sku and p.unit = u.unit
+                            ORDER BY p.sku
+                            LIMIT 100'''
                 
                 products_result = self.cursor.execute(sql)
+
 
             products = [
                 ProductsDialogModel(sku=p[0], product_name=p[1], price=p[2], 

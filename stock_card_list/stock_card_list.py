@@ -92,6 +92,10 @@ class StockCardListWindow(QtWidgets.QWidget):
             self.close()
             return
 
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 
@@ -113,6 +117,7 @@ class StockCardListWindow(QtWidgets.QWidget):
 
         if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
             self.close()
+            return
 
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)
@@ -123,6 +128,7 @@ class StockCardListWindow(QtWidgets.QWidget):
 
         if not self.permission_manager.has_permission(PERM_R_STOCK_CARD):
             self.close()
+            return
 
         self.show_products_data()
         self.ui.stock_card_table.setRowCount(0)

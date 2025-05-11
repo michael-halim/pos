@@ -110,6 +110,10 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         self.language_manager.translate_widget_text(self)   
 
         self.purchasing_history_headers = ['Date', 'Supplier Name', 'Qty', 'Unit', 'Price', 'Disc (%)', 'Disc (Rp)', 'Subtotal']

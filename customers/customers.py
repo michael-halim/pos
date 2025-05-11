@@ -81,10 +81,15 @@ class CustomersWindow(QtWidgets.QWidget):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):    
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
             self.close()
             return
         
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 
@@ -102,6 +107,7 @@ class CustomersWindow(QtWidgets.QWidget):
         """Override show to ensure data is refreshed"""
         super().show()
         if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            self.close()
             return
         
         # Refresh the data
@@ -112,6 +118,7 @@ class CustomersWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            self.close()
             return
         
         # Refresh the data

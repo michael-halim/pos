@@ -10,11 +10,21 @@ import sqlite3
 
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
+from generals.constants import (
+    PERM_B_DATABASE, PERM_R_DATABASE,
+) 
+from generals.messages import (
+    ERR_PERM_B_DATABASE, ERR_PERM_R_DATABASE,
+    PERM_DENIED
+)
+from generals.permission_manager import PermissionManager
 
 
 class BackupRestoreDatabase(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
 
         self.backup_dir = "backups"
         self.db_path = resource_path('db/pos.db')
@@ -24,8 +34,36 @@ class BackupRestoreDatabase(QtWidgets.QWidget):
             os.makedirs(self.backup_dir)
 
 
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_DATABASE) or not self.permission_manager.has_permission(PERM_B_DATABASE):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_DATABASE + ' or ' + ERR_PERM_B_DATABASE)
+            self.close()
+            return
+    
+
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_DATABASE) or not self.permission_manager.has_permission(PERM_B_DATABASE):
+            self.close()
+            return
+        
+
+    def showMaximized(self):
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_DATABASE) or not self.permission_manager.has_permission(PERM_B_DATABASE):
+            self.close()
+            return
+
+
     def export_database(self):
         """Export/backup the current database"""
+        if not self.permission_manager.has_permission(PERM_B_DATABASE):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_B_DATABASE)
+            return
+
         try:
             # Generate backup filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -50,6 +88,10 @@ class BackupRestoreDatabase(QtWidgets.QWidget):
 
     def import_database(self):
         """Import/restore database from backup"""
+        if not self.permission_manager.has_permission(PERM_R_DATABASE):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_DATABASE)
+            return
+
         try:
             # Show file dialog to select backup file
             file_path, _ = QtWidgets.QFileDialog.getOpenFileName(

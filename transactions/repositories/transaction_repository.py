@@ -26,7 +26,18 @@ class TransactionRepository:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         self.permission_manager = PermissionManager()
+    
 
+    def get_cost_price_by_sku(self, sku: str) -> int:
+        sql = 'SELECT cost_price FROM products WHERE sku = ? LIMIT 1'
+        self.cursor.execute(sql, (sku,))
+        cost_price = self.cursor.fetchone()[0]
+
+        if cost_price is None:
+            cost_price = 0
+
+        return cost_price
+    
 
     def submit_transaction(self, transaction: TransactionModel, detail_transactions: List[DetailTransactionModel]) -> ResponseMessage:
         if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
@@ -53,9 +64,11 @@ class TransactionRepository:
 
             # Insert all detail transactions
             sql = '''INSERT INTO detail_transactions 
-                    (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+                    (transaction_id, sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, sub_total, net_profit) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
             
+            cache_cost_price = {}
+            total_net_profit = 0
             detail_data = []
             for detail in detail_transactions:  
                 sku = detail.sku
@@ -63,10 +76,18 @@ class TransactionRepository:
                 unit_value = detail.unit_value
                 unit = detail.unit
                 stock_affected: int = int(qty) * int(unit_value)
+
+                # Get Cost Price
+                if sku not in cache_cost_price:
+                    cache_cost_price[sku] = self.get_cost_price_by_sku(sku)
+
+                net_profit = int(detail.subtotal) - ( int(cache_cost_price[sku]) * int(qty) )
+                total_net_profit += net_profit
+
                 # Insert detail transaction
                 self.cursor.execute(sql, (detail.transaction_id, sku, unit, unit_value, 
                                           qty, detail.price, detail.discount_rp, detail.discount_rp_per_item, 
-                                          detail.discount_pct, detail.subtotal))
+                                          detail.discount_pct, detail.subtotal, net_profit))
                 
                 detail_data.append({
                     'transaction_id': detail.transaction_id,
@@ -78,7 +99,8 @@ class TransactionRepository:
                     'discount_rp': detail.discount_rp,
                     'discount_rp_per_item': detail.discount_rp_per_item,
                     'discount_pct': detail.discount_pct,
-                    'subtotal': detail.subtotal
+                    'subtotal': detail.subtotal,
+                    'net_profit': net_profit
                 })
                 
                 # Update product stock
@@ -99,6 +121,11 @@ class TransactionRepository:
                 
                 self.cursor.execute(stock_card_sql, (sku, transaction_id, None, stock_affected, updated_stock, remarks))
             
+
+            # Update Net Profit of Transaction
+            update_net_profit_sql = 'UPDATE transactions SET total_net_profit = ? WHERE transaction_id = ?'
+            self.cursor.execute(update_net_profit_sql, (total_net_profit, transaction_id))
+
 
             # Insert Customer Points
             customer_id = transaction.customer_id
@@ -168,14 +195,15 @@ class TransactionRepository:
 
             # Get old transaction data
             sql = '''SELECT transaction_id, customer_id, total_amount, payment_method, payment_rp, payment_change, 
-                            discount_amount, tax_pct, tax_amount, payment_remarks 
+                            discount_amount, tax_pct, tax_amount, payment_remarks, total_net_profit
                     FROM transactions 
                     WHERE transaction_id = ?
                     LIMIT 1'''
+            
             self.cursor.execute(sql, (transaction.transaction_id,))
             transactions_result = self.cursor.fetchone()
 
-            sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, subtotal 
+            sql = '''SELECT sku, unit, unit_value, qty, price, discount_rp, discount_rp_per_item, discount_pct, subtotal, net_profit
                     FROM detail_transactions 
                     WHERE transaction_id = ?'''
             self.cursor.execute(sql, (transaction.transaction_id,))
@@ -192,7 +220,8 @@ class TransactionRepository:
                     'discount_rp': detail[5],
                     'discount_rp_per_item': detail[6],
                     'discount_pct': detail[7],
-                    'subtotal': detail[8]
+                    'subtotal': detail[8],
+                    'net_profit': detail[9]
                 })
 
             old_total_amount = transactions_result[2]
@@ -207,7 +236,8 @@ class TransactionRepository:
                 'tax_pct': transactions_result[7],
                 'tax_amount': transactions_result[8],
                 'payment_remarks': transactions_result[9],
-                'detail_transactions': old_data_detail_transactions
+                'total_net_profit': transactions_result[10],
+                'detail_transactions': old_data_detail_transactions,
             }
 
             # Update Customer
@@ -234,12 +264,13 @@ class TransactionRepository:
                         updated_at = ?, updated_by = ?
                     WHERE transaction_id = ?'''
 
+            updated_transaction_id = transaction.transaction_id
             self.cursor.execute(sql, (transaction.customer_id, transaction.total_amount, transaction.payment_method, transaction.payment_amount, transaction.payment_change, 
                                       transaction.total_discount, transaction.tax_pct, transaction.tax_amount, transaction.payment_remarks, today, 
-                                      self.permission_manager.get_user_id(), transaction.transaction_id))
+                                      self.permission_manager.get_user_id(), updated_transaction_id))
 
             new_data = {
-                'transaction_id': transaction.transaction_id,
+                'transaction_id': updated_transaction_id,
                 'customer_id': transaction.customer_id,
                 'total_amount': transaction.total_amount,
                 'payment_method': transaction.payment_method,
@@ -252,6 +283,8 @@ class TransactionRepository:
             }
 
             updated_data = []
+            cache_cost_price = {}
+            total_net_profit = 0
 
             # Update updated detail transactions
             for updated_detail in updated_detail_transactions:
@@ -309,9 +342,17 @@ class TransactionRepository:
                     
                     self.cursor.execute(stock_card_sql, (updated_detail.sku, transaction.transaction_id, None, stock_affected, updated_stock, remarks)) 
 
+                
+                # Get Cost Price
+                if updated_detail.sku not in cache_cost_price:
+                    cache_cost_price[updated_detail.sku] = self.get_cost_price_by_sku(updated_detail.sku)
+
+                # Calculate Net Profit
+                net_profit = int(updated_detail.subtotal) - ( int(cache_cost_price[updated_detail.sku]) * int(updated_detail.qty) )
+                total_net_profit += net_profit
 
                 sql = '''UPDATE detail_transactions 
-                        SET qty = ?, price = ?, discount_rp = ?, discount_rp_per_item = ?, discount_pct = ?, sub_total = ?
+                        SET qty = ?, price = ?, discount_rp = ?, discount_rp_per_item = ?, discount_pct = ?, sub_total = ?, net_profit = ?
                          WHERE transaction_id = ? AND sku = ? AND unit = ?'''
                 
                 updated_data.append({
@@ -324,11 +365,12 @@ class TransactionRepository:
                     'transaction_id': updated_detail.transaction_id,
                     'sku': updated_detail.sku,
                     'unit': updated_detail.unit,
+                    'net_profit': net_profit
                 })
 
                 self.cursor.execute(sql, (updated_detail.qty, updated_detail.price, updated_detail.discount_rp, 
                                         updated_detail.discount_rp_per_item, updated_detail.discount_pct, updated_detail.subtotal, 
-                                        updated_detail.transaction_id, updated_detail.sku, updated_detail.unit))
+                                        net_profit, updated_detail.transaction_id, updated_detail.sku, updated_detail.unit))
 
 
             deleted_data = []
@@ -376,12 +418,20 @@ class TransactionRepository:
             for added_detail in added_detail_transactions:
                 sql = '''INSERT INTO detail_transactions (transaction_id, sku, unit, unit_value, qty, 
                                                             price, discount_rp, discount_rp_per_item, 
-                                                            discount_pct, sub_total) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+                                                            discount_pct, sub_total, net_profit) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+
+                # Get Cost Price
+                if added_detail.sku not in cache_cost_price:
+                    cache_cost_price[added_detail.sku] = self.get_cost_price_by_sku(added_detail.sku)
+
+                # Calculate Net Profit
+                net_profit = int(added_detail.subtotal) - ( int(cache_cost_price[added_detail.sku]) * int(added_detail.qty) )
+                total_net_profit += net_profit
 
                 self.cursor.execute(sql, (added_detail.transaction_id, added_detail.sku, added_detail.unit, added_detail.unit_value, 
                                           added_detail.qty, added_detail.price, added_detail.discount_rp, added_detail.discount_rp_per_item, 
-                                          added_detail.discount_pct, added_detail.subtotal))
+                                          added_detail.discount_pct, added_detail.subtotal, net_profit))
 
                 # Update product stock
                 stock_affected: int = int(added_detail.qty) * int(added_detail.unit_value)
@@ -413,6 +463,10 @@ class TransactionRepository:
 
                 self.cursor.execute(stock_card_sql, (added_detail.sku, transaction.transaction_id, None, stock_affected, updated_stock, remarks))
 
+
+            # Update Net Profit of Transaction
+            update_net_profit_sql = 'UPDATE transactions SET total_net_profit = ? WHERE transaction_id = ?'
+            self.cursor.execute(update_net_profit_sql, (total_net_profit, updated_transaction_id))
 
             # Insert Log
             new_data['updated_detail_transactions'] = updated_data

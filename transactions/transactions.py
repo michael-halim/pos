@@ -40,7 +40,7 @@ class TransactionsWindow(QtWidgets.QWidget):
         
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_C_TRANSACTIONS)
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_TRANSACTIONS)
             self.close()
             return
 
@@ -192,6 +192,11 @@ class TransactionsWindow(QtWidgets.QWidget):
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
             self.close()
+            return
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)

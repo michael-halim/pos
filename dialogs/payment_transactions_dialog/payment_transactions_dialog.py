@@ -7,6 +7,7 @@ from generals.build import resource_path
 
 from dialogs.payment_transactions_dialog.translations import PAYMENT_TRANSACTIONS_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
+from generals.permission_manager import PermissionManager
 
 
 class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
@@ -14,6 +15,8 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
 
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/payment_transactions_dialog.ui'), self)
@@ -37,6 +40,10 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         self.language_manager.translate_widget_text(self)
 

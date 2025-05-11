@@ -72,6 +72,10 @@ class CustomersDialogWindow(QtWidgets.QWidget):
             self.close()
             return
         
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 

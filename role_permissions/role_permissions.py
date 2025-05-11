@@ -87,6 +87,10 @@ class RolePermissionsWindow(QtWidgets.QWidget):
             self.close()
             return
 
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 
@@ -107,7 +111,7 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         """Override show to ensure data is refreshed"""
         super().show()
         if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
+            self.close()
             return
 
         # Refresh the data
@@ -118,7 +122,7 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PERMISSIONS)
+            self.close()
             return
 
         # Refresh the data
@@ -200,9 +204,6 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         added_data = current_permissions - past_permissions_result.data
         deleted_data = past_permissions_result.data - current_permissions
 
-        print('added_data: ', added_data)
-        print('deleted_data: ', deleted_data)
-        print('roles_form_data: ', roles_form_data)
         result = self.role_permissions_service.update_role_permissions(roles_form_data, added_data, deleted_data)
         if result.success:
             POSMessageBox.info(self, title=OK, message=result.message)

@@ -340,8 +340,8 @@ QMessageBox#info-box {
       <item row="0" column="0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
            <widget class="QLabel" name="filter_products_label">
             <property name="minimumSize">
              <size>
@@ -359,7 +359,7 @@ QMessageBox#info-box {
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item>
            <widget class="QLineEdit" name="filter_products_input">
             <property name="minimumSize">
              <size>
@@ -389,6 +389,51 @@ QLineEdit:focus {
             </property>
             <property name="clearButtonEnabled">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="find_products_button">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+            </property>
+            <property name="text">
+             <string>Find</string>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../assets/research.png</normaloff>../assets/research.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>14</width>
+              <height>14</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -580,6 +625,51 @@ QLineEdit:focus {
           <item>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
+             <widget class="QPushButton" name="refresh_products_button">
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+              </property>
+              <property name="text">
+               <string>Refresh</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../assets/refresh.png</normaloff>../assets/refresh.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>16</width>
+                <height>16</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="add_products_button">
               <property name="minimumSize">
                <size>
@@ -660,6 +750,51 @@ QPushButton:disabled {
               <property name="icon">
                <iconset>
                 <normaloff>../assets/file-import.png</normaloff>../assets/file-import.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>14</width>
+                <height>14</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="export_products_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+              </property>
+              <property name="text">
+               <string>Export Excel</string>
+              </property>
+              <property name="icon">
+               <iconset>
+                <normaloff>../assets/file.png</normaloff>../assets/file.png</iconset>
               </property>
               <property name="iconSize">
                <size>

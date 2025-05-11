@@ -31,6 +31,16 @@ class EditStockOpnameDialogWindow(QtWidgets.QWidget):
         self.language_manager.translate_widget_text(self)   
 
 
+    # Overrides
+    # ============
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+
     def edit_stock_opname(self):
         stock_opname_id = self.ui.stock_opname_id_input.text().strip()
         final_stock = self.ui.final_stock_stock_opname_input.text().strip()

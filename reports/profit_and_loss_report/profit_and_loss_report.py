@@ -71,37 +71,42 @@ class ProfitAndLossReportWindow(QtWidgets.QWidget):
 
     # Overrides
     # ==============
-    def show(self):
-        """Override show to refresh data when window is shown"""
-        super().show()
-        if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
-            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_PROFIT_AND_LOSS_REPORT)
-            self.close()
-            return
-        
-
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
         if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PROFIT_AND_LOSS_REPORT)
             self.close()
+            return
 
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 
-        self.profit_and_loss_headers = ['Period', 'Profit/Loss Period', 'Total Profit/Loss']
+        self.profit_and_loss_headers = ['Period', 'Revenue', 'Accumulated Revenue', 'Profit', 'Accumulated Profit']
         if self.language_manager.get_current_language() == 'id':
-            self.profit_and_loss_headers = ['Periode', 'Periode Profit/Loss', 'Total Profit/Loss']
+            self.profit_and_loss_headers = ['Periode', 'Pendapatan', 'Total Pendapatan', 'Keuntungan', 'Total Keuntungan']
 
         self.language_manager.translate_table_headers(self.ui.profit_and_loss_table, self.profit_and_loss_headers)
 
+
+    def show(self):
+        """Override show to refresh data when window is shown"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
+            self.close()
+            return
+        
 
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
         if not self.permission_manager.has_permission(PERM_R_PROFIT_AND_LOSS_REPORT):
             self.close()
+            return
         
 
     # Shows
@@ -144,6 +149,8 @@ class ProfitAndLossReportWindow(QtWidgets.QWidget):
 
             table_items =  [ 
                 QtWidgets.QTableWidgetItem(month_name),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(str(pnl_data.revenue)))),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(str(pnl_data.accumulated_revenue)))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(str(pnl_data.profit)))),
                 QtWidgets.QTableWidgetItem(add_prefix(format_number(str(pnl_data.accumulated_profit)))),
             ]
