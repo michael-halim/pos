@@ -1,0 +1,285 @@
+from connect_db import DatabaseConnection
+import json
+from datetime import datetime
+
+from categories.models.categories_models import CategoriesTableModel, ProcuctsTableModel
+
+from generals.permission_manager import PermissionManager
+from response.response_message import ResponseMessage
+from generals.constants import PERM_R_CATEGORIES, PERM_C_CATEGORIES, PERM_U_CATEGORIES, PERM_D_CATEGORIES
+from generals.messages import ERR_PERM_R_CATEGORIES, ERR_PERM_C_CATEGORIES, ERR_PERM_U_CATEGORIES, ERR_PERM_D_CATEGORIES
+
+
+class CategoriesRepository:
+    def __init__(self):
+        self.db = DatabaseConnection().get_connection()
+        self.cursor = self.db.cursor()
+        self.permission_manager = PermissionManager()
+
+
+    def get_categories(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
+        try:
+            categories_result = []
+            if search_text:
+                sql = '''SELECT category_id, category_name 
+                            FROM categories
+                            WHERE category_id LIKE ? OR category_name LIKE ?'''
+                
+                search_text = f'%{search_text}%'
+                categories_result = self.cursor.execute(sql, (search_text, search_text))
+
+            else:
+                sql = '''SELECT category_id, category_name FROM categories'''
+                categories_result = self.cursor.execute(sql)
+
+            categories = [
+                CategoriesTableModel(category_id=r[0], category_name=r[1]) 
+                for r in categories_result
+            ]
+
+            return ResponseMessage.ok(
+                message="Categories fetched successfully!",
+                data=categories
+            )
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+
+
+    def get_category_by_id(self, category_id: int):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
+        try: 
+            sql = '''SELECT category_id, category_name
+                    FROM categories
+                    WHERE category_id = ?'''
+            
+            category_result = self.cursor.execute(sql, (category_id,))
+            category = category_result.fetchone()
+            category = CategoriesTableModel(category_id=category[0], category_name=category[1])
+
+            return ResponseMessage.ok(
+                message="Category fetched successfully!",
+                data=category
+            )
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+
+
+    def get_products(self, search_text: str = None):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
+        try:
+            products_result = []
+            if search_text:
+                sql = '''SELECT sku, product_name, price, stock, unit
+                        FROM products
+                        WHERE sku LIKE ? OR product_name LIKE ?'''
+                
+                search_text = f'%{search_text}%'
+                products_result = self.cursor.execute(sql, (search_text, search_text))
+
+            else:
+                sql = '''SELECT sku, product_name, price, stock, unit
+                        FROM products
+                        LIMIT 100'''
+
+                products_result = self.cursor.execute(sql)
+
+
+            products = [
+                ProcuctsTableModel(sku=r[0], product_name=r[1], price=r[2], stock=r[3], 
+                                   unit=r[4]) 
+                for r in products_result
+            ]
+
+            return ResponseMessage.ok(
+                message="Products fetched successfully!",
+                data=products
+            )
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+        
+
+    def get_selected_products_by_category_id(self, category_id: int):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_R_CATEGORIES)
+        
+        try: 
+            sql = '''SELECT sku
+                    FROM product_categories_detail
+                    WHERE category_id = ?'''
+            
+            products_result = self.cursor.execute(sql, (category_id,))
+
+            products = set(
+                r[0] for r in products_result
+            )
+            
+            return ResponseMessage.ok(
+                message="Products selected fetched successfully!",
+                data=products
+            )
+        
+        except Exception as e:
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+
+
+    def submit_category(self, data: CategoriesTableModel, products: set[str]):
+        if not self.permission_manager.has_permission(PERM_C_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_C_CATEGORIES)
+        
+        try:
+            # Start transaction
+            self.cursor.execute('BEGIN TRANSACTION')
+
+            sql = '''INSERT INTO categories (category_name) VALUES (?)'''
+            
+            self.cursor.execute(sql, (data.category_name,))
+            
+            category_id = self.cursor.lastrowid
+
+            sql = '''INSERT INTO product_categories_detail (category_id, sku) VALUES (?, ?)'''
+            self.cursor.executemany(sql, [(category_id, product) for product in products])
+            
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'category_id': category_id,
+                'category_name': data.category_name,
+                'products': list(products)
+            }
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Category {data.category_name} created', f'Category {data.category_name} created successfully!', 'C', 
+                                        None, json.dumps(new_data), today, self.permission_manager.get_user_id()))
+            
+
+            # Commit transaction
+            self.db.commit()
+
+            return ResponseMessage.ok(message="Category submitted successfully!")
+        
+        except Exception as e:
+            # Rollback transaction
+            self.db.rollback()
+            return ResponseMessage.fail(message=f"Error: {str(e)}")
+        
+    
+    def update_category(self, category_form_data: CategoriesTableModel, added_products: set[str], deleted_products: set[str]):
+        if not self.permission_manager.has_permission(PERM_U_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_U_CATEGORIES)
+        
+        try:
+            # Start transaction
+            self.cursor.execute('BEGIN TRANSACTION')
+
+            category_id = category_form_data.category_id
+            # Get old category data
+            sql = '''SELECT c.category_id, c.category_name, pc.sku
+                    FROM categories c
+                    LEFT JOIN product_categories_detail pc ON c.category_id = pc.category_id
+                    WHERE c.category_id = ?'''
+            self.cursor.execute(sql, (category_id,))
+            result = self.cursor.fetchall()
+            old_data = {
+                'category_id': result[0][0],
+                'category_name': result[0][1],
+                'products': [r[2] for r in result]
+            }
+
+            # Update role
+            sql = '''UPDATE categories SET category_name = ? WHERE category_id = ?'''
+            self.cursor.execute(sql, (category_form_data.category_name, category_id))
+
+            # Delete product categories detail
+            for product_id in deleted_products:   
+                sql = '''DELETE FROM product_categories_detail WHERE category_id = ? AND sku = ?'''
+                self.cursor.execute(sql, (category_id, product_id))
+
+            # Insert new product categories detail
+            for product_id in added_products:
+                sql = '''INSERT INTO product_categories_detail (category_id, sku) VALUES (?, ?)'''
+                self.cursor.execute(sql, (category_id, product_id))      
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            new_data = {
+                'category_id': category_id,
+                'category_name': category_form_data.category_name,
+                'added_products': list(added_products),
+                'deleted_products': list(deleted_products)
+            }
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Category {category_form_data.category_name} updated', f'Category {category_form_data.category_name} updated successfully!', 'U', 
+                                        json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
+
+
+            # If everything successful, commit the transaction  
+            self.db.commit()
+
+            return ResponseMessage.ok(message="Category updated successfully!")
+
+        except Exception as e:
+            # If any error occurs, rollback all changes
+            self.db.rollback()
+            return ResponseMessage.fail(message=f"Failed to update category: {str(e)}")
+        
+
+    def delete_category_by_id(self, category_id: int):
+        if not self.permission_manager.has_permission(PERM_D_CATEGORIES):
+            return ResponseMessage.fail(message=ERR_PERM_D_CATEGORIES)
+        
+        try:
+            # Start transaction
+            self.cursor.execute('BEGIN TRANSACTION')
+
+            # Get old category data
+            sql = '''SELECT c.category_id, c.category_name, pc.sku
+                    FROM categories c
+                    LEFT JOIN product_categories_detail pc ON c.category_id = pc.category_id
+                    WHERE c.category_id = ?'''
+            self.cursor.execute(sql, (category_id,))
+            result = self.cursor.fetchall()
+            old_data = {
+                'category_id': result[0][0],
+                'category_name': result[0][1],
+                'products': [r[2] for r in result]
+            }
+
+            # Delete role permissions
+            sql = '''DELETE FROM categories WHERE category_id = ?'''
+            self.cursor.execute(sql, (category_id,))
+
+            # Delete role
+            sql = '''DELETE FROM product_categories_detail WHERE category_id = ?'''
+            self.cursor.execute(sql, (category_id,))
+
+            # Insert Log
+            today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            sql = '''INSERT INTO logs (log_name, log_description, log_type, old_data, 
+                                        new_data, created_at, created_by) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            self.cursor.execute(sql, (f'Category {result[0][1]} deleted', f'Category {result[0][1]} deleted successfully!', 'D', 
+                                        json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
+
+
+            # If everything successful, commit the transaction  
+            self.db.commit()
+
+            return ResponseMessage.ok(message="Category deleted successfully!")
+
+        except Exception as e:
+            # If any error occurs, rollback all changes
+            self.db.rollback()
+            return ResponseMessage.fail(message=f"Failed to delete category: {str(e)}")

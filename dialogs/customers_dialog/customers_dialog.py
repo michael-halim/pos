@@ -1,0 +1,209 @@
+from PyQt6 import QtWidgets, uic, QtCore
+
+from dialogs.customers_dialog.services.customers_dialog_services import CustomersDialogService
+from dialogs.customers_dialog.models.customers_dialog_models import CustomersDialogModel
+
+from helper import format_number, add_prefix
+from generals.fonts import POSFonts
+from generals.build import resource_path
+from generals.permission_manager import PermissionManager
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
+    PERM_R_CUSTOMERS
+) 
+from generals.messages import ERR, ERR_PERM_R_CUSTOMERS, PERM_DENIED
+from dialogs.customers_dialog.translations import CUSTOMERS_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+
+
+class CustomersDialogWindow(QtWidgets.QWidget):
+    customer_selected = QtCore.pyqtSignal(dict)
+
+    def __init__(self):
+        super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+
+        self.ui = uic.loadUi(resource_path('ui/customers_dialog.ui'), self)
+
+        # Init Services
+        self.customer_dialog_service = CustomersDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CUSTOMERS_DIALOG_TRANSLATIONS)
+        
+        # Init Table
+        self.customers_dialog_table = self.ui.customers_dialog_table
+
+        # Connect search input to filter function
+        self.ui.filter_customers_dialog_input.textChanged.connect(self.show_customers_data)
+
+        # Connect button to function
+        self.ui.close_customer_dialog_button.clicked.connect(lambda: self.close())
+        self.ui.add_customers_dialog_button.clicked.connect(self.send_customer_data)
+
+        # Set selection behavior to select entire rows
+        self.customers_dialog_table.setSelectionBehavior(SELECT_ROWS)
+        self.customers_dialog_table.setSelectionMode(SINGLE_SELECTION)
+
+        # Set edit triggers to no edit
+        self.customers_dialog_table.setEditTriggers(NO_EDIT_TRIGGERS)
+
+        # Set table properties
+        self.customers_dialog_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.customers_dialog_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+
+        # Show data
+        self.show_customers_data()
+
+
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
+            self.close()
+            return
+        
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.customers_dialog_table_headers = ['Id', 'Name', 'Phone', 'Points', 'Tx (#)', 'Tx (Rp.)']
+        if self.language_manager.get_current_language() == 'id':
+            self.customers_dialog_table_headers = ['Id', 'Nama', 'Telepon', 'Poin', 'Transaksi (#)', 'Transaksi (Rp.)']
+
+        self.language_manager.translate_table_headers(self.customers_dialog_table, self.customers_dialog_table_headers)
+
+        # Refresh the data
+        self.show_customers_data()
+
+
+    def show(self):
+        """Override show to ensure data is refreshed"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+        # Refresh the data
+        self.show_customers_data()
+
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            return
+        # Refresh the data
+        self.show_customers_data()
+
+
+    # Shows
+    # ===============
+    def show_customers_data(self):
+        if not self.permission_manager.has_permission(PERM_R_CUSTOMERS):
+            POSMessageBox.warning(self, title=PERM_DENIED, message=ERR_PERM_R_CUSTOMERS)
+            self.close()
+            return
+
+        self.customers_dialog_table.setSortingEnabled(False)
+
+        search_text = self.ui.filter_customers_dialog_input.text().strip()
+        search_text = search_text.lower() if search_text else None
+
+        customers_result = self.customer_dialog_service.get_customers(search_text)
+
+        if not customers_result.success:
+            POSMessageBox.error(self, title=ERR, message=customers_result.message)
+            return
+
+        self.set_customers_table_data(customers_result.data)
+
+
+    # Setters
+    # ===============
+    def set_customers_table_data(self, data: list[CustomersDialogModel]):
+        # Clear the table
+        self.customers_dialog_table.setRowCount(0)
+
+        for customer in data:
+            current_row = self.customers_dialog_table.rowCount()
+            self.customers_dialog_table.insertRow(current_row)
+
+            table_items =  [ 
+                QtWidgets.QTableWidgetItem(str(customer.customer_id)),
+                QtWidgets.QTableWidgetItem(customer.customer_name),
+                QtWidgets.QTableWidgetItem(customer.customer_phone),
+                QtWidgets.QTableWidgetItem(format_number(customer.customer_points)),
+                QtWidgets.QTableWidgetItem(format_number(customer.number_of_transactions)),
+                QtWidgets.QTableWidgetItem(add_prefix(format_number(customer.transaction_value))),
+            ]
+            
+            for col, item in enumerate(table_items):
+                item.setFont(POSFonts.get_font(size=12))
+                self.customers_dialog_table.setItem(current_row, col, item)
+
+        self.customers_dialog_table.setSortingEnabled(True)
+
+
+    def send_customer_data(self):
+        selected_rows = self.customers_dialog_table.selectedItems()
+        if selected_rows:
+            row = selected_rows[0].row()
+            
+            # Create dictionary with product details
+            customer_data = {
+                'customer_id': self.customers_dialog_table.item(row, 0).text(),
+            }
+            
+            # Emit signal with product data
+            self.customer_selected.emit(customer_data)
+            self.close()
+
+
+    def set_filter(self, search_text: str):
+        """Pre-fill the search filter"""
+        self.ui.filter_customers_dialog_input.setText(search_text)
+        
+        # Optionally trigger the filter
+        self.filter_customers()
+
+
+    def filter_customers(self):
+        search_text = self.ui.filter_customers_dialog_input.text().lower()
+        for row in range(self.customers_dialog_table.rowCount()):
+            match_found = False
+            for col in range(self.customers_dialog_table.columnCount()):
+                item = self.customers_dialog_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match_found = True
+                    break
+            self.customers_dialog_table.setRowHidden(row, not match_found)
+
+
+    # Events Listeners
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.customers_dialog_table.rowCount() > 0 and not self.customers_dialog_table.selectedItems():
+                self.customers_dialog_table.selectRow(0)
+                self.customers_dialog_table.setFocus()
+                event.accept()
+                return
+
+        elif event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            if self.customers_dialog_table.selectedItems():
+                self.send_customer_data()
+                event.accept()
+                return
+            
+        super().keyPressEvent(event)

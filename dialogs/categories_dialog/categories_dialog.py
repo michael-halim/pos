@@ -1,0 +1,209 @@
+from PyQt6 import QtWidgets, uic, QtCore
+
+from dialogs.categories_dialog.models.categories_dialog_models import CategoriesDialogModel
+from dialogs.categories_dialog.services.categories_dialog_services import CategoriesDialogService
+
+from generals.fonts import POSFonts
+from generals.build import resource_path
+from generals.message_box import POSMessageBox
+from generals.constants import (
+    SELECT_ROWS, SINGLE_SELECTION, 
+    NO_EDIT_TRIGGERS, RESIZE_MODE_INTERACTIVE,
+    PERM_R_CATEGORIES
+) 
+from generals.messages import ERR, ERR_PERM_R_CATEGORIES, PERM_DENIED
+from dialogs.categories_dialog.translations import CATEGORIES_DIALOG_TRANSLATIONS
+from generals.language_manager import LanguageManager
+from generals.permission_manager import PermissionManager
+
+
+class CategoriesDialogWindow(QtWidgets.QDialog):
+    # Add signal to communicate with main window
+    category_selected = QtCore.pyqtSignal(dict)
+    
+    def __init__(self):
+        super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            return
+
+        self.ui = uic.loadUi(resource_path('ui/categories_dialog.ui'), self)
+        
+        # Init Services
+        self.categories_dialog_service = CategoriesDialogService()
+
+        # Init Language Manager
+        self.language_manager = LanguageManager()
+        self.language_manager.add_translations(CATEGORIES_DIALOG_TRANSLATIONS)
+
+        # Init Table
+        self.categories_dialog_table = self.ui.categories_dialog_table
+        self.categories_dialog_table.setSortingEnabled(True)
+        
+        # Init Button
+        self.ui.add_categories_dialog_button.clicked.connect(self.send_category_data)
+        self.ui.close_categories_dialog_button.clicked.connect(lambda: self.close())
+        
+        # Connect search input to filter function
+        self.ui.filter_categories_dialog_input.textChanged.connect(self.show_categories_data)
+
+        # Set selection behavior to select entire rows
+        self.categories_dialog_table.setSelectionBehavior(SELECT_ROWS)
+        self.categories_dialog_table.setSelectionMode(SINGLE_SELECTION)
+        
+        # Set edit triggers to no edit
+        self.categories_dialog_table.setEditTriggers(NO_EDIT_TRIGGERS)
+
+        # Set table properties
+        self.categories_dialog_table.horizontalHeader().setSectionResizeMode(RESIZE_MODE_INTERACTIVE)
+        self.categories_dialog_table.verticalHeader().setSectionResizeMode(RESIZE_MODE_INTERACTIVE)
+
+        self.show_categories_data()
+
+
+    # Overrides
+    # ===============
+    def showEvent(self, event):
+        """Override showEvent to refresh data when window is shown"""
+        super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            self.close()
+            return
+
+        # Set window title
+        if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
+            self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+        # Translate Widget Text
+        self.language_manager.translate_widget_text(self)
+
+        self.categories_dialog_table_headers = ['Category Id', 'Category Name']
+        if self.language_manager.get_current_language() == 'id':
+            self.categories_dialog_table_headers = ['Id Kategori', 'Nama Kategori']
+
+        self.language_manager.translate_table_headers(self.categories_dialog_table, self.categories_dialog_table_headers)
+
+        # Refresh the data
+        self.show_categories_data()
+
+
+    def show(self):
+        """Override show to ensure data is refreshed"""
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
+        # Refresh the data
+        self.show_categories_data()
+
+
+    def showMaximized(self):
+        """Override showMaximized to ensure data is refreshed"""
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
+        # Refresh the data
+        self.show_categories_data()
+
+
+    # Shows
+    # ===============
+    def show_categories_data(self):
+        if not self.permission_manager.has_permission(PERM_R_CATEGORIES):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_CATEGORIES)
+            return
+
+        self.categories_dialog_table.setSortingEnabled(False)
+
+        search_text = self.ui.filter_categories_dialog_input.text().strip()
+        search_text = search_text.lower() if search_text else None
+
+        categories_dialog_result = self.categories_dialog_service.get_categories(search_text)
+
+        if not categories_dialog_result.success:
+            POSMessageBox.error(self, title=ERR, message=categories_dialog_result.message)
+            return
+
+        self.set_categories_table_data(categories_dialog_result.data)
+
+
+    # Setters
+    # ===============
+    def set_categories_table_data(self, data: list[CategoriesDialogModel]):
+        # Clear the table
+        self.categories_dialog_table.setRowCount(0)
+
+        for category in data:
+            current_row = self.categories_dialog_table.rowCount()
+            self.categories_dialog_table.insertRow(current_row)
+
+            table_items =  [ 
+                QtWidgets.QTableWidgetItem(str(category.category_id)),
+                QtWidgets.QTableWidgetItem(category.category_name),
+            ]
+            
+            for col, item in enumerate(table_items):
+                item.setFont(POSFonts.get_font(size=12))
+                self.categories_dialog_table.setItem(current_row, col, item)
+
+        self.categories_dialog_table.setSortingEnabled(True)
+
+
+    # Signal Handlers
+    # ===============
+    def send_category_data(self):
+        selected_rows = self.categories_dialog_table.selectedItems()
+        if selected_rows:
+            row = selected_rows[0].row()
+            
+            # Create dictionary with category details
+            category_data = {
+                'category_id': self.categories_dialog_table.item(row, 0).text(),
+            }
+            
+            # Emit signal with category data
+            self.category_selected.emit(category_data)
+            self.close()
+
+
+    def set_filter(self, search_text: str):
+        """Pre-fill the search filter"""
+        self.ui.filter_categories_dialog_input.setText(search_text)
+        # Optionally trigger the filter
+        self.filter_categories()
+
+
+    def filter_categories(self):
+        search_text = self.ui.filter_categories_dialog_input.text().lower()
+        for row in range(self.categories_dialog_table.rowCount()):
+            match_found = False
+            for col in range(self.categories_dialog_table.columnCount()):
+                item = self.categories_dialog_table.item(row, col)
+                if item and search_text in item.text().lower():
+                    match_found = True
+                    break
+            self.categories_dialog_table.setRowHidden(row, not match_found)
+
+
+    # Events Listeners
+    # ===============
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            if self.categories_dialog_table.rowCount() > 0 and not self.categories_dialog_table.selectedItems():
+                self.categories_dialog_table.selectRow(0)
+                self.categories_dialog_table.setFocus()
+                event.accept()
+                return
+
+        elif event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            if self.categories_dialog_table.selectedItems():
+                self.send_category_data()
+                event.accept()
+                return  
+            
+        super().keyPressEvent(event)
