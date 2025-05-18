@@ -354,7 +354,7 @@ class MasterStockDialogWindow(QtWidgets.QWidget):
         category_name = self.ui.category_name_master_stock_input.text().strip()
         supplier_id = self.ui.supplier_master_stock_input.text().strip()
         supplier_name = self.ui.supplier_name_master_stock_input.text().strip()
-        unit = self.ui.unit_master_stock_input.text().strip()
+        unit = self.ui.unit_master_stock_input.text().strip().upper()
         cost_price = remove_non_digit(self.ui.cost_price_master_stock_input.text().strip()) if self.ui.cost_price_master_stock_input.text().strip() else 0
         price = remove_non_digit(self.ui.price_master_stock_input.text().strip())
         stock = remove_non_digit(self.ui.stock_master_stock_input.text().strip())

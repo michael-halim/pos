@@ -17,7 +17,7 @@ from generals.constants import (
 ) 
 from generals.messages import (
     ERR, OK, ERR_PERM_R_TRANSACTIONS, ERR_PERM_C_TRANSACTIONS, ERR_PERM_U_TRANSACTIONS, ERR_PERM_D_TRANSACTIONS,
-    PERM_DENIED, CONFIRM, WARNING
+    PERM_DENIED, CONFIRM
 )
 from transactions_list.translations import TRANSACTION_LIST_TRANSLATIONS
 from generals.permission_manager import PermissionManager
@@ -92,8 +92,6 @@ class TransactionsListWindow(QtWidgets.QWidget):
         self.detail_transactions_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.detail_transactions_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         
-        # Show data for both tables
-        self.show_transactions_data()
 
 
     # Overrides
@@ -113,10 +111,10 @@ class TransactionsListWindow(QtWidgets.QWidget):
         # Translate Widget Text
         self.language_manager.translate_widget_text(self)
 
-        self.transaction_headers = ['Date', 'Tx Num', 'Total', 'Method', 'Remarks']
+        self.transaction_headers = ['Date', 'Tx Num', 'Total Payment', 'Method', 'Remarks']
         self.detail_transaction_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
         if self.language_manager.get_current_language() == 'id':
-            self.transaction_headers = ['Tanggal', 'ID Transaksi', 'Total', 'Metode', 'Keterangan']
+            self.transaction_headers = ['Tanggal', 'ID Transaksi', 'Total Belanja', 'Metode', 'Keterangan']
             self.detail_transaction_headers = ['Kode Barang', 'Nama Produk', 'Harga', 'Qty', 'Satuan', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
 
         self.language_manager.translate_table_headers(self.ui.transactions_table, self.transaction_headers)

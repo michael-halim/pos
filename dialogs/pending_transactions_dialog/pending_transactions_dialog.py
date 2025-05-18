@@ -94,6 +94,11 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
     def showEvent(self, event):
         """Override showEvent to refresh data when window is shown"""
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_PENDING_TRANSACTIONS)
+            self.close()
+            return
+
         # Reset the current selection
         self.current_pending_transaction_id = None
         
@@ -117,9 +122,20 @@ class PendingTransactionsDialogWindow(QtWidgets.QWidget):
         self.show_detail_pending_transactions_data()
 
 
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            self.close()
+            return
+
+
     def showMaximized(self):
         """Override showMaximized to ensure data is refreshed"""
         super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_R_PENDING_TRANSACTIONS):
+            self.close()
+            return
+
         # Reset the current selection
         self.current_pending_transaction_id = None
         # Refresh the data

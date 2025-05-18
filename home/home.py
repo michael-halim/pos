@@ -296,12 +296,6 @@ class HomeWindow(QtWidgets.QMainWindow):
     def backup_restore_database(self):
         if self._backup_restore_database is None or not self._backup_restore_database.isVisible():
             self._backup_restore_database = BackupRestoreDatabase()
-            self._backup_restore_database.show()
-
-        else:
-            self._backup_restore_database.raise_()
-            self._backup_restore_database.activateWindow()
-            self._backup_restore_database.show()
 
         return self._backup_restore_database
 

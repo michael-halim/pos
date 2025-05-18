@@ -13,6 +13,7 @@ from generals.messages import (
     ERR_PERM_C_PRODUCTS, ERR_PERM_U_PRODUCTS, ERR_PERM_D_PRODUCTS,
 )
 from generals.permission_manager import PermissionManager
+from generals.cache_manager import CacheManager
 
 
 class MasterStockDialogRepository:
@@ -20,8 +21,10 @@ class MasterStockDialogRepository:
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
         self.permission_manager = PermissionManager()
-
+        self.cache_manager = CacheManager()
+        self.products_cache = self.cache_manager.get_cache('products')
     
+
     def get_suppliers(self, search_text: str = ''):
         try:
             suppliers_result = []
@@ -228,6 +231,9 @@ class MasterStockDialogRepository:
             
             # Commit Transaction
             self.db.commit()
+
+            # Invalidate cache
+            self.cache_manager.invalidate('products')
             
             return ResponseMessage.ok(message="Master stock submitted successfully!")
 
@@ -305,6 +311,9 @@ class MasterStockDialogRepository:
             # Commit Transaction  
             self.db.commit()
 
+            # Invalidate cache
+            self.cache_manager.invalidate('products')
+
             return ResponseMessage.ok(message="Master stock updated successfully!")
 
         except Exception as e:
@@ -358,9 +367,13 @@ class MasterStockDialogRepository:
             # Commit Transaction  
             self.db.commit()
 
+            # Invalidate cache
+            self.cache_manager.invalidate('products')
+
             return ResponseMessage.ok(message="Master stock deleted successfully!")
 
         except Exception as e:
             # If any error occurs, rollback all changes
             self.db.rollback()
             return ResponseMessage.fail(message=f"Failed to delete master stock: {str(e)}")
+        

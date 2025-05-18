@@ -376,9 +376,7 @@ QMessageBox#info-box {
                      </size>
                     </property>
                     <property name="font">
-                     <font>
-                      <pointsize>-1</pointsize>
-                     </font>
+                     <font/>
                     </property>
                     <property name="calendarPopup">
                      <bool>true</bool>
@@ -416,9 +414,7 @@ QMessageBox#info-box {
                      </size>
                     </property>
                     <property name="font">
-                     <font>
-                      <pointsize>-1</pointsize>
-                     </font>
+                     <font/>
                     </property>
                     <property name="calendarPopup">
                      <bool>true</bool>
@@ -622,7 +618,7 @@ QPushButton:disabled {
               </column>
               <column>
                <property name="text">
-                <string>Total</string>
+                <string>Total Payment</string>
                </property>
                <property name="font">
                 <font>

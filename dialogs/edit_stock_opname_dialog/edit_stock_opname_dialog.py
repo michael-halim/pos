@@ -5,13 +5,20 @@ from stock_opname.models.stock_opname_models import EditStockOpnameModel
 
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
+from generals.constants import PERM_U_STOCK_OPNAME
+from generals.messages import ERR_PERM_U_STOCK_OPNAME, PERM_DENIED
 from dialogs.edit_stock_opname_dialog.translations import EDIT_STOCK_OPNAME_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
+from generals.permission_manager import PermissionManager
 
 
 class EditStockOpnameDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_U_STOCK_OPNAME):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/edit_stock_opname_dialog.ui'), self)
@@ -36,9 +43,28 @@ class EditStockOpnameDialogWindow(QtWidgets.QWidget):
     def showEvent(self, event) -> None:
         super().showEvent(event)
 
+        if not self.permission_manager.has_permission(PERM_U_STOCK_OPNAME):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_U_STOCK_OPNAME)
+            self.close()
+            return
+
         # Set window title
         if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
             self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_U_STOCK_OPNAME):
+            self.close()
+            return
+
+    
+    def showMaximized(self):
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_U_STOCK_OPNAME):
+            self.close()
+            return
 
 
     def edit_stock_opname(self):

@@ -2,13 +2,14 @@ from PyQt6 import QtWidgets, uic
 from PyQt6.QtCore import pyqtSignal
 
 from helper import format_number, add_prefix, remove_non_digit
+
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
-
+from generals.constants import PERM_C_TRANSACTIONS
+from generals.messages import ERR_PERM_C_TRANSACTIONS, PERM_DENIED
 from dialogs.payment_transactions_dialog.translations import PAYMENT_TRANSACTIONS_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
 from generals.permission_manager import PermissionManager
-
 
 class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
     transactions_submitted = pyqtSignal(dict)
@@ -17,6 +18,8 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
         super().__init__()
 
         self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            return
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/payment_transactions_dialog.ui'), self)
@@ -40,12 +43,30 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
     # ===============
     def showEvent(self, event):
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_TRANSACTIONS)
+            self.close()
+            return
 
         # Set window title
         if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
             self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
 
         self.language_manager.translate_widget_text(self)
+
+
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            self.close()
+            return
+        
+
+    def showMaximized(self):
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
+            self.close()
+            return
 
 
     def submit_payment_transactions(self):

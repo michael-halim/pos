@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets, uic, QtGui, QtCore
 from datetime import datetime
+import math
 
 from products.services.products_services import ProductsService
 from products.models.products_models import ProductsModel
@@ -27,6 +28,7 @@ from generals.permission_manager import PermissionManager
 from generals.language_manager import LanguageManager
 
 
+
 class ProductsWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
@@ -38,8 +40,6 @@ class ProductsWindow(QtWidgets.QWidget):
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
             return
         
-        # Set window title
-       
         
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/products.ui'), self)
@@ -74,6 +74,14 @@ class ProductsWindow(QtWidgets.QWidget):
         # Connect search input to filter function
         self.ui.filter_products_input.returnPressed.connect(self.show_products_data)
 
+        # Connect data per page combobox to filter function
+        self.ui.data_per_page_combobox.currentTextChanged.connect(self.show_products_data)
+
+        self.ui.first_page_button.clicked.connect(self.on_first_page_clicked)
+        self.ui.previous_page_button.clicked.connect(self.on_previous_page_clicked)
+        self.ui.next_page_button.clicked.connect(self.on_next_page_clicked)
+        self.ui.last_page_button.clicked.connect(self.on_last_page_clicked)
+
         # Set selection behavior to select entire rows
         self.ui.products_table.setSelectionBehavior(SELECT_ROWS)
         self.ui.products_table.setSelectionMode(SINGLE_SELECTION)
@@ -84,7 +92,10 @@ class ProductsWindow(QtWidgets.QWidget):
         self.ui.products_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
         self.ui.products_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
-        
+        self.current_page = 1
+        self.total_pages = 1
+        self.total_all_products = 0
+
 
     # Overrides
     # ===============
@@ -180,14 +191,24 @@ class ProductsWindow(QtWidgets.QWidget):
         search_text = self.ui.filter_products_input.text().strip()
         search_text = search_text.upper() if search_text else None
 
-        products_result = self.products_service.get_products(search_text)
+        limit = int(self.ui.data_per_page_combobox.currentText())
+        offset = (self.current_page - 1) * limit
+
+        products_result = self.products_service.get_products(search_text, limit, offset)
 
         if not products_result.success:
             POSMessageBox.error(self, title=ERR, message=products_result.message)
             return
 
-        self.set_products_table_data(products_result.data)
-        
+
+        self.set_products_table_data(products_result.data['products'])
+        self.total_count = products_result.data['total_count']
+        self.ui.current_page_button.setText(str(self.current_page))
+
+        self.total_pages = math.ceil(self.total_count / limit)
+
+        self.ui.showing_products_label.setText(f'Showing {offset + 1} - {offset + limit} of {self.total_count} products')
+
         # Mark data as loaded
         self.data_loaded = True
 
@@ -335,6 +356,30 @@ class ProductsWindow(QtWidgets.QWidget):
     def on_progress_export_excel(self, progress: int):
         """Handle the progress of the export"""
         print(f"Progress: {progress}%")
+
+
+    # Event Listeners
+    # ===============
+    def on_first_page_clicked(self):
+        self.current_page = 1
+        self.show_products_data()   
+
+    
+    def on_previous_page_clicked(self):
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.show_products_data()
+
+
+    def on_next_page_clicked(self):
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            self.show_products_data()
+
+
+    def on_last_page_clicked(self):
+        self.current_page = self.total_pages
+        self.show_products_data()
 
 
     # Setup Permissions

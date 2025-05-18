@@ -1,6 +1,4 @@
-from PyQt6 import QtWidgets
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QProcess
+from PyQt6.QtWidgets import QWidget, QFileDialog
 
 import os
 import sys
@@ -9,7 +7,6 @@ import shutil
 import sqlite3
 
 from generals.message_box import POSMessageBox
-from generals.build import resource_path
 from generals.constants import (
     PERM_B_DATABASE, PERM_R_DATABASE,
 ) 
@@ -20,58 +17,65 @@ from generals.messages import (
 from generals.permission_manager import PermissionManager
 
 
-class BackupRestoreDatabase(QtWidgets.QWidget):
+def get_application_path():
+    """Get the correct application path for both development and installed versions"""
+    if getattr(sys, 'frozen', False):
+        # Running as installed application
+        return os.path.dirname(sys.executable)
+    else:
+        # Running in development
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+class BackupRestoreDatabase(QWidget):
     def __init__(self):
         super().__init__()
 
         self.permission_manager = PermissionManager()
 
-        self.backup_dir = "backups"
-        self.db_path = resource_path('db/pos.db')
+        # Get the correct base path
+        base_path = get_application_path()
+        self.db_path = os.path.join(base_path, 'data', 'pos.db')
+        self.backup_dir = os.path.join(base_path, 'backups')
         
-        # Create backup directory if it doesn't exist
-        if not os.path.exists(self.backup_dir):
-            os.makedirs(self.backup_dir)
-
-
-    # Overrides
-    # ===============
-    def showEvent(self, event):
-        super().showEvent(event)
-        if not self.permission_manager.has_permission(PERM_R_DATABASE) or not self.permission_manager.has_permission(PERM_B_DATABASE):
-            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_R_DATABASE + ' or ' + ERR_PERM_B_DATABASE)
-            self.close()
-            return
-    
-
-    def show(self):
-        super().show()
-        if not self.permission_manager.has_permission(PERM_R_DATABASE) or not self.permission_manager.has_permission(PERM_B_DATABASE):
-            self.close()
-            return
-        
-
-    def showMaximized(self):
-        super().showMaximized()
-        if not self.permission_manager.has_permission(PERM_R_DATABASE) or not self.permission_manager.has_permission(PERM_B_DATABASE):
-            self.close()
-            return
+        # Ensure directories exist
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        os.makedirs(self.backup_dir, exist_ok=True)
 
 
     def export_database(self):
-        """Export/backup the current database"""
+        """Export/backup the current database, allowing user to choose location"""
         if not self.permission_manager.has_permission(PERM_B_DATABASE):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_B_DATABASE)
             return
 
         try:
-            # Generate backup filename with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup_path = os.path.join(self.backup_dir, f"backup_{timestamp}.db")
-            
+            # Generate default filename with timestamp
+            timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
+            default_filename = f"backup_{timestamp}.db"
+
+            # Show file dialog to choose where to save the backup
+            backup_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save Database Backup",
+                os.path.join(self.backup_dir, default_filename),
+                "SQLite Database (*.db)"
+            )
+
+            if not backup_path:
+                return  # User cancelled
+
             # Create a copy of the database file
+            if not os.path.exists(self.db_path):
+                POSMessageBox.error(self, title="Error", message="Source DB does not exist!")
+                return
+
+            if not os.path.exists(os.path.dirname(backup_path)):
+                POSMessageBox.error(self, title="Error", message="Backup directory does not exist!")
+                return
+
             shutil.copy2(self.db_path, backup_path)
-            
+
             POSMessageBox.info(
                 self,
                 title="Success",
@@ -94,7 +98,7 @@ class BackupRestoreDatabase(QtWidgets.QWidget):
 
         try:
             # Show file dialog to select backup file
-            file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            file_path, _ = QFileDialog.getOpenFileName(
                 self,
                 "Select Database Backup",
                 self.backup_dir,
@@ -131,29 +135,34 @@ class BackupRestoreDatabase(QtWidgets.QWidget):
                     self.backup_dir, 
                     f"pre_restore_backup_{timestamp}.db"
                 )
-                shutil.copy2(self.db_path, current_backup)
+                
+                # Ensure the data directory exists
+                os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+
+                try:
+                    # Only backup if the current database exists
+                    if os.path.exists(self.db_path):
+                        shutil.copy2(self.db_path, current_backup)
                     
-                # Replace current database with backup
-                shutil.copy2(file_path, self.db_path)
-                POSMessageBox.info(
-                    self,
-                    title="Success",
-                    message="Database restored successfully. Application will now close.\n"
-                )
+                    # Copy the new database
+                    shutil.copy2(file_path, self.db_path)
 
-                # Restart application
-                self.restart_application()
+                    POSMessageBox.info(
+                        self,
+                        title="Success",
+                        message="Database restored successfully. Please restart the application manually."
+                    )
 
+                except Exception as e:
+                    POSMessageBox.error(
+                        self,
+                        title="Error",
+                        message=f"Failed to restore database: {str(e)}"
+                    )
 
         except Exception as e:
             POSMessageBox.error(
                 self,
                 title="Error",
-                message=f"Failed to restore database: {str(e)}"
+                message=f"An error occurred: {str(e)}"
             )
-
-    def restart_application(self):
-        """Restart the application using QProcess"""
-        QApplication.quit()
-        process = QProcess()
-        process.startDetached(sys.executable, sys.argv)

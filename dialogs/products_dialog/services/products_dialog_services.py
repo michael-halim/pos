@@ -5,6 +5,6 @@ class ProductsDialogService:
         self.repository = ProductsDialogRepository()
 
 
-    def get_products(self, search_text: str = None, limit: int = 100):
-        return self.repository.get_products(search_text, limit)
+    def get_products(self, search_text: str = None, limit: int = 100, offset: int = 25):
+        return self.repository.get_products(search_text, limit, offset)
 

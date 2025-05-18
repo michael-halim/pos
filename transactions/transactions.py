@@ -1,5 +1,4 @@
 from PyQt6 import QtWidgets, uic, QtCore
-
 from datetime import datetime
 
 from dialogs.pending_transactions_dialog.pending_transactions_dialog import PendingTransactionsDialogWindow
@@ -201,12 +200,12 @@ class TransactionsWindow(QtWidgets.QWidget):
         # Translate widget text and update table headers
         self.language_manager.translate_widget_text(self)
 
-        self.transaction_headers = ['SKU', 'Product Name', 'Price', 'Qty', 'Unit', 'Unit Value', 'Discount (%)', 'Discount Per Item (Rp)', 'Discount (Rp)', 'Subtotal']
+        self.transaction_headers = ['SKU', 'Name', 'Price', 'Qty', 'Unit', 'Unit Value', 'Disc (%)', 'Disc Per Item (Rp)', 'Disc (Rp)', 'Subtotal']
         self.wholesale_transaction_headers = ['Unit', 'Unit Value', 'Price']
         self.transaction_history_headers = ['Date', 'Qty', 'Unit']
         self.purchase_history_headers = ['Date', 'Qty', 'Unit']
         if self.language_manager.get_current_language() == 'id':    
-            self.transaction_headers = ['Kode Barang', 'Nama', 'Harga', 'Qty', 'Satuan', 'Nilai Satuan', 'Diskon (%)', 'Diskon Per Item (Rp)', 'Diskon (Rp)', 'Subtotal']
+            self.transaction_headers = ['Kode Barang', 'Nama', 'Harga', 'Qty', 'Satuan', 'Nilai Satuan', 'Disk (%)', 'Disk Per Item (Rp)', 'Disk (Rp)', 'Subtotal']
             self.wholesale_transaction_headers = ['Satuan', 'Nilai Satuan', 'Harga']
             self.transaction_history_headers = ['Tanggal', 'Qty', 'Satuan']
             self.purchase_history_headers = ['Tanggal', 'Qty', 'Satuan']
@@ -288,6 +287,18 @@ class TransactionsWindow(QtWidgets.QWidget):
             # After adding new row, reapply filter if there's any
             self.filter_transactions()
 
+            # Scroll to the bottom of the table
+            self.transactions_table.scrollToBottom()
+
+            # Scroll to the rightmost column in the last row
+            model = self.transactions_table.model()
+            row_count = model.rowCount()
+            col_count = model.columnCount()
+            if row_count > 0 and col_count > 0:
+                index = model.index(row_count - 1, col_count - 1)
+                self.transactions_table.scrollTo(index)
+
+
         except Exception as e:
             POSMessageBox.error(self, title=ERR, message=f"Failed to add transaction: {str(e)}")
 
@@ -317,6 +328,17 @@ class TransactionsWindow(QtWidgets.QWidget):
             transaction_table_data: TransactionTableItemModel = self.get_selected_transaction_table_data()
             
             self.set_transaction_form_data(transaction_table_data)
+
+            # Set focus to qty input
+            self.ui.qty_transaction_input.setFocus()
+
+            # Set Combobox to current unit and disable it
+            unit = transaction_table_data.unit
+            if self.ui.qty_transaction_combobox.findText(unit) == -1:
+                self.ui.qty_transaction_combobox.addItem(unit)
+
+            self.ui.qty_transaction_combobox.setCurrentText(unit)
+            self.ui.qty_transaction_combobox.setEnabled(False)
 
             # Make sure only qty is editable
             self.ui.qty_transaction_input.setReadOnly(False)
@@ -370,6 +392,7 @@ class TransactionsWindow(QtWidgets.QWidget):
                 
                 # Re-enable all inputs
                 self.ui.sku_transaction_input.setEnabled(True)
+                self.ui.qty_transaction_combobox.setEnabled(True)
 
                 # Clear wholesale, purchasing history and transaction history data
                 self.clear_wholesale_transactions_data()
@@ -1431,7 +1454,7 @@ class TransactionsWindow(QtWidgets.QWidget):
     # Event Filter
     # ===============
     def eventFilter(self, obj, event):
-        # If qty input is focused and key pressed is Enter it automatically show the unit combobox
+        # If qty input is focused and key pressed is Enter it automatically show the unit combobox or update
         if obj == self.ui.qty_transaction_input and event.type() == QtCore.QEvent.Type.KeyPress:
             key = event.key()
 
@@ -1439,11 +1462,27 @@ class TransactionsWindow(QtWidgets.QWidget):
             if key in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
                 text = self.ui.qty_transaction_input.text()
                 if text.isdigit():
-                    self.ui.qty_transaction_combobox.showPopup()
+                    # If add button text is update, update the detail transaction
+                    button_text = self.ui.add_transaction_button.text().strip().lower()
+                    if button_text == 'update':
+                        self.update_detail_transaction()
+                        self.ui.sku_transaction_input.setFocus()
+
+                    else:
+                        # Show the unit combobox if is insert mode
+                        self.ui.qty_transaction_combobox.showPopup()
+
                 else:
                     self.ui.qty_transaction_input.clear()
-        
-        return super().eventFilter(obj, event)        
+
+                return True # prevent further processing
+            
+            if key == QtCore.Qt.Key.Key_Up:
+                self.ui.sku_transaction_input.setFocus()
+                return True # prevent further processing
+
+
+        return super().eventFilter(obj, event)
 
 
     def keyPressEvent(self, event):

@@ -391,7 +391,7 @@ QMessageBox#info-box {
                </font>
               </property>
               <property name="text">
-               <string>admin</string>
+               <string/>
               </property>
              </widget>
             </item>
@@ -433,7 +433,7 @@ QMessageBox#info-box {
                <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
               </property>
               <property name="text">
-               <string>admin</string>
+               <string/>
               </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>

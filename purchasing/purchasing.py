@@ -1044,6 +1044,20 @@ class PurchasingWindow(QtWidgets.QWidget):
                     self.ui.qty_purchasing_input.clear()
 
 
+        # If qty input is focused and key pressed is Up it focus to price input
+        if obj == self.ui.qty_purchasing_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            key = event.key()
+            if key == QtCore.Qt.Key.Key_Up:
+                self.ui.price_purchasing_input.setFocus()
+
+
+        # If price input is focused and key pressed is Up it focus to sku input
+        if obj == self.ui.price_purchasing_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            key = event.key()
+            if key == QtCore.Qt.Key.Key_Up:
+                self.ui.sku_purchasing_input.setFocus()
+
+
         return super().eventFilter(obj, event)
 
 

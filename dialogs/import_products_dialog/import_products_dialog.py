@@ -7,12 +7,19 @@ from generals.build import resource_path
 from generals.message_box import POSMessageBox
 from dialogs.import_products_dialog.translations import IMPORT_PRODUCTS_DIALOG_TRANSLATIONS
 from generals.language_manager import LanguageManager
-
+from generals.permission_manager import PermissionManager
+from generals.constants import PERM_I_PRODUCTS  
+from generals.messages import ERR_PERM_I_PRODUCTS, PERM_DENIED
 
 class ImportProductsDialogWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
+        self.permission_manager = PermissionManager()
+        if not self.permission_manager.has_permission(PERM_I_PRODUCTS):
+            return
+
+        # Init Services
         self.import_products_service = ImportProductsDialogService()
 
         self.ui = uic.loadUi(resource_path('ui/import_products.ui'), self)
@@ -35,10 +42,28 @@ class ImportProductsDialogWindow(QtWidgets.QWidget):
     # ============
     def showEvent(self, event):
         super().showEvent(event)
+        if not self.permission_manager.has_permission(PERM_I_PRODUCTS):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_I_PRODUCTS)
+            self.close()
+            return
 
         # Set window title
         if self.permission_manager.get_username().lower() not in self.windowTitle().lower():
             self.setWindowTitle(self.windowTitle() + ' - ' + self.permission_manager.get_username())
+
+
+    def show(self):
+        super().show()
+        if not self.permission_manager.has_permission(PERM_I_PRODUCTS):
+            self.close()
+            return
+
+
+    def showMaximized(self):
+        super().showMaximized()
+        if not self.permission_manager.has_permission(PERM_I_PRODUCTS):
+            self.close()
+            return
 
 
     def select_file(self):
@@ -105,7 +130,7 @@ class ImportProductsDialogWindow(QtWidgets.QWidget):
             self.ui.log_import_products_input.setText(f"Successfully processed {result['valid_count']} products")
             self.ui.log_import_products_input.setStyleSheet('color: green;')
             
-            self.import_products_service.import_products_to_database(result['valid_products'], self.on_import_complete)
+            self.import_products_service.import_products_to_database(result['valid_products'],  result['category_set'], result['supplier_set'], self.on_import_complete)
             
             
     def on_error(self, error):

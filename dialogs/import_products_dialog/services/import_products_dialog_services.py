@@ -50,6 +50,9 @@ class ImportProductsDialogService:
             # Store valid products
             valid_products = []
             
+            category_set = set()
+            supplier_set = set()
+
             # Process each row
             total_rows = 0
             for co, row in enumerate(sheet.iter_rows()):
@@ -66,7 +69,9 @@ class ImportProductsDialogService:
                 price = row[5].value
                 stock = row[6].value
                 remarks = row[7].value
-                
+                category_name = row[8].value
+                supplier_name = row[9].value
+
                 # Validate required fields
                 if sku is None or product_name is None or unit is None or price is None or stock is None:
                     errors.append({
@@ -85,7 +90,12 @@ class ImportProductsDialogService:
                 price = str(price)
                 stock = str(stock)
                 remarks = str(remarks) if remarks is not None else ""
-                
+                category_name = str(category_name) if category_name is not None else ""
+                supplier_name = str(supplier_name) if supplier_name is not None else ""
+
+                category_set.add(category_name.upper())
+                supplier_set.add(supplier_name.upper())
+
                 # Validate empty strings
                 if sku.strip() == '' or product_name.strip() == '' or unit.strip() == '' or price.strip() == '' or stock.strip() == '':
                     errors.append({
@@ -104,12 +114,16 @@ class ImportProductsDialogService:
                     cost_price=cost_price.strip(),
                     price=price.strip(),
                     stock=stock.strip(),
-                    remarks=remarks.strip()
+                    remarks=remarks.strip(),
+                    category=category_name.strip().upper(),
+                    supplier=supplier_name.strip().upper()
                 ))
                 
             # Return the results
             result = {
                 'valid_products': valid_products,
+                'category_set': category_set,
+                'supplier_set': supplier_set,
                 'errors': errors,
                 'total_rows': total_rows,
                 'valid_count': len(valid_products),
@@ -124,7 +138,8 @@ class ImportProductsDialogService:
             raise
     
 
-    def import_products_to_database(self, products: List[ImportProductsModel], on_complete=None, on_error=None, on_progress=None):
+    def import_products_to_database(self, products: List[ImportProductsModel], category_set: set, supplier_set: set, 
+                                    on_complete=None, on_error=None, on_progress=None):
         batch_size = 250
         if len(products) <= 100:
             batch_size = 25
@@ -137,5 +152,7 @@ class ImportProductsDialogService:
             on_error,
             on_progress,
             products,
-            batch_size
+            batch_size,
+            category_set,
+            supplier_set
         )

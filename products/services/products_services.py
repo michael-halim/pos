@@ -5,7 +5,7 @@ from openpyxl import Workbook
 from generals.permission_manager import PermissionManager
 from generals.constants import PERM_R_PRODUCTS, PERM_D_PRODUCTS, PERM_E_PRODUCTS
 from generals.messages import ERR_PERM_R_PRODUCTS, ERR_PERM_D_PRODUCTS, ERR_PERM_E_PRODUCTS
-from products.models.products_models import ProductsModel, ProductsExportModel
+from products.models.products_models import ProductsExportModel
 
 from response.response_message import ResponseMessage
 from exports.export_service import ExportService
@@ -20,11 +20,11 @@ class ProductsService:
         self.export_service = ExportService()
 
 
-    def get_products(self, search_text: str = None, limit: int = 100):
+    def get_products(self, search_text: str = None, limit: int = 100, offset: int = 50):
         if not self.permission_manager.has_permission(PERM_R_PRODUCTS):
             return ResponseMessage.fail(message=ERR_PERM_R_PRODUCTS)
         
-        return self.repository.get_products(search_text, limit)
+        return self.repository.get_products(search_text, limit, offset)
 
 
     def get_products_for_export(self, limit: int = 1000):
