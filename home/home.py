@@ -21,6 +21,7 @@ from reports.profit_and_loss_report.profit_and_loss_report import ProfitAndLossR
 from reports.daily_sales_report.daily_sales_report import DailySalesReportWindow
 from reports.monthly_sales_report.monthly_sales_report import MonthlySalesReportWindow
 from backup_restore_database.backup_database import BackupRestoreDatabase
+from purchase_return.purchase_return import PurchaseReturnWindow
 
 from generals.build import resource_path
 from generals.permission_manager import PermissionManager
@@ -62,6 +63,7 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._daily_sales_report_window = None
         self._monthly_sales_report_window = None
         self._profit_and_loss_report_window = None
+        self._purchase_return_window = None
 
         self.language_manager = LanguageManager()
         self.ui.language_combobox.currentTextChanged.connect(self.on_language_combobox_changed)
@@ -104,6 +106,10 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         # Logs Menu
         self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
+
+        # Purchase Return Menu
+        self.ui.purchase_return_button.clicked.connect(lambda: self.purchase_return_window.showMaximized())
+        self.ui.purchase_return_list_button.clicked.connect(lambda: self.purchase_return_window.showMaximized())
 
         # Database Menu   
         self.ui.backup_database_button.clicked.connect(lambda: self.backup_restore_database.export_database())  
@@ -384,6 +390,20 @@ class HomeWindow(QtWidgets.QMainWindow):
 
 
         return self._monthly_sales_report_window
+
+
+    @property
+    def purchase_return_window(self):
+        if self._purchase_return_window is None or not self._purchase_return_window.isVisible():
+            self._purchase_return_window = PurchaseReturnWindow()
+            self._purchase_return_window.show()
+
+        else:
+            self._purchase_return_window.raise_()
+            self._purchase_return_window.activateWindow()
+            self._purchase_return_window.show()
+
+        return self._purchase_return_window
 
 
     def on_language_combobox_changed(self, text):

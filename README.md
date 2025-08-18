@@ -43,6 +43,14 @@ This POS (Point of Sale) system is designed to streamline retail operations with
 - pip (Python package installer)
 - Git (for cloning the repository)
 
+### How to Unlock Private LAN
+- Control Panel > Network & Internet > Network Sharing Center > Advanced Sharing Centers
+- Services > SSDP Discov > Automatic
+- Services > Upnp Device Host > Automatic
+- Services > Function Discovery Provider Host > Auto
+- Services > Function Discovery Publication > Auto
+ 
+
 ### Installation Steps
 ```bash
 

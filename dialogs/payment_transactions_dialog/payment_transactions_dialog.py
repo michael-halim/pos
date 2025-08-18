@@ -110,4 +110,6 @@ class PaymentTransactionsDialogWindow(QtWidgets.QWidget):
         payment_change = int(total_amount) - int(payment_rp)
 
         self.ui.payment_change_transaction_input.setText(add_prefix(format_number(str(payment_change))))
-
+        if payment_change > 0:
+            self.ui.payment_change_transaction_input.setText('- ' + add_prefix(format_number(str(abs(payment_change)))))
+            

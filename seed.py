@@ -15,6 +15,50 @@ class SeedData:
         self.should_insert_data = should_insert
 
 
+    def create_purchase_return_detail_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS purchase_return_detail (
+            purchase_return_id VARCHAR(20) NOT NULL,
+            sku VARCHAR(20) NOT NULL,
+            unit VARCHAR(10) NOT NULL,
+            unit_value INT(10) NOT NULL,
+            qty INT(10) NOT NULL,
+            price INT(10) NOT NULL,
+            subtotal INT(10) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO purchase_return_detail (purchase_return_id, sku, unit, unit_value, qty, price, subtotal)
+                            VALUES 
+                            ('RTP202502010001', 'SKU001', 'PCS', 1, 10, 1000, 10000);'''
+
+            self.cursor.execute(sql_insert)
+
+
+    def create_purchase_return_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS purchase_return (
+            purchase_return_id VARCHAR(20) NOT NULL,
+            supplier_id INT NOT NULL,
+            purchase_return_date DATETIME NOT NULL,
+            total_amount INT(10) NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_by INT NOT NULL,
+            purchase_return_remarks TEXT DEFAULT '',
+            updated_at DATETIME NULL DEFAULT NULL,
+            updated_by INT NULL DEFAULT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO purchase_return (purchase_return_id, supplier_id, purchase_return_date, total_amount, created_at, created_by, purchase_return_remarks, updated_at, updated_by)
+                            VALUES 
+                            ('RTP202502010001', 1, CURRENT_TIMESTAMP, 100000, CURRENT_TIMESTAMP, 1, 'Remarks Purchase Return One', NULL, NULL);'''
+
+            self.cursor.execute(sql_insert)
+            
+
     def create_stock_opname_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS stock_opname (
             stock_opname_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -533,6 +577,8 @@ class SeedData:
 
 
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS purchase_return_detail')
+        self.cursor.execute('DROP TABLE IF EXISTS purchase_return')
         self.cursor.execute('DROP TABLE IF EXISTS stock_opname')
         self.cursor.execute('DROP TABLE IF EXISTS stock_card')
         self.cursor.execute('DROP TABLE IF EXISTS roles')
@@ -555,6 +601,8 @@ class SeedData:
 
 
     def truncate_all_tables(self):
+        self.cursor.execute('DELETE FROM purchase_return_detail')
+        self.cursor.execute('DELETE FROM purchase_return')
         self.cursor.execute('DELETE FROM stock_opname')
         self.cursor.execute('DELETE FROM stock_card')
         self.cursor.execute('DELETE FROM roles')
@@ -582,6 +630,8 @@ class SeedData:
 
         self.drop_all_tables()
 
+        self.create_purchase_return_detail_table()
+        self.create_purchase_return_table()
         self.create_stock_opname_table()
         self.create_stock_card_table()
         self.create_suppliers_table()

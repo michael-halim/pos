@@ -966,13 +966,13 @@ QPushButton:disabled {
              <item row="0" column="0">
               <layout class="QVBoxLayout" name="verticalLayout_3">
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                <layout class="QHBoxLayout" name="horizontalLayout_3">
                  <item>
                   <widget class="QPushButton" name="transactions_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>250</width>
+                     <height>150</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1016,8 +1016,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="transactions_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>250</width>
+                     <height>150</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1062,11 +1062,105 @@ QPushButton:disabled {
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>
+                  <widget class="QPushButton" name="sales_return_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>250</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Sales Return</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/purchase-white.png</normaloff>../assets/purchase-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="sales_return_list_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>250</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Sales Return List</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/purchasing-white.png</normaloff>../assets/purchasing-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_7">
+                 <item>
                   <widget class="QPushButton" name="purchasing_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>250</width>
+                     <height>150</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1110,8 +1204,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="purchasing_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>250</width>
+                     <height>150</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1154,13 +1248,107 @@ QPushButton:disabled {
                 </layout>
                </item>
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <layout class="QHBoxLayout" name="horizontalLayout_16">
+                 <item>
+                  <widget class="QPushButton" name="purchase_return_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>250</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Purchase Return</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/purchase-white.png</normaloff>../assets/purchase-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="purchase_return_list_button">
+                   <property name="minimumSize">
+                    <size>
+                     <width>250</width>
+                     <height>150</height>
+                    </size>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>30</pointsize>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton{
+    color: #fff;
+    background-color: rgba(13, 110, 253, 0.85); /* RGBA with alpha channel */
+    border-color: rgba(13, 110, 253, 0.7);
+}
+QPushButton:hover {
+    background-color: rgba(11, 94, 215, 0.9);
+    border-color: rgba(10, 88, 202, 0.9);
+    opacity: 0.95;
+}
+QPushButton:disabled {
+    background-color: #a8c1ff;
+    border-color: #a8c1ff;
+    color: #e6eeff;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>Purchase Return List</string>
+                   </property>
+                   <property name="icon">
+                    <iconset>
+                     <normaloff>../assets/purchasing-white.png</normaloff>../assets/purchasing-white.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>35</width>
+                     <height>35</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_17">
                  <item>
                   <widget class="QPushButton" name="stock_opname_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>250</width>
+                     <height>150</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1204,8 +1392,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="stock_card_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>250</width>
+                     <height>150</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1246,19 +1434,6 @@ QPushButton:disabled {
                   </widget>
                  </item>
                 </layout>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_6">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
                </item>
               </layout>
              </item>

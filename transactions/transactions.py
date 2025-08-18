@@ -270,7 +270,12 @@ class TransactionsWindow(QtWidgets.QWidget):
 
 
         try:
-            
+            # Remove Tax if any
+            re_enable_tax = False
+            if not self.ui.tax_pct_transaction_input.isEnabled():
+                re_enable_tax = True
+                self.remove_tax_transaction()
+
             self.set_transactions_table_data([transaction_form_data])
                 
             # Update total amount
@@ -280,6 +285,11 @@ class TransactionsWindow(QtWidgets.QWidget):
             # Update total discount
             total_discount = self.calculate_total_discount()
             self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
+
+            # Update Tax if any
+            if re_enable_tax:
+                self.on_tax_transaction_input_changed()
+                self.add_tax_transaction()
 
             # Clear data transaction
             self.clear_data_transaction()
@@ -443,7 +453,13 @@ class TransactionsWindow(QtWidgets.QWidget):
             self.ui.total_discount_transaction_input.setText(add_prefix(format_number(str(total_discount))))
 
             # Re-calculate tax if any
-            if not self.ui.tax_pct_transaction_input.isEnabled():
+            if not self.ui.tax_pct_transaction_input.isEnabled() and self.transactions_table.rowCount() == 1:
+                self.remove_tax_transaction()
+                self.ui.tax_pct_transaction_input.setEnabled(True)
+                self.ui.tax_pct_transaction_input.setClearButtonEnabled(True)
+                self.ui.tax_rp_transaction_input.setText(add_prefix(format_number('0')))
+
+            elif not self.ui.tax_pct_transaction_input.isEnabled():
                 self.remove_tax_transaction()
                 self.on_tax_transaction_input_changed()
                 self.add_tax_transaction()  
