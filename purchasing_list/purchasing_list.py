@@ -157,7 +157,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
         selected_rows = self.purchasing_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to edit")
+            POSMessageBox.warning(self, title=ERR, message="Please select a purchasing to edit")
             return
         
         row = selected_rows[0].row()
@@ -174,7 +174,7 @@ class PurchasingListWindow(QtWidgets.QWidget):
 
         selected_rows = self.purchasing_table.selectedItems()
         if not selected_rows:
-            POSMessageBox.warning(self, title=ERR, message="Please select a transaction to delete")
+            POSMessageBox.warning(self, title=ERR, message="Please select a purchasing to delete")
             return
         
         row = selected_rows[0].row()

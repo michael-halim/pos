@@ -1,5 +1,7 @@
 from typing import List
 
+from generals.permission_manager import PermissionManager
+
 from purchasing.repositories.purchasing_repositories import PurchasingRepository
 from purchasing.models.purchasing_models import (
     PurchasingModel, 
@@ -7,10 +9,14 @@ from purchasing.models.purchasing_models import (
 )
 
 from response.response_message import ResponseMessage
+from generals.constants import PERM_C_PURCHASING, PERM_U_PURCHASING
+from generals.messages import ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING
+
 class PurchasingService:
     def __init__(self):
         self.repository = PurchasingRepository()
-        
+        self.permission_manager = PermissionManager()
+
 
     def get_product_by_sku(self, sku: str):
         return self.repository.get_product_by_sku(sku)
@@ -25,6 +31,9 @@ class PurchasingService:
 
 
     def submit_purchasing(self, purchasing: PurchasingModel, detail_purchasing: List[DetailPurchasingModel]) -> ResponseMessage:
+        if not self.permission_manager.has_permission(PERM_C_PURCHASING):
+            return ResponseMessage.fail(message=ERR_PERM_C_PURCHASING)
+        
         return self.repository.submit_purchasing(purchasing, detail_purchasing)
 
 
@@ -32,10 +41,12 @@ class PurchasingService:
                           added_detail_purchasing: List[DetailPurchasingModel], 
                           updated_detail_purchasing: List[DetailPurchasingModel], 
                           deleted_detail_purchasing: List[DetailPurchasingModel]) -> ResponseMessage:
+        if not self.permission_manager.has_permission(PERM_U_PURCHASING):
+            return ResponseMessage.fail(message=ERR_PERM_U_PURCHASING)
+        
         return self.repository.update_purchasing(purchasing, added_detail_purchasing, 
                                                  updated_detail_purchasing, 
                                                  deleted_detail_purchasing)
-
 
 
     def get_purchasing_history_by_sku(self, sku: str):

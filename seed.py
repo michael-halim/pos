@@ -195,6 +195,8 @@ class SeedData:
                         (1, 'read_profit_and_loss_report'),
                         (1, 'backup_database'),
                         (1, 'restore_database'),
+                        (1, 'create_purchase_return'), (1, 'read_purchase_return'), (1, 'update_purchase_return'), (1, 'delete_purchase_return'),
+                        (1, 'create_sales_return'), (1, 'read_sales_return'), (1, 'update_sales_return'), (1, 'delete_sales_return'),
                         (2, 'create_transactions'), (2, 'print_transactions');'''
         
         self.cursor.execute(sql_insert)

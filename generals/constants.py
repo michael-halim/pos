@@ -89,5 +89,15 @@ PERM_R_SALES_PER_ITEM_REPORT = 'read_sales_per_item_report'
 PERM_R_MONTHLY_SALES_REPORT = 'read_monthly_sales_report'
 PERM_R_DAILY_SALES_REPORT = 'read_daily_sales_report'
 
+PERM_C_PURCHASE_RETURN = 'create_purchase_return'
+PERM_R_PURCHASE_RETURN = 'read_purchase_return'
+PERM_U_PURCHASE_RETURN = 'update_purchase_return'
+PERM_D_PURCHASE_RETURN = 'delete_purchase_return'
+
+PERM_C_SALES_RETURN = 'create_sales_return'
+PERM_R_SALES_RETURN = 'read_sales_return'
+PERM_U_SALES_RETURN = 'update_sales_return'
+PERM_D_SALES_RETURN = 'delete_sales_return'
+
 PERM_B_DATABASE = 'backup_database'
 PERM_R_DATABASE = 'restore_database'

@@ -413,12 +413,12 @@ QMessageBox#info-box {
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>30</height>
+                <height>34</height>
                </size>
               </property>
               <property name="font">
                <font>
-                <pointsize>12</pointsize>
+                <pointsize>-1</pointsize>
                </font>
               </property>
               <property name="buttonSymbols">

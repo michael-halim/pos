@@ -3,6 +3,7 @@ OK = 'Success'
 WARNING = 'Warning'
 CONFIRM = 'Confirm'
 PERM_DENIED = 'Permission Denied'
+CONFIRM_DELETE = 'Confirm Delete'
 
 ERR_PERM_C_PRODUCTS = 'You don\'t have permission to create products'
 ERR_PERM_R_PRODUCTS = 'You don\'t have permission to view products'
@@ -74,6 +75,16 @@ ERR_PERM_R_PROFIT_AND_LOSS_REPORT = 'You don\'t have permission to view profit a
 ERR_PERM_R_SALES_PER_ITEM_REPORT = 'You don\'t have permission to view sales per item report'
 ERR_PERM_R_MONTHLY_SALES_REPORT = 'You don\'t have permission to view monthly sales report'
 ERR_PERM_R_DAILY_SALES_REPORT = 'You don\'t have permission to view daily sales report'
+
+ERR_PERM_C_PURCHASE_RETURN = 'You don\'t have permission to create purchase return'
+ERR_PERM_R_PURCHASE_RETURN = 'You don\'t have permission to view purchase return'
+ERR_PERM_U_PURCHASE_RETURN = 'You don\'t have permission to update purchase return'
+ERR_PERM_D_PURCHASE_RETURN = 'You don\'t have permission to delete purchase return'
+
+ERR_PERM_C_SALES_RETURN = 'You don\'t have permission to create sales return'
+ERR_PERM_R_SALES_RETURN = 'You don\'t have permission to view sales return'
+ERR_PERM_U_SALES_RETURN = 'You don\'t have permission to update sales return'
+ERR_PERM_D_SALES_RETURN = 'You don\'t have permission to delete sales return'
 
 ERR_PERM_B_DATABASE = 'You don\'t have permission to backup database'
 ERR_PERM_R_DATABASE = 'You don\'t have permission to restore database'

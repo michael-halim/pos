@@ -238,6 +238,16 @@ class PurchasingWindow(QtWidgets.QWidget):
         is_toogle_disc_pct = (int(discount_pct) > 0 and int(discount_rp) > 0)
         self.set_discount_radio_button(discount_pct, discount_rp, is_toogle_disc_pct= is_toogle_disc_pct)
 
+        # Set focus to qty input
+        self.ui.qty_purchasing_input.setFocus()
+        
+        # Set Combobox to current unit and disable it
+        if self.ui.qty_purchasing_combobox.findText(unit) == -1:
+            self.ui.qty_purchasing_combobox.addItem(unit)
+
+        self.ui.qty_purchasing_combobox.setCurrentText(unit)
+        self.ui.qty_purchasing_combobox.setEnabled(False)
+    
         # Put the data into the form
         self.ui.sku_purchasing_input.setText(sku)
         self.ui.product_name_purchasing_input.setText(product_name)
@@ -779,6 +789,7 @@ class PurchasingWindow(QtWidgets.QWidget):
             self.ui.supplier_name_in_purchasing_input.setText(supplier_result.data.supplier_name)
 
         self.ui.sku_purchasing_input.setFocus()
+
 
     # Calculate
     # ===============

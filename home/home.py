@@ -22,6 +22,9 @@ from reports.daily_sales_report.daily_sales_report import DailySalesReportWindow
 from reports.monthly_sales_report.monthly_sales_report import MonthlySalesReportWindow
 from backup_restore_database.backup_database import BackupRestoreDatabase
 from purchase_return.purchase_return import PurchaseReturnWindow
+from purchase_return_list.purchase_return_list import PurchaseReturnListWindow
+from sales_return.sales_return import SalesReturnWindow
+from sales_return_list.sales_return_list import SalesReturnListWindow
 
 from generals.build import resource_path
 from generals.permission_manager import PermissionManager
@@ -64,6 +67,9 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._monthly_sales_report_window = None
         self._profit_and_loss_report_window = None
         self._purchase_return_window = None
+        self._purchase_return_list_window = None
+        self._sales_return_window = None
+        self._sales_return_list_window = None
 
         self.language_manager = LanguageManager()
         self.ui.language_combobox.currentTextChanged.connect(self.on_language_combobox_changed)
@@ -109,7 +115,9 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         # Purchase Return Menu
         self.ui.purchase_return_button.clicked.connect(lambda: self.purchase_return_window.showMaximized())
-        self.ui.purchase_return_list_button.clicked.connect(lambda: self.purchase_return_window.showMaximized())
+        a = PurchaseReturnListWindow()
+        self.ui.purchase_return_list_button.clicked.connect(lambda: a.showMaximized())
+        # self.ui.sales_return_button.clicked.connect(lambda: self.sales_return_window.show())
 
         # Database Menu   
         self.ui.backup_database_button.clicked.connect(lambda: self.backup_restore_database.export_database())  
@@ -405,6 +413,20 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         return self._purchase_return_window
 
+    
+    @property
+    def purchase_return_list_window(self):
+        if self._purchase_return_list_window is None or not self._purchase_return_list_window.isVisible():
+            self._purchase_return_list_window = PurchaseReturnListWindow()
+            self._purchase_return_list_window.show()
+
+        else:
+            self._purchase_return_list_window.raise_()
+            self._purchase_return_list_window.activateWindow()
+            self._purchase_return_list_window.show()
+
+        return self._purchase_return_list_window
+    
 
     def on_language_combobox_changed(self, text):
         if text == 'Indonesia':
