@@ -3,19 +3,6 @@ from datetime import datetime
 
 
 @dataclass
-class PurchasingTableItemModel:
-    sku: str
-    product_name: str
-    price: int
-    qty: int
-    unit: str
-    unit_value: int
-    discount_rp: int
-    discount_pct: int
-    subtotal: int
-
-
-@dataclass
 class PurchasingModel:
     purchasing_id: str
     supplier_id: str

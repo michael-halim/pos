@@ -23,9 +23,11 @@ from generals.language_manager import LanguageManager
 
 
 class CashierSalesReportWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window: None):
         super().__init__()
-        
+
+        self.home_window = home_window
+
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_CASHIER_SALES_REPORT):
             return
@@ -268,3 +270,15 @@ class CashierSalesReportWindow(QtWidgets.QWidget):
                 
             else:
                 POSMessageBox.error(self, title=ERR, message=dt_results.message)
+
+
+    # Event Filters
+    # ==============
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()

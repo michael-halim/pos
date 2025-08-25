@@ -15,8 +15,8 @@ class SeedData:
         self.should_insert_data = should_insert
 
 
-    def create_purchase_return_detail_table(self):
-        sql = '''CREATE TABLE IF NOT EXISTS purchase_return_detail (
+    def create_detail_purchase_return_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS detail_purchase_return (
             purchase_return_id VARCHAR(20) NOT NULL,
             sku VARCHAR(20) NOT NULL,
             unit VARCHAR(10) NOT NULL,
@@ -29,7 +29,7 @@ class SeedData:
         self.cursor.execute(sql)
 
         if self.should_insert_data:
-            sql_insert = '''INSERT INTO purchase_return_detail (purchase_return_id, sku, unit, unit_value, qty, price, subtotal)
+            sql_insert = '''INSERT INTO detail_purchase_return (purchase_return_id, sku, unit, unit_value, qty, price, subtotal)
                             VALUES 
                             ('RTP202502010001', 'SKU001', 'PCS', 1, 10, 1000, 10000);'''
 
@@ -105,6 +105,7 @@ class SeedData:
                             VALUES 
                             ('SKU001', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 50, NULL, 50, 'By Administrator'),
                             ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40, 'By Manager'),
+                            ('SKU001', CURRENT_DATE, CURRENT_TIME, 'RTP202502010001', NULL, 10, 30, 'By Manager'),
                             ('SKU002', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 10, NULL, 10, 'By Manager'),
                             ('SKU003', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 15, NULL, 15, 'By Admin');'''
 
@@ -502,7 +503,7 @@ class SeedData:
         if self.should_insert_data:
             sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
                         VALUES 
-                        ('SKU001', 'PRODUCT ONE', 'barcode', 1, 1, 1000, 1500, 'Best seller', 40, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
+                        ('SKU001', 'PRODUCT ONE', 'barcode', 1, 1, 1000, 1500, 'Best seller', 30, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
                         ('SKU002', 'PRODUCT TWO', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 10, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
                         ('SKU003', 'PRODUCT THREE', 'barcode', 3, 3, 3000, 20, 'New arrival', 15, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
             
@@ -579,7 +580,7 @@ class SeedData:
 
 
     def drop_all_tables(self):
-        self.cursor.execute('DROP TABLE IF EXISTS purchase_return_detail')
+        self.cursor.execute('DROP TABLE IF EXISTS detail_purchase_return')
         self.cursor.execute('DROP TABLE IF EXISTS purchase_return')
         self.cursor.execute('DROP TABLE IF EXISTS stock_opname')
         self.cursor.execute('DROP TABLE IF EXISTS stock_card')
@@ -603,7 +604,7 @@ class SeedData:
 
 
     def truncate_all_tables(self):
-        self.cursor.execute('DELETE FROM purchase_return_detail')
+        self.cursor.execute('DELETE FROM detail_purchase_return')
         self.cursor.execute('DELETE FROM purchase_return')
         self.cursor.execute('DELETE FROM stock_opname')
         self.cursor.execute('DELETE FROM stock_card')
@@ -632,7 +633,7 @@ class SeedData:
 
         self.drop_all_tables()
 
-        self.create_purchase_return_detail_table()
+        self.create_detail_purchase_return_table()
         self.create_purchase_return_table()
         self.create_stock_opname_table()
         self.create_stock_card_table()

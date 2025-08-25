@@ -34,9 +34,12 @@ from generals.permission_manager import PermissionManager
 
 
 class TransactionsWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window=None):
         super().__init__()
-        
+
+        # Reference to home window
+        self.home_window = home_window
+
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_C_TRANSACTIONS):
             POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_C_TRANSACTIONS)
@@ -1500,6 +1503,16 @@ class TransactionsWindow(QtWidgets.QWidget):
 
         return super().eventFilter(obj, event)
 
+
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when transactions window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+
+        event.accept()
+        
 
     def keyPressEvent(self, event):
         if (event.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier) and event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):

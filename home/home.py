@@ -1,5 +1,5 @@
 from connect_db import DatabaseConnection
-from PyQt6 import QtWidgets, uic
+from PyQt6 import QtWidgets, uic, QtCore
 
 from products.products import ProductsWindow
 from categories.categories import CategoriesWindow
@@ -39,6 +39,11 @@ class HomeWindow(QtWidgets.QMainWindow):
         ui_file = resource_path('ui/main.ui')
         self.ui = uic.loadUi(ui_file, self)
 
+        # Hide the close button from the title bar
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowType.WindowCloseButtonHint)
+
+        # Flag to allow programmatic closing
+        self._allow_close = False
 
         self.permission_manager = PermissionManager()
 
@@ -85,10 +90,10 @@ class HomeWindow(QtWidgets.QMainWindow):
         
         # Connect Button to Dialog in Master Data Menu - using property getters
         # Master Data Menu
-        self.ui.products_button.clicked.connect(lambda: self.products_dialog.show())
-        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.show())
-        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.show())
-        self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.show())
+        self.ui.products_button.clicked.connect(lambda: self.products_dialog.showMaximized())
+        self.ui.categories_button.clicked.connect(lambda: self.categories_dialog.showMaximized())
+        self.ui.suppliers_button.clicked.connect(lambda: self.suppliers_dialog.showMaximized())
+        self.ui.customers_button.clicked.connect(lambda: self.customers_dialog.showMaximized())
 
         # Transaction Menu
         self.ui.transactions_button.clicked.connect(lambda: self.transactions_dialog.showMaximized())
@@ -96,42 +101,43 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.ui.purchasing_button.clicked.connect(lambda: self.purchasing_dialog.showMaximized())
         self.ui.purchasing_list_button.clicked.connect(lambda: self.purchasing_list_dialog.showMaximized())
         self.ui.stock_card_list_button.clicked.connect(lambda: self.stock_card_list_window.showMaximized())
-        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_window.show())
+        self.ui.stock_opname_button.clicked.connect(lambda: self.stock_opname_list_window.showMaximized())
 
         # Settings Menu
-        self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.show())
-        self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.show())
+        self.ui.role_permissions_button.clicked.connect(lambda: self.role_permissions_dialog.showMaximized())
+        self.ui.users_dialog_button.clicked.connect(lambda: self.users_dialog_window.showMaximized())
 
         # Report Menu
         self.ui.sales_per_item_report_button.clicked.connect(lambda: self.sales_per_item_report_window.showMaximized())
         self.ui.back_office_sales_report_button.clicked.connect(lambda: self.back_office_sales_report_window.showMaximized())
         self.ui.cashier_sales_report_button.clicked.connect(lambda: self.cashier_sales_report_window.showMaximized())
-        self.ui.profit_and_loss_report_button.clicked.connect(lambda: self.profit_and_loss_report_window.show())
-        self.ui.daily_sales_report_button.clicked.connect(lambda: self.daily_sales_report_window.show())
-        self.ui.monthly_sales_report_button.clicked.connect(lambda: self.monthly_sales_report_window.show())
+        self.ui.profit_and_loss_report_button.clicked.connect(lambda: self.profit_and_loss_report_window.showMaximized())
+        self.ui.daily_sales_report_button.clicked.connect(lambda: self.daily_sales_report_window.showMaximized())
+        self.ui.monthly_sales_report_button.clicked.connect(lambda: self.monthly_sales_report_window.showMaximized())
 
         # Logs Menu
-        self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.show())
+        self.ui.logs_button.clicked.connect(lambda: self.logs_dialog.showMaximized())
 
         # Purchase Return Menu
         self.ui.purchase_return_button.clicked.connect(lambda: self.purchase_return_window.showMaximized())
-        a = PurchaseReturnListWindow()
-        self.ui.purchase_return_list_button.clicked.connect(lambda: a.showMaximized())
-        # self.ui.sales_return_button.clicked.connect(lambda: self.sales_return_window.show())
+        self.ui.purchase_return_list_button.clicked.connect(lambda: self.purchase_return_list_window.showMaximized())
+        self.ui.sales_return_button.clicked.connect(lambda: self.sales_return_window.showMaximized())
+        self.ui.sales_return_list_button.clicked.connect(lambda: self.sales_return_list_window.showMaximized())
 
         # Database Menu   
         self.ui.backup_database_button.clicked.connect(lambda: self.backup_restore_database.export_database())  
         self.ui.restore_database_button.clicked.connect(lambda: self.backup_restore_database.import_database())
 
-        self.ui.logout_button.clicked.connect(lambda: self.close())
+        self.ui.logout_button.clicked.connect(self.logout)
 
     
     # Property getters for lazy initialization
     @property
     def products_dialog(self):
         if self._products_dialog is None or not self._products_dialog.isVisible():
-            self._products_dialog = ProductsWindow()
-            self._products_dialog.show()
+            self._products_dialog = ProductsWindow(home_window=self)
+            self._products_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._products_dialog.raise_()
@@ -144,8 +150,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def categories_dialog(self):
         if self._categories_dialog is None or not self._categories_dialog.isVisible():
-            self._categories_dialog = CategoriesWindow()
-            self._categories_dialog.show()
+            self._categories_dialog = CategoriesWindow(home_window=self)
+            self._categories_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._categories_dialog.raise_()
@@ -158,8 +165,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def suppliers_dialog(self):
         if self._suppliers_dialog is None or not self._suppliers_dialog.isVisible():
-            self._suppliers_dialog = SuppliersWindow()
-            self._suppliers_dialog.show()
+            self._suppliers_dialog = SuppliersWindow(home_window=self)
+            self._suppliers_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._suppliers_dialog.raise_()
@@ -172,8 +180,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def transactions_dialog(self):
         if self._transactions_dialog is None or not self._transactions_dialog.isVisible():
-            self._transactions_dialog = TransactionsWindow()
-            self._transactions_dialog.show()
+            self._transactions_dialog = TransactionsWindow(home_window=self)
+            self._transactions_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._transactions_dialog.raise_()
@@ -186,8 +195,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def transactions_list_dialog(self):
         if self._transactions_list_dialog is None or not self._transactions_list_dialog.isVisible() :
-            self._transactions_list_dialog = TransactionsListWindow()
-            self._transactions_list_dialog.show()
+            self._transactions_list_dialog = TransactionsListWindow(home_window=self)
+            self._transactions_list_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._transactions_list_dialog.raise_()
@@ -200,8 +210,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def purchasing_dialog(self):
         if self._purchasing_dialog is None or not self._purchasing_dialog.isVisible():
-            self._purchasing_dialog = PurchasingWindow()
-            self._purchasing_dialog.show()
+            self._purchasing_dialog = PurchasingWindow(home_window=self)
+            self._purchasing_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._purchasing_dialog.raise_()
@@ -214,8 +225,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def purchasing_list_dialog(self):
         if self._purchasing_list_dialog is None or not self._purchasing_list_dialog.isVisible():
-            self._purchasing_list_dialog = PurchasingListWindow()
-            self._purchasing_list_dialog.show()
+            self._purchasing_list_dialog = PurchasingListWindow(home_window=self)
+            self._purchasing_list_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._purchasing_list_dialog.raise_()
@@ -224,11 +236,13 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         return self._purchasing_list_dialog
 
+
     @property
     def role_permissions_dialog(self):
         if self._role_permissions_dialog is None or not self._role_permissions_dialog.isVisible():
-            self._role_permissions_dialog = RolePermissionsWindow()
-            self._role_permissions_dialog.show()
+            self._role_permissions_dialog = RolePermissionsWindow(home_window=self)
+            self._role_permissions_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._role_permissions_dialog.raise_()
@@ -237,11 +251,13 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         return self._role_permissions_dialog
 
+
     @property
     def customers_dialog(self):
         if self._customers_dialog is None or not self._customers_dialog.isVisible():
-            self._customers_dialog = CustomersWindow()
-            self._customers_dialog.show()
+            self._customers_dialog = CustomersWindow(home_window=self)
+            self._customers_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._customers_dialog.raise_()
@@ -254,8 +270,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def logs_dialog(self):
         if self._logs_dialog is None or not self._logs_dialog.isVisible():
-            self._logs_dialog = LogsWindow()
-            self._logs_dialog.show()
+            self._logs_dialog = LogsWindow(home_window=self)
+            self._logs_dialog.showMaximized()
+            self.close_programmatically()
 
         else:
             self._logs_dialog.raise_()
@@ -268,8 +285,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def users_dialog_window(self):
         if self._users_dialog_window is None or not self._users_dialog_window.isVisible():
-            self._users_dialog_window = UsersWindow()
-            self._users_dialog_window.show()
+            self._users_dialog_window = UsersWindow(home_window=self)
+            self._users_dialog_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._users_dialog_window.raise_()
@@ -278,11 +296,13 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         return self._users_dialog_window
 
+
     @property
     def stock_card_list_window(self):
         if self._stock_card_list_window is None or not self._stock_card_list_window.isVisible():
-            self._stock_card_list_window = StockCardListWindow()
-            self._stock_card_list_window.show()
+            self._stock_card_list_window = StockCardListWindow(home_window=self)
+            self._stock_card_list_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._stock_card_list_window.raise_()
@@ -295,8 +315,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def stock_opname_list_window(self):
         if self._stock_opname_list_window is None or not self._stock_opname_list_window.isVisible():
-            self._stock_opname_list_window = StockOpnameListWindow()
-            self._stock_opname_list_window.show()
+            self._stock_opname_list_window = StockOpnameListWindow(home_window=self)
+            self._stock_opname_list_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._stock_opname_list_window.raise_()
@@ -317,8 +338,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def sales_per_item_report_window(self):
         if self._sales_per_item_report_window is None or not self._sales_per_item_report_window.isVisible():
-            self._sales_per_item_report_window = SalesPerItemReportWindow()
-            self._sales_per_item_report_window.show()
+            self._sales_per_item_report_window = SalesPerItemReportWindow(home_window=self)
+            self._sales_per_item_report_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._sales_per_item_report_window.raise_()
@@ -331,8 +353,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def back_office_sales_report_window(self):
         if self._back_office_sales_report_window is None or not self._back_office_sales_report_window.isVisible():
-            self._back_office_sales_report_window = BackOfficeSalesReportWindow()
-            self._back_office_sales_report_window.show()
+            self._back_office_sales_report_window = BackOfficeSalesReportWindow(home_window=self)
+            self._back_office_sales_report_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._back_office_sales_report_window.raise_()
@@ -345,8 +368,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def cashier_sales_report_window(self):
         if self._cashier_sales_report_window is None or not self._cashier_sales_report_window.isVisible():
-            self._cashier_sales_report_window = CashierSalesReportWindow()
-            self._cashier_sales_report_window.show()
+            self._cashier_sales_report_window = CashierSalesReportWindow(home_window=self)
+            self._cashier_sales_report_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._cashier_sales_report_window.raise_()
@@ -360,8 +384,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def profit_and_loss_report_window(self):
         if self._profit_and_loss_report_window is None or not self._profit_and_loss_report_window.isVisible():
-            self._profit_and_loss_report_window = ProfitAndLossReportWindow()
-            self._profit_and_loss_report_window.show()
+            self._profit_and_loss_report_window = ProfitAndLossReportWindow(home_window=self)
+            self._profit_and_loss_report_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._profit_and_loss_report_window.raise_()
@@ -374,8 +399,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def daily_sales_report_window(self):
         if self._daily_sales_report_window is None or not self._daily_sales_report_window.isVisible():
-            self._daily_sales_report_window = DailySalesReportWindow()
-            self._daily_sales_report_window.show()
+            self._daily_sales_report_window = DailySalesReportWindow(home_window=self)
+            self._daily_sales_report_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._daily_sales_report_window.raise_()
@@ -388,8 +414,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def monthly_sales_report_window(self):
         if self._monthly_sales_report_window is None or not self._monthly_sales_report_window.isVisible():
-            self._monthly_sales_report_window = MonthlySalesReportWindow()
-            self._monthly_sales_report_window.show()
+            self._monthly_sales_report_window = MonthlySalesReportWindow(home_window=self)
+            self._monthly_sales_report_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._monthly_sales_report_window.raise_()
@@ -403,8 +430,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def purchase_return_window(self):
         if self._purchase_return_window is None or not self._purchase_return_window.isVisible():
-            self._purchase_return_window = PurchaseReturnWindow()
-            self._purchase_return_window.show()
+            self._purchase_return_window = PurchaseReturnWindow(home_window=self)
+            self._purchase_return_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._purchase_return_window.raise_()
@@ -417,8 +445,9 @@ class HomeWindow(QtWidgets.QMainWindow):
     @property
     def purchase_return_list_window(self):
         if self._purchase_return_list_window is None or not self._purchase_return_list_window.isVisible():
-            self._purchase_return_list_window = PurchaseReturnListWindow()
-            self._purchase_return_list_window.show()
+            self._purchase_return_list_window = PurchaseReturnListWindow(home_window=self)
+            self._purchase_return_list_window.showMaximized()
+            self.close_programmatically()
 
         else:
             self._purchase_return_list_window.raise_()
@@ -427,6 +456,36 @@ class HomeWindow(QtWidgets.QMainWindow):
 
         return self._purchase_return_list_window
     
+
+    @property
+    def sales_return_window(self):
+        if self._sales_return_window is None or not self._sales_return_window.isVisible():
+            self._sales_return_window = SalesReturnWindow(home_window=self)
+            self._sales_return_window.showMaximized()
+            self.close_programmatically()
+
+        else:
+            self._sales_return_window.raise_()
+            self._sales_return_window.activateWindow()
+            self._sales_return_window.show()
+
+        return self._sales_return_window
+
+
+    @property
+    def sales_return_list_window(self):
+        if self._sales_return_list_window is None or not self._sales_return_list_window.isVisible():
+            self._sales_return_list_window = SalesReturnListWindow(home_window=self)
+            self._sales_return_list_window.showMaximized()
+            self.close_programmatically()
+
+        else:
+            self._sales_return_list_window.raise_()
+            self._sales_return_list_window.activateWindow()
+            self._sales_return_list_window.show()
+
+        return self._sales_return_list_window
+
 
     def on_language_combobox_changed(self, text):
         if text == 'Indonesia':
@@ -437,8 +496,7 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.language_manager.translate_widget_text(self)
 
 
-    def closeEvent(self, event):
-        # Close database connection
+    def logout(self):
         self.db = DatabaseConnection().get_connection()
         self.cursor = self.db.cursor()
 
@@ -449,4 +507,19 @@ class HomeWindow(QtWidgets.QMainWindow):
         for window in QtWidgets.QApplication.topLevelWidgets():
             window.close()
 
-        event.accept()
+        self.close()
+
+
+    def close_programmatically(self):
+        """Method to allow programmatic closing from other parts of the code"""
+        self._allow_close = True
+        self.close()
+
+
+    def closeEvent(self, event):
+        """Override closeEvent to allow programmatic closing but prevent UI closing"""
+        if self._allow_close:
+            event.accept()
+        else:
+            # Prevent UI-initiated closing (Alt+Tab, taskbar, etc.)
+            event.ignore()

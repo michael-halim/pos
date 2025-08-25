@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PurchasingList</class>
- <widget class="QWidget" name="PurchasingList">
+ <class>PurchaseReturnList</class>
+ <widget class="QWidget" name="PurchaseReturnList">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Purchasing List</string>
+   <string>Purchasing Return List</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -376,9 +376,7 @@ QMessageBox#info-box {
                      </size>
                     </property>
                     <property name="font">
-                     <font>
-                      <pointsize>-1</pointsize>
-                     </font>
+                     <font/>
                     </property>
                     <property name="calendarPopup">
                      <bool>true</bool>
@@ -416,9 +414,7 @@ QMessageBox#info-box {
                      </size>
                     </property>
                     <property name="font">
-                     <font>
-                      <pointsize>-1</pointsize>
-                     </font>
+                     <font/>
                     </property>
                     <property name="calendarPopup">
                      <bool>true</bool>

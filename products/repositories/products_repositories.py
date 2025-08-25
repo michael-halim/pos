@@ -29,7 +29,6 @@ class ProductsRepository:
             # Try to get from cache first
             cached_result = self.products_cache.get_value(cache_key)
             if cached_result:
-                print(f'cached_result: {cached_result}')
                 return ResponseMessage.ok(
                     message="Products fetched from cache successfully!",
                     data=cached_result

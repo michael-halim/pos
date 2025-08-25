@@ -18,8 +18,10 @@ from generals.permission_manager import PermissionManager
 
 
 class SalesReturnListWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window: None):
         super().__init__()
+
+        self.home_window = home_window
 
         # Load the UI file
         self.ui = uic.loadUi(resource_path('ui/sales_return_list.ui'), self)

@@ -30,8 +30,10 @@ from generals.language_manager import LanguageManager
 
 
 class PurchaseReturnWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window: None):
         super().__init__()
+
+        self.home_window = home_window
 
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_C_PURCHASE_RETURN):
@@ -54,7 +56,7 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
         self.products_dialog = ProductsDialogWindow()
 
         # Init Tables
-        self.purchase_return_detail_table = self.ui.purchase_return_detail_table
+        self.detail_purchase_return_table = self.ui.detail_purchase_return_table
 
         # Connect the add button to add_transaction method
         self.ui.close_purchase_return_button.clicked.connect(lambda: self.close())
@@ -93,13 +95,21 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
         self.ui.sku_purchase_return_input.returnPressed.connect(self.on_handle_sku_enter)
 
         # Connect price input event listener
-        self.ui.price_purchase_return_input.textChanged.connect(self.on_input_number_changed)
+        self.ui.price_purchase_return_input.textChanged.connect(self.on_price_purchase_return_input_changed)
 
         # Set date input
         self.ui.purchase_return_date_input.setDate(datetime.now())
 
         # UX For Shortcut
         # =================
+        # Set focus to supplier input
+        self.ui.supplier_in_purchase_return_input.setFocus()
+
+        # Connect price input event listener
+        self.ui.price_purchase_return_input.installEventFilter(self)
+
+        # Connect qty input event listener
+        self.ui.qty_purchase_return_input.installEventFilter(self)
 
         # Connect combobox activated signal
         self.ui.qty_purchase_return_combobox.activated.connect(self.on_unit_selected)
@@ -109,15 +119,15 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
 
 
         # Set selection behavior to select entire rows
-        self.purchase_return_detail_table.setSelectionBehavior(SELECT_ROWS)
-        self.purchase_return_detail_table.setSelectionMode(SINGLE_SELECTION)
+        self.detail_purchase_return_table.setSelectionBehavior(SELECT_ROWS)
+        self.detail_purchase_return_table.setSelectionMode(SINGLE_SELECTION)
 
         # Set wholesale transactions table to be read only
-        self.purchase_return_detail_table.setEditTriggers(NO_EDIT_TRIGGERS)
+        self.detail_purchase_return_table.setEditTriggers(NO_EDIT_TRIGGERS)
 
         # Set table properties to resize to contents
-        self.purchase_return_detail_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
-        self.purchase_return_detail_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.detail_purchase_return_table.horizontalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
+        self.detail_purchase_return_table.verticalHeader().setSectionResizeMode(RESIZE_TO_CONTENTS)
 
 
     # Overrides
@@ -140,12 +150,12 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
         if self.language_manager.get_current_language() == 'id':
             self.purchase_return_headers = ['Kode Barang', 'Nama Produk', 'Qty', 'Satuan', 'Nilai Satuan', 'Harga', 'Subtotal']
 
-        self.language_manager.translate_table_headers(self.ui.purchase_return_detail_table, self.purchase_return_headers)
+        self.language_manager.translate_table_headers(self.ui.detail_purchase_return_table, self.purchase_return_headers)
 
 
     def add_detail_purchase_return(self):
         # Stop temporary sorting
-        self.purchase_return_detail_table.setSortingEnabled(False)
+        self.detail_purchase_return_table.setSortingEnabled(False)
         try:
             purchase_return_form_data = self.get_purchase_return_form_data()
 
@@ -166,12 +176,12 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
 
         finally:
             # Re-enable sorting
-            self.purchase_return_detail_table.setSortingEnabled(True)
+            self.detail_purchase_return_table.setSortingEnabled(True)
 
 
     def edit_detail_purchase_return(self):
         # Get selected row
-        selected_rows = self.purchase_return_detail_table.selectedItems()
+        selected_rows = self.detail_purchase_return_table.selectedItems()
         if not selected_rows:
             POSMessageBox.warning(self, title=WARNING, message="Please select a purchase return to edit")
             return
@@ -183,32 +193,21 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
         self.ui.add_purchase_return_button.clicked.disconnect()
         self.ui.add_purchase_return_button.clicked.connect(self.update_detail_purchase_return)
 
-        # Get sku, unit, unit_value, qty, price, discount_rp, discount_pct, subtotal
-        sku = self.purchase_return_detail_table.item(self.current_selected_sku, 0).text()
-        product_name = self.purchase_return_detail_table.item(self.current_selected_sku, 1).text()
-        qty = remove_non_digit(self.purchase_return_detail_table.item(self.current_selected_sku, 2).text())
-        unit = self.purchase_return_detail_table.item(self.current_selected_sku, 3).text()
-        unit_value = self.purchase_return_detail_table.item(self.current_selected_sku, 4).text()
-        price = remove_non_digit(self.purchase_return_detail_table.item(self.current_selected_sku, 5).text())
+        # Get Selected Purchase Return Table Data
+        purchase_return_table_data: DetailPurchaseReturnModel = self.get_selected_purchase_return_table_data()
+
+        self.set_purchase_return_form_data(purchase_return_table_data)
 
         # Set focus to qty input
         self.ui.qty_purchase_return_input.setFocus()
         
         # Set Combobox to current unit and disable it
-        if self.ui.qty_purchase_return_combobox.findText(unit) == -1:
-            self.ui.qty_purchase_return_combobox.addItem(unit)
+        if self.ui.qty_purchase_return_combobox.findText(purchase_return_table_data.unit) == -1:
+            self.ui.qty_purchase_return_combobox.addItem(purchase_return_table_data.unit)
 
-        self.ui.qty_purchase_return_combobox.setCurrentText(unit)
+        self.ui.qty_purchase_return_combobox.setCurrentText(purchase_return_table_data.unit)
         self.ui.qty_purchase_return_combobox.setEnabled(False)
         
-        # Put the data into the form
-        self.ui.sku_purchase_return_input.setText(sku)
-        self.ui.product_name_purchase_return_input.setText(product_name)
-        self.ui.price_purchase_return_input.setText(price)
-        self.ui.qty_purchase_return_input.setText(qty)
-        self.ui.qty_purchase_return_combobox.setCurrentText(unit)
-        self.ui.unit_value_purchase_return_input.setText(unit_value)
-
         # Make sure only qty is editable
         self.ui.price_purchase_return_input.setEnabled(True)
         self.ui.sku_purchase_return_input.setEnabled(False)
@@ -226,9 +225,9 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
                 subtotal = int(price) * int(qty)
                 
                 # Update the row in the table
-                self.purchase_return_detail_table.item(self.current_selected_sku, 2).setText(format_number(qty))
-                self.purchase_return_detail_table.item(self.current_selected_sku, 5).setText(add_prefix(format_number(str(price))))
-                self.purchase_return_detail_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(subtotal))))
+                self.detail_purchase_return_table.item(self.current_selected_sku, 2).setText(format_number(qty))
+                self.detail_purchase_return_table.item(self.current_selected_sku, 5).setText(add_prefix(format_number(str(price))))
+                self.detail_purchase_return_table.item(self.current_selected_sku, 6).setText(add_prefix(format_number(str(subtotal))))
                 
                 # Update total amount
                 total_amount = self.calculate_total_purchase_return()
@@ -255,7 +254,7 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
 
 
     def delete_detail_purchase_return(self):
-        selected_rows = self.purchase_return_detail_table.selectedItems()
+        selected_rows = self.detail_purchase_return_table.selectedItems()
         if not selected_rows:
             POSMessageBox.warning(self, title=WARNING, message="Please select a purchase return to delete")
             return
@@ -267,8 +266,8 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
             row = selected_rows[0].row()
 
             # Get the transaction details before deletion
-            sku = self.purchase_return_detail_table.item(row, 0).text()
-            unit = self.purchase_return_detail_table.item(row, 3).text()
+            sku = self.detail_purchase_return_table.item(row, 0).text()
+            unit = self.detail_purchase_return_table.item(row, 3).text()
 
             # Remove from cached index
             purchase_return_index_key = f'{sku}_{unit}'
@@ -276,7 +275,7 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
                 del self.cached_purchase_return_index[purchase_return_index_key]
 
             # Remove the row from table
-            self.purchase_return_detail_table.removeRow(row)
+            self.detail_purchase_return_table.removeRow(row)
 
             # Update total amount
             total_amount: int = self.calculate_total_purchase_return()
@@ -331,6 +330,56 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
         else:
             POSMessageBox.error(self, title=ERR, message=result.message)
 
+
+    def update_purchase_return(self):
+        if not self.permission_manager.has_permission(PERM_U_PURCHASE_RETURN):
+            POSMessageBox.error(self, title=PERM_DENIED, message=ERR_PERM_U_PURCHASE_RETURN)
+            return
+
+        # Get detail purchase return from purchase return table
+        detail_purchase_return_data: list[DetailPurchaseReturnModel] = self.get_detail_purchase_return()
+        if len(detail_purchase_return_data) == 0:
+            POSMessageBox.error(self, title=ERR, message="No purchase return to update")
+            return
+
+        # Create purchase return id
+        purchase_return_id: str = self.ui.purchase_return_id_input.text().strip()
+
+        # Calculate total amount and total discount
+        total_amount: int = self.calculate_total_purchase_return()
+
+        # Get Purchase Return Data
+        purchase_return_remarks: str = self.ui.remarks_purchase_return_input.toPlainText().strip()
+        supplier_id: str = self.ui.supplier_in_purchase_return_input.text().strip()
+
+
+        # Create purchase return data
+        purchase_return_data: PurchaseReturnModel = PurchaseReturnModel(
+            purchase_return_id = purchase_return_id,
+            supplier_id = supplier_id,
+            purchase_return_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            total_amount = total_amount,
+            created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            created_by = self.permission_manager.get_user_id(),
+            purchase_return_remarks = purchase_return_remarks,
+            updated_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            updated_by = self.permission_manager.get_user_id()
+        )
+
+        # Get added, updated, and deleted detail purchase return
+        added_detail_purchase_return, updated_detail_purchase_return, deleted_detail_purchase_return = self.get_added_updated_deleted_detail_purchase_return(purchase_return_id, detail_purchase_return_data)
+
+        # Update purchase return
+        result = self.purchase_return_service.update_purchase_return(purchase_return_data, added_detail_purchase_return, updated_detail_purchase_return, deleted_detail_purchase_return)
+        if result.success:
+            POSMessageBox.info(self, title=OK, message=result.message)
+            
+            # Clear the purchase return table and total
+            self.clear_purchase_return()
+
+        else:
+            POSMessageBox.error(self, title=ERR, message=result.message)
+
     
     # Setters
     # ===============
@@ -339,16 +388,16 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
             purchase_return_index_key = f'{item.sku}_{item.unit}'
             if purchase_return_index_key in self.cached_purchase_return_index:
                 idx = self.cached_purchase_return_index[purchase_return_index_key]
-                price: str = remove_non_digit(self.purchase_return_detail_table.item(idx, 5).text())
-                updated_qty: int = int(remove_non_digit(self.purchase_return_detail_table.item(idx, 2).text())) + int(item.qty)
+                price: str = remove_non_digit(self.detail_purchase_return_table.item(idx, 5).text())
+                updated_qty: int = int(remove_non_digit(self.detail_purchase_return_table.item(idx, 2).text())) + int(item.qty)
                 updated_amount: int = int(price) * int(updated_qty)
 
-                self.purchase_return_detail_table.item(idx, 2).setText(format_number(str(updated_qty)))
-                self.purchase_return_detail_table.item(idx, 6).setText(add_prefix(format_number(str(updated_amount))))
+                self.detail_purchase_return_table.item(idx, 2).setText(format_number(str(updated_qty)))
+                self.detail_purchase_return_table.item(idx, 6).setText(add_prefix(format_number(str(updated_amount))))
 
             else:
-                current_row = self.purchase_return_detail_table.rowCount()
-                self.purchase_return_detail_table.insertRow(current_row)
+                current_row = self.detail_purchase_return_table.rowCount()
+                self.detail_purchase_return_table.insertRow(current_row)
 
                 table_items =  [ 
                     QtWidgets.QTableWidgetItem(item.sku),
@@ -362,12 +411,12 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
                 
                 for col, item in enumerate(table_items):
                     item.setFont(POSFonts.get_font(size=12))
-                    self.purchase_return_detail_table.setItem(current_row, col, item)
+                    self.detail_purchase_return_table.setItem(current_row, col, item)
 
                 # Add purchase return index
                 self.cached_purchase_return_index[purchase_return_index_key] = current_row
 
-        self.purchase_return_detail_table.setSortingEnabled(True)
+        self.detail_purchase_return_table.setSortingEnabled(True)
 
 
     def set_product_unit_details(self, sku: str):
@@ -395,14 +444,58 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
                 self.ui.qty_purchase_return_combobox.addItem(pud.unit)
 
 
+    def set_purchase_return_form_data(self, data: DetailPurchaseReturnModel):
+        self.ui.sku_purchase_return_input.setText(data.sku)
+        self.ui.product_name_purchase_return_input.setText(data.product_name)
+        self.ui.price_purchase_return_input.setText(data.price)
+        self.ui.qty_purchase_return_input.setText(data.qty)
+        self.ui.qty_purchase_return_combobox.setCurrentText(data.unit)
+        self.ui.unit_value_purchase_return_input.setText(format_number(data.unit_value))
+
+
+    def set_purchase_return_by_id(self, purchase_return_id: str):
+        self.clear_purchase_return()
+
+        self.ui.purchase_return_id_input.setText(purchase_return_id)
+
+        purchase_return_result = self.purchase_return_service.get_purchase_return_by_id(purchase_return_id)
+        detail_purchase_return_result = self.purchase_return_service.get_detail_purchase_return_by_id(purchase_return_id)
+
+        if not purchase_return_result.success:
+            POSMessageBox.error(self, title=ERR, message=purchase_return_result.message)
+            return
+
+        if not detail_purchase_return_result.success:
+            POSMessageBox.error(self, title=ERR, message=detail_purchase_return_result.message)
+            return
+        
+
+        # Set Purchase Return Data
+        self.ui.supplier_in_purchase_return_input.setText(str(purchase_return_result.data.supplier_id))
+        self.on_handle_supplier_enter()
+
+        self.ui.total_purchase_return_input.setText(add_prefix(format_number(str(purchase_return_result.data.total_amount))))
+        self.ui.remarks_purchase_return_input.setText(str(purchase_return_result.data.purchase_return_remarks))
+
+        # Set Detail Purchase Return Data
+        self.set_purchase_return_table_data(detail_purchase_return_result.data)
+
+        self.is_loading_combo = False
+
+        # Change Submit Button to Update Button
+        self.ui.submit_purchase_return_button.setText('Update')
+        self.ui.submit_purchase_return_button.clicked.disconnect()
+        self.ui.submit_purchase_return_button.clicked.connect(self.update_purchase_return)
+
+
     # Getters
     # ===============
     def get_total_qty_in_purchase_return(self, sku: str):
         total_qty = 0
-        for row in range(self.purchase_return_detail_table.rowCount()):
-            if self.purchase_return_detail_table.item(row, 0).text() == sku:
-                qty_in_purchase_return = remove_non_digit(self.purchase_return_detail_table.item(row, 2).text())
-                unit_value_in_purchase_return = remove_non_digit(self.purchase_return_detail_table.item(row, 4).text())
+        for row in range(self.detail_purchase_return_table.rowCount()):
+            if self.detail_purchase_return_table.item(row, 0).text() == sku:
+                qty_in_purchase_return = remove_non_digit(self.detail_purchase_return_table.item(row, 2).text())
+                unit_value_in_purchase_return = remove_non_digit(self.detail_purchase_return_table.item(row, 4).text())
                 total_qty += int(qty_in_purchase_return) * int(unit_value_in_purchase_return)
 
         return total_qty
@@ -436,14 +529,14 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
             detail_purchase_return data is all the details from purchase return table
         '''
         detail_purchase_return: list[DetailPurchaseReturnModel] = []
-        for row in range(self.purchase_return_detail_table.rowCount()):
-            sku = self.purchase_return_detail_table.item(row, 0).text()
-            product_name = self.purchase_return_detail_table.item(row, 1).text()
-            qty = remove_non_digit(self.purchase_return_detail_table.item(row, 2).text())
-            unit = self.purchase_return_detail_table.item(row, 3).text()
-            unit_value = remove_non_digit(self.purchase_return_detail_table.item(row, 4).text())
-            price = remove_non_digit(self.purchase_return_detail_table.item(row, 5).text())
-            subtotal = remove_non_digit(self.purchase_return_detail_table.item(row, 6).text())
+        for row in range(self.detail_purchase_return_table.rowCount()):
+            sku = self.detail_purchase_return_table.item(row, 0).text()
+            product_name = self.detail_purchase_return_table.item(row, 1).text()
+            qty = remove_non_digit(self.detail_purchase_return_table.item(row, 2).text())
+            unit = self.detail_purchase_return_table.item(row, 3).text()
+            unit_value = remove_non_digit(self.detail_purchase_return_table.item(row, 4).text())
+            price = remove_non_digit(self.detail_purchase_return_table.item(row, 5).text())
+            subtotal = remove_non_digit(self.detail_purchase_return_table.item(row, 6).text())
 
             detail_purchase_return.append(
                 DetailPurchaseReturnModel(
@@ -460,6 +553,66 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
             
         return detail_purchase_return
 
+    def get_selected_purchase_return_table_data(self) -> DetailPurchaseReturnModel:
+        selected_rows = self.detail_purchase_return_table.selectedItems()
+        if not selected_rows:
+            return None
+
+        row = selected_rows[0].row()
+        purchase_return_id = self.ui.purchase_return_id_input.text().strip() if self.ui.purchase_return_id_input.text().strip() else ''
+        sku = self.detail_purchase_return_table.item(row, 0).text()
+        product_name = self.detail_purchase_return_table.item(row, 1).text()
+        qty = remove_non_digit(self.detail_purchase_return_table.item(row, 2).text())
+        unit = self.detail_purchase_return_table.item(row, 3).text()
+        unit_value = remove_non_digit(self.detail_purchase_return_table.item(row, 4).text())
+        price = remove_non_digit(self.detail_purchase_return_table.item(row, 5).text())
+        subtotal = remove_non_digit(self.detail_purchase_return_table.item(row, 6).text())
+
+        return DetailPurchaseReturnModel(purchase_return_id=purchase_return_id, sku=sku, 
+                    product_name=product_name, price=price, qty=qty, unit=unit, 
+                    unit_value=unit_value, subtotal=subtotal)
+    
+
+    def get_added_updated_deleted_detail_purchase_return(self, purchase_return_id: str, detail_purchase_return_data: list[DetailPurchaseReturnModel]):
+        added_detail_purchase_return: list[DetailPurchaseReturnModel] = []
+        updated_detail_purchase_return: list[DetailPurchaseReturnModel] = []
+        deleted_detail_purchase_return: list[DetailPurchaseReturnModel] = []
+
+        if purchase_return_id == '':
+            purchase_return_id = self.ui.purchase_return_id_input.text().strip()
+
+        # old_dpr_result is the detail purchase return of the old purchase return
+        old_dpr_result = self.purchase_return_service.get_detail_purchase_return_by_id(purchase_return_id)
+        if not old_dpr_result.success:
+            return (added_detail_purchase_return, updated_detail_purchase_return, deleted_detail_purchase_return)
+
+        # Get Set of Old Detail Purchase Return        
+        set_of_old_dpr: set[tuple[str, str]] = set()
+        map_of_old_dpr: dict[tuple[str, str], DetailPurchaseReturnModel] = {}
+        for dpr in old_dpr_result.data:
+            set_of_old_dpr.add((dpr.sku, dpr.unit))
+            map_of_old_dpr[(dpr.sku, dpr.unit)] = dpr
+
+        # Get Set of New Detail Purchase Return and Get Added and Updated Detail Purchase Return
+        set_of_new_dpr: set[tuple[str, str]] = set()
+        for dpr in detail_purchase_return_data:
+            dpr.purchase_return_id = purchase_return_id
+            if (dpr.sku, dpr.unit) in set_of_old_dpr: # If the new DPR is in the old DPR, then it is an updated DPR
+                updated_detail_purchase_return.append(dpr)
+
+            elif (dpr.sku, dpr.unit) not in set_of_old_dpr: # If the new DPR not in the old DPR, then it is an added DPR
+                added_detail_purchase_return.append(dpr)
+
+            set_of_new_dpr.add((dpr.sku, dpr.unit))
+
+        # Get Deleted Detail Purchase Return
+        for old_dpr in set_of_old_dpr:
+            if old_dpr not in set_of_new_dpr:
+                # If the old DPR not in the new DPR, then it is a deleted DPR
+                deleted_detail_purchase_return.append(map_of_old_dpr[old_dpr])
+
+        return (added_detail_purchase_return, updated_detail_purchase_return, deleted_detail_purchase_return)
+    
 
     # Signal Handlers
     # ===============
@@ -552,16 +705,22 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
 
     def calculate_total_purchase_return(self):
         total_amount = 0
-        for row in range(self.purchase_return_detail_table.rowCount()):
-            total_amount += int(remove_non_digit(self.purchase_return_detail_table.item(row, 6).text()))
+        for row in range(self.detail_purchase_return_table.rowCount()):
+            total_amount += int(remove_non_digit(self.detail_purchase_return_table.item(row, 6).text()))
         return total_amount
 
 
     # Clears
     # ===============
     def clear_purchase_return(self):
+        # Reset button text to Submit
+        self.ui.submit_purchase_return_button.setText('Submit')
+        self.ui.submit_purchase_return_button.clicked.disconnect()
+        self.ui.submit_purchase_return_button.clicked.connect(self.submit_purchase_return)
+        self.ui.purchase_return_id_input.setText('')
+
         # Remove All Items from Purchase Return Table
-        self.purchase_return_detail_table.setRowCount(0)
+        self.detail_purchase_return_table.setRowCount(0)
         self.ui.total_purchase_return_input.setText(add_prefix('0'))
         self.cached_purchase_return_index = {}
         self.cached_qty = {}
@@ -585,15 +744,44 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
     # Event Filters
     # ===============
     def eventFilter(self, obj, event):
+        # If price input is focused and key pressed is Enter it automatically set focus to qty input
+        if obj == self.ui.price_purchase_return_input and event.type() == QtCore.QEvent.Type.KeyPress:
+            key = event.key()
+
+            # Check for Enter
+            if key in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+                text = remove_non_digit(self.ui.price_purchase_return_input.text().strip())
+              
+                if text != '' and text.isdigit():
+                    # If add button text is update, update the detail purchase return
+                    button_text = self.ui.add_purchase_return_button.text().strip().lower()
+                    if button_text == 'update':
+                        self.update_detail_purchase_return()
+                        self.ui.sku_purchase_return_input.setFocus()
+
+                    else:
+                        # Set focus to qty input
+                        self.ui.qty_purchase_return_input.setFocus()
+
+                else:
+                    self.ui.price_purchase_return_input.clear()
+
+                return True # prevent further processing
+            
+            if key == QtCore.Qt.Key.Key_Up:
+                self.ui.sku_purchase_return_input.setFocus()
+                return True # prevent further processing
+
+
         # If qty input is focused and key pressed is Enter it automatically show the unit combobox or update
         if obj == self.ui.qty_purchase_return_input and event.type() == QtCore.QEvent.Type.KeyPress:
             key = event.key()
 
             # Check for Enter
             if key in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
-                text = self.ui.qty_purchase_return_input.text()
-                if text.isdigit():
-                    # If add button text is update, update the detail purchase return
+                text = remove_non_digit(self.ui.qty_purchase_return_input.text().strip())
+                if text != '' and text.isdigit():
+                    # If add button text is update, update the detail transaction
                     button_text = self.ui.add_purchase_return_button.text().strip().lower()
                     if button_text == 'update':
                         self.update_detail_purchase_return()
@@ -609,7 +797,7 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
                 return True # prevent further processing
             
             if key == QtCore.Qt.Key.Key_Up:
-                self.ui.sku_purchase_return_input.setFocus()
+                self.ui.price_purchase_return_input.setFocus()
                 return True # prevent further processing
 
 
@@ -618,10 +806,25 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
 
     def keyPressEvent(self, event):
         if (event.modifiers() & QtCore.Qt.KeyboardModifier.ControlModifier) and event.key() in (QtCore.Qt.Key.Key_Return, QtCore.Qt.Key.Key_Enter):
+            button_text = self.ui.submit_purchase_return_button.text().strip().lower()
+            if button_text == 'update':
+                self.update_purchase_return()
+                return
+            
             self.submit_purchase_return()
             return
-            
+        
         super().keyPressEvent(event)
+
+
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()
 
 
     def on_handle_supplier_enter(self):
@@ -666,7 +869,7 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
             self.products_dialog.show()
 
 
-    def on_input_number_changed(self):
+    def on_price_purchase_return_input_changed(self):
         # Disconnect price input event listener
         self.ui.price_purchase_return_input.textChanged.disconnect()
 
@@ -675,9 +878,9 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
         self.ui.price_purchase_return_input.setText(add_prefix(format_number(str(int(price)))))
 
         # Reconnect price input event listener
-        self.ui.price_purchase_return_input.textChanged.connect(self.on_input_number_changed)
+        self.ui.price_purchase_return_input.textChanged.connect(self.on_price_purchase_return_input_changed)
 
-    
+
     def on_qty_purchase_return_combobox_changed(self, text):
         # Skip if we're loading items
         if self.is_loading_combo:
@@ -719,7 +922,7 @@ class PurchaseReturnWindow(QtWidgets.QWidget):
             self.ui.stock_after_purchase_return_input.setText(f'-{format_number(str(qty_after_transaction))}')
             self.ui.stock_after_purchase_return_input.setStyleSheet('color: red;')
 
-    
+
     def on_unit_selected(self):
         qty_text = self.ui.qty_purchase_return_input.text()
         # Only proceed if qty is a valid number and not empty

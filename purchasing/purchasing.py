@@ -7,7 +7,7 @@ from dialogs.master_stock_dialog.master_stock_dialog import MasterStockDialogWin
 from dialogs.price_unit_dialog.price_unit_dialog import PriceUnitDialogWindow
 
 from purchasing.services.purchasing_services import PurchasingService
-from purchasing.models.purchasing_models import PurchasingTableItemModel, DetailPurchasingModel, PurchasingModel, PurchasingHistoryTableItemModel
+from purchasing.models.purchasing_models import DetailPurchasingModel, PurchasingModel, PurchasingHistoryTableItemModel
 
 from helper import format_number, add_prefix, remove_non_digit
 from generals.message_box import POSMessageBox
@@ -28,8 +28,11 @@ from generals.permission_manager import PermissionManager
 
 
 class PurchasingWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window=None):
         super().__init__()
+
+        # Reference to home window
+        self.home_window = home_window
 
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_C_PURCHASING):
@@ -1070,6 +1073,16 @@ class PurchasingWindow(QtWidgets.QWidget):
 
 
         return super().eventFilter(obj, event)
+
+
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when purchasing window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()
 
 
     def keyPressEvent(self, event):

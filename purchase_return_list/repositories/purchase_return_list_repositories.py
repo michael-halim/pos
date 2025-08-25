@@ -1,8 +1,7 @@
 from connect_db import DatabaseConnection
-from typing import List
+import json
 from response.response_message import ResponseMessage
-from purchase_return_list.models.purchase_return_list_models import PurchaseReturnListModel
-from purchase_return.models.purchase_return_models import DetailPurchaseReturnModel
+from purchase_return_list.models.purchase_return_list_models import PurchaseReturnListModel, DetailPurchaseReturnListModel
 from generals.permission_manager import PermissionManager
 from datetime import datetime
 
@@ -63,21 +62,16 @@ class PurchaseReturnListRepository:
     def get_detail_purchase_return_by_id(self, purchase_return_id: str):
         try:
             sql = '''SELECT dpr.sku, p.product_name, dpr.price, dpr.qty, dpr.unit, dpr.subtotal
-                    FROM detail_purchase_return dpr 
-                    JOIN purchase_return pr on pr.purchase_return_id = dpr.purchase_return_id
+                    FROM detail_purchase_return dpr
                     JOIN products p ON p.sku = dpr.sku
-                    WHERE dpr.purchase_return_id = ?'''
+                    WHERE dpr.purchase_return_id = ? '''
             
             detail_purchase_return_result = self.cursor.execute(sql, (purchase_return_id,))
             
-            # If everything successful, commit the transaction
-            self.db.commit()
-
             detail_purchase_return_list = [
-                    DetailPurchaseReturnModel(
-                        sku=row[0], product_name=row[1], 
-                    price=row[2], qty=row[3], unit=row[4], 
-                    discount_rp=row[5], discount_pct=row[6], subtotal=row[7]
+                    DetailPurchaseReturnListModel(
+                        sku=row[0], product_name=row[1], price=row[2], 
+                        qty=row[3], unit=row[4], subtotal=row[5]
                 )
                 for row in detail_purchase_return_result
             ]
@@ -92,7 +86,7 @@ class PurchaseReturnListRepository:
             self.db.rollback()
             return ResponseMessage.fail(
                 message=f"Failed to fetch purchase return detail {str(e)}",
-            )  
+            )
         
     
     def delete_purchase_return_by_id(self, purchase_return_id: str):
@@ -130,36 +124,29 @@ class PurchaseReturnListRepository:
 
             detail_purchase_return_results = self.cursor.fetchall()
 
-            old_detail_purchasing_data = []
-            for detail in detail_purchasing_results:
-                old_detail_purchasing_data.append({
+            old_detail_purchase_return_data = []
+            for detail in detail_purchase_return_results:
+                old_detail_purchase_return_data.append({
                     'sku': detail[0],
                     'unit': detail[1],
                     'unit_value': detail[2],
                     'qty': detail[3],
                     'price': detail[4],
-                    'discount_rp': detail[5],
-                    'discount_pct': detail[6],
-                    'subtotal': detail[7]
+                    'subtotal': detail[5]
                 })
 
-            old_data['detail_purchasing'] = old_detail_purchasing_data
+            old_data['detail_purchase_return'] = old_detail_purchase_return_data
 
 
             # Delete the transaction
-            sql = '''DELETE FROM purchasing_history WHERE purchasing_id = ?'''
-            self.cursor.execute(sql, (purchasing_id,))
+            sql = '''DELETE FROM purchase_return WHERE purchase_return_id = ?'''
+            self.cursor.execute(sql, (purchase_return_id,))
 
-            # Get detail transactions
-            sql = '''SELECT sku, unit, qty, unit_value FROM detail_purchasing_history WHERE purchasing_id = ?'''
-            self.cursor.execute(sql, (purchasing_id,))
-            detail_purchasing = self.cursor.fetchall()
-
-            # Delete the detail transactions
-            for dp in detail_purchasing:
+            # Delete the detail purchase return
+            for dp in detail_purchase_return_results:
                 # Update product stock
                 stock_affected: int = int(dp[2]) * int(dp[3])
-                update_sql = 'UPDATE products SET stock = stock - ? WHERE sku = ?'
+                update_sql = 'UPDATE products SET stock = stock + ? WHERE sku = ?'
                 self.cursor.execute(update_sql, (stock_affected, dp[0]))
 
                 # Get updated stock value directly after update
@@ -168,15 +155,15 @@ class PurchaseReturnListRepository:
                 updated_stock = self.cursor.fetchone()[0]
 
                 # Update Stock Card by Inserting Data to Stock Card Table
-                remarks = f'Correction Stock from Delete Purchasing#{purchasing_id} by {self.permission_manager.get_username()}'
+                remarks = f'Correction Stock from Delete Purchase Return#{purchase_return_id} by {self.permission_manager.get_username()}'
                 stock_card_sql = '''INSERT INTO stock_card (sku, date, time, transaction_id, stock_in, 
                                                             stock_out, running_balance, remarks) 
                                     VALUES (?, CURRENT_DATE, CURRENT_TIME, ?, ?, ?, ?, ?)'''
-                self.cursor.execute(stock_card_sql, (dp[0], purchasing_id, stock_affected, None, updated_stock, remarks))
+                self.cursor.execute(stock_card_sql, (dp[0], purchase_return_id, stock_affected, None, updated_stock, remarks))
 
 
-            sql = '''DELETE FROM detail_purchasing_history WHERE purchasing_id = ?'''
-            self.cursor.execute(sql, (purchasing_id,))
+            sql = '''DELETE FROM detail_purchase_return WHERE purchase_return_id = ?'''
+            self.cursor.execute(sql, (purchase_return_id,))
 
 
             # Insert Log    
@@ -185,16 +172,16 @@ class PurchaseReturnListRepository:
                                         new_data, created_at, created_by) 
                     VALUES (?, ?, ?, ?, ?, ?, ?)''' 
             
-            self.cursor.execute(sql, (f'Purchasing#{purchasing_id} deleted', f'Purchasing#{purchasing_id} deleted successfully!', 'D', 
+            self.cursor.execute(sql, (f'Purchase Return#{purchase_return_id} deleted', f'Purchase Return#{purchase_return_id} deleted successfully!', 'D', 
                                         json.dumps(old_data), None, today, self.permission_manager.get_user_id()))
             
 
             # Commit Transactions
             self.db.commit()
-            return ResponseMessage.ok(message="Purchasing deleted successfully!")
+            return ResponseMessage.ok(message="Purchase return deleted successfully!")
         
         except Exception as e:
             self.db.rollback()
             return ResponseMessage.fail(
-                message=f"Failed to delete purchasing {str(e)}",
+                message=f"Failed to delete purchase return {str(e)}",
             )   

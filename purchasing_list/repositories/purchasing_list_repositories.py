@@ -145,16 +145,17 @@ class PurchasingListRepository:
             old_data['detail_purchasing'] = old_detail_purchasing_data
 
 
-            # Delete the transaction
+            # Delete the purchasing history
             sql = '''DELETE FROM purchasing_history WHERE purchasing_id = ?'''
             self.cursor.execute(sql, (purchasing_id,))
 
-            # Get detail transactions
+            # MUST TEST THIS, BECAUSE THE SAME WITH LINE 130 - 133
+            # Get detail purchasing history
             sql = '''SELECT sku, unit, qty, unit_value FROM detail_purchasing_history WHERE purchasing_id = ?'''
             self.cursor.execute(sql, (purchasing_id,))
             detail_purchasing = self.cursor.fetchall()
 
-            # Delete the detail transactions
+            # Delete the detail purchasing history
             for dp in detail_purchasing:
                 # Update product stock
                 stock_affected: int = int(dp[2]) * int(dp[3])
@@ -174,6 +175,7 @@ class PurchasingListRepository:
                 self.cursor.execute(stock_card_sql, (dp[0], purchasing_id, stock_affected, None, updated_stock, remarks))
 
 
+            # Delete the detail purchasing history
             sql = '''DELETE FROM detail_purchasing_history WHERE purchasing_id = ?'''
             self.cursor.execute(sql, (purchasing_id,))
 

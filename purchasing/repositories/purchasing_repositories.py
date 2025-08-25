@@ -249,7 +249,7 @@ class PurchasingRepository:
             old_data['detail_purchasing'] = old_detail_purchasing_data
 
 
-            # Update main transaction
+            # Update main purchasing
             sql = '''UPDATE purchasing_history 
                     SET supplier_id = ?, invoice_date = ?, invoice_number = ?, invoice_expired_date = ?, total_amount = ?, 
                         updated_at = ?, updated_by = ?, purchasing_remarks = ?
@@ -361,7 +361,6 @@ class PurchasingRepository:
 
                 # Update product stock
                 stock_affected: int = int(deleted_detail.qty) * int(deleted_detail.unit_value)
-                stock_subtracted: int = int(deleted_detail.qty) - int(stock_affected)
 
                 # Net Price = Subtotal / Stock Affected -> Price for each smallest unit
                 net_price: int =  int(deleted_detail.subtotal) / int(stock_affected)
@@ -372,7 +371,8 @@ class PurchasingRepository:
                                     last_price = ?,
                                     average_price = ((average_price * stock) - ( ? * ? )) / (stock - ?) 
                                 WHERE sku = ?'''
-                self.cursor.execute(update_sql, (stock_subtracted, net_price, net_price, stock_affected, stock_affected, deleted_detail.sku))
+                
+                self.cursor.execute(update_sql, (stock_affected, net_price, net_price, stock_affected, stock_affected, deleted_detail.sku))
 
                 # Get updated stock value directly after update
                 get_updated_stock_sql = 'SELECT stock FROM products WHERE sku = ?'
@@ -472,6 +472,7 @@ class PurchasingRepository:
             self.cursor.execute(sql, (f'Purchasing#{purchasing.purchasing_id} updated', f'Purchasing#{purchasing.purchasing_id} updated successfully!', 'U', 
                                         json.dumps(old_data), json.dumps(new_data), today, self.permission_manager.get_user_id()))
             
+            # If everything successful, commit the transaction
             self.db.commit()
 
             return ResponseMessage.ok(f"Purchasing#{purchasing.purchasing_id} updated successfully!")

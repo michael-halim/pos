@@ -22,8 +22,10 @@ from generals.language_manager import LanguageManager
 
 
 class DailySalesReportWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window: None):
         super().__init__()
+
+        self.home_window = home_window
 
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_DAILY_SALES_REPORT):
@@ -161,3 +163,15 @@ class DailySalesReportWindow(QtWidgets.QWidget):
         self.ui.total_transactions_input.setText(add_prefix(format_number(total_transactions)))
 
         self.daily_sales_table.setSortingEnabled(True)
+
+
+    # Event Filters
+    # ==============
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()

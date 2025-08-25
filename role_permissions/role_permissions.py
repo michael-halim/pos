@@ -22,8 +22,10 @@ from generals.language_manager import LanguageManager
 
 
 class RolePermissionsWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window: None):
         super().__init__()
+
+        self.home_window = home_window
 
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_PERMISSIONS):
@@ -513,3 +515,13 @@ class RolePermissionsWindow(QtWidgets.QWidget):
         
         # Let the parent class handle other keys
         super().keyPressEvent(event)
+
+
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()

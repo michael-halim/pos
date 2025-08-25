@@ -24,8 +24,11 @@ from generals.language_manager import LanguageManager
 
 
 class PurchasingListWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window=None):
         super().__init__()
+
+        # Reference to home window
+        self.home_window = home_window
 
         self.permission_manager = PermissionManager()
         if not self.permission_manager.has_permission(PERM_R_PURCHASING):   
@@ -311,3 +314,15 @@ class PurchasingListWindow(QtWidgets.QWidget):
                     match_found = True
                     break
             self.detail_purchasing_table.setRowHidden(row, not match_found)
+
+
+    # Event Filters
+    # ==============
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when purchasing list window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()

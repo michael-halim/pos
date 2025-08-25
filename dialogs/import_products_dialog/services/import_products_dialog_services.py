@@ -69,8 +69,8 @@ class ImportProductsDialogService:
                 price = row[5].value
                 stock = row[6].value
                 remarks = row[7].value
-                category_name = row[8].value
-                supplier_name = row[9].value
+                category_name = row[8].value if row[8].value is not None else ''
+                supplier_name = row[9].value if row[9].value is not None else ''
 
                 # Validate required fields
                 if sku is None or product_name is None or unit is None or price is None or stock is None:

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1346</width>
-    <height>877</height>
+    <height>881</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -706,6 +706,12 @@ QPushButton:hover {
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>120</height>
+         </size>
+        </property>
         <property name="currentIndex">
          <number>1</number>
         </property>
@@ -733,8 +739,8 @@ QPushButton:hover {
                      <widget class="QPushButton" name="products_button">
                       <property name="minimumSize">
                        <size>
-                        <width>500</width>
-                        <height>200</height>
+                        <width>0</width>
+                        <height>120</height>
                        </size>
                       </property>
                       <property name="font">
@@ -784,8 +790,8 @@ QPushButton:disabled {
                      <widget class="QPushButton" name="categories_button">
                       <property name="minimumSize">
                        <size>
-                        <width>500</width>
-                        <height>200</height>
+                        <width>0</width>
+                        <height>120</height>
                        </size>
                       </property>
                       <property name="font">
@@ -836,8 +842,8 @@ QPushButton:disabled {
                      <widget class="QPushButton" name="suppliers_button">
                       <property name="minimumSize">
                        <size>
-                        <width>500</width>
-                        <height>200</height>
+                        <width>0</width>
+                        <height>120</height>
                        </size>
                       </property>
                       <property name="font">
@@ -884,8 +890,8 @@ QPushButton:disabled {
                      <widget class="QPushButton" name="customers_button">
                       <property name="minimumSize">
                        <size>
-                        <width>500</width>
-                        <height>200</height>
+                        <width>0</width>
+                        <height>120</height>
                        </size>
                       </property>
                       <property name="font">
@@ -935,6 +941,9 @@ QPushButton:disabled {
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
                     </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::MinimumExpanding</enum>
+                    </property>
                     <property name="sizeHint" stdset="0">
                      <size>
                       <width>20</width>
@@ -971,8 +980,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="transactions_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1016,8 +1025,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="transactions_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1065,8 +1074,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="sales_return_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1110,8 +1119,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="sales_return_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1159,8 +1168,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="purchasing_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1204,8 +1213,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="purchasing_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1253,8 +1262,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="purchase_return_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1298,8 +1307,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="purchase_return_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1347,8 +1356,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="stock_opname_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1392,8 +1401,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="stock_card_list_button">
                    <property name="minimumSize">
                     <size>
-                     <width>250</width>
-                     <height>150</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1437,6 +1446,22 @@ QPushButton:disabled {
                </item>
               </layout>
              </item>
+             <item row="1" column="0">
+              <spacer name="verticalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::MinimumExpanding</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
           </item>
@@ -1460,8 +1485,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="users_dialog_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1505,8 +1530,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="role_permissions_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1553,6 +1578,9 @@ QPushButton:disabled {
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::MinimumExpanding</enum>
+                 </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
@@ -1586,8 +1614,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="sales_per_item_report_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1631,8 +1659,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="cashier_sales_report_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1680,8 +1708,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="back_office_sales_report_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1725,8 +1753,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="profit_and_loss_report_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1774,8 +1802,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="daily_sales_report_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1819,8 +1847,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="monthly_sales_report_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1867,6 +1895,9 @@ QPushButton:disabled {
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::MinimumExpanding</enum>
+                 </property>
                  <property name="sizeHint" stdset="0">
                   <size>
                    <width>20</width>
@@ -1901,7 +1932,7 @@ QPushButton:disabled {
                    <property name="minimumSize">
                     <size>
                      <width>500</width>
-                     <height>200</height>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -1994,8 +2025,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="backup_database_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -2039,8 +2070,8 @@ QPushButton:disabled {
                   <widget class="QPushButton" name="restore_database_button">
                    <property name="minimumSize">
                     <size>
-                     <width>500</width>
-                     <height>200</height>
+                     <width>0</width>
+                     <height>120</height>
                     </size>
                    </property>
                    <property name="font">
@@ -2086,6 +2117,9 @@ QPushButton:disabled {
                 <spacer name="verticalSpacer_4">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::MinimumExpanding</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>

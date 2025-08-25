@@ -28,10 +28,12 @@ from generals.permission_manager import PermissionManager
 from generals.language_manager import LanguageManager
 
 
-
 class ProductsWindow(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, home_window=None):
         super().__init__()
+
+        # Reference to home window
+        self.home_window = home_window
 
         # Flag to track if data has been loaded
         self.data_loaded = False
@@ -232,7 +234,7 @@ class ProductsWindow(QtWidgets.QWidget):
             return
 
         self.master_stock_dialog.clear_master_stock_form()
-        self.master_stock_dialog.show()
+        self.master_stock_dialog.showMaximized()
 
         # Set data_loaded to False so it will refresh when this window is shown again
         self.data_loaded = False
@@ -249,7 +251,7 @@ class ProductsWindow(QtWidgets.QWidget):
             row = selected_rows[0].row()
             sku = self.products_table.item(row, 0).text()
             self.master_stock_dialog.set_master_stock_form_by_sku(sku)
-            self.master_stock_dialog.show()
+            self.master_stock_dialog.showMaximized()
 
             # Set data_loaded to False so it will refresh when this window is shown again
             self.data_loaded = False
@@ -406,6 +408,16 @@ class ProductsWindow(QtWidgets.QWidget):
 
     # Event Filters
     # ===============
+    def closeEvent(self, event):
+        """Override closeEvent to show home window when products window is closed"""
+        if self.home_window:
+            self.home_window.show()
+            self.home_window.raise_()
+            self.home_window.activateWindow()
+            
+        event.accept()
+
+
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key.Key_Down:
             if self.products_table.rowCount() > 0 and not self.products_table.selectedItems():
