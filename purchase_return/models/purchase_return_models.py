@@ -1,14 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
 from datetime import datetime
-
-
-@dataclass
-class PurchaseReturnModel:
-    id: int
-    name: str
-    description: Optional[str] = None
-
 
 @dataclass
 class ProductModel:

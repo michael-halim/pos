@@ -431,7 +431,7 @@ QMessageBox#info-box {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
               <item>
-               <widget class="QLabel" name="supplier_in_sales_return_label">
+               <widget class="QLabel" name="customer_in_sales_return_label">
                 <property name="minimumSize">
                  <size>
                   <width>150</width>
@@ -444,7 +444,7 @@ QMessageBox#info-box {
                  </font>
                 </property>
                 <property name="text">
-                 <string>Supplier ID : </string>
+                 <string>Customer ID : </string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -452,7 +452,7 @@ QMessageBox#info-box {
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="supplier_in_sales_return_input">
+               <widget class="QLineEdit" name="customer_in_sales_return_input">
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
@@ -470,7 +470,7 @@ QMessageBox#info-box {
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="find_supplier_in_sales_return_button">
+               <widget class="QPushButton" name="find_customer_in_sales_return_button">
                 <property name="minimumSize">
                  <size>
                   <width>100</width>
@@ -519,7 +519,7 @@ QPushButton:disabled {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QLabel" name="supplier_name_in_sales_return_label">
+               <widget class="QLabel" name="customer_name_in_sales_return_label">
                 <property name="minimumSize">
                  <size>
                   <width>150</width>
@@ -532,7 +532,7 @@ QPushButton:disabled {
                  </font>
                 </property>
                 <property name="text">
-                 <string>Supplier Name : </string>
+                 <string>Customer Name : </string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -540,7 +540,7 @@ QPushButton:disabled {
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="supplier_name_in_sales_return_input">
+               <widget class="QLineEdit" name="customer_name_in_sales_return_input">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>

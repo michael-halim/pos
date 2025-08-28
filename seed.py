@@ -15,6 +15,51 @@ class SeedData:
         self.should_insert_data = should_insert
 
 
+    def create_detail_sales_return_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS detail_sales_return (
+            sales_return_id VARCHAR(20) NOT NULL,
+            sku VARCHAR(20) NOT NULL,
+            unit VARCHAR(10) NOT NULL,
+            unit_value INT(10) NOT NULL,
+            qty INT(10) NOT NULL,
+            price INT(10) NOT NULL,
+            subtotal INT(10) NOT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO detail_sales_return (sales_return_id, sku, unit, unit_value, qty, price, subtotal)
+                            VALUES 
+                            ('RTS202502010001', 'SKU002', 'PCS', 1, 10, 1000, 10000);'''
+
+            self.cursor.execute(sql_insert)
+
+
+    def create_sales_return_table(self):
+        sql = '''CREATE TABLE IF NOT EXISTS sales_return (
+            sales_return_id VARCHAR(20) NOT NULL,
+            customer_id INT NOT NULL,
+            sales_return_date DATETIME NOT NULL,
+            total_amount INT(10) NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_by INT NOT NULL,
+            sales_return_remarks TEXT DEFAULT '',
+            updated_at DATETIME NULL DEFAULT NULL,
+            updated_by INT NULL DEFAULT NULL
+        );'''
+
+        self.cursor.execute(sql)
+
+        if self.should_insert_data:
+            sql_insert = '''INSERT INTO sales_return (sales_return_id, customer_id, sales_return_date, total_amount, created_at, created_by, 
+                                                        sales_return_remarks, updated_at, updated_by)
+                            VALUES 
+                            ('RTS202502010001', 1, CURRENT_TIMESTAMP, 10000, CURRENT_TIMESTAMP, 1, 'Remarks Sales Return One', NULL, NULL);'''
+
+            self.cursor.execute(sql_insert)
+            
+
     def create_detail_purchase_return_table(self):
         sql = '''CREATE TABLE IF NOT EXISTS detail_purchase_return (
             purchase_return_id VARCHAR(20) NOT NULL,
@@ -107,6 +152,7 @@ class SeedData:
                             ('SKU001', CURRENT_DATE, CURRENT_TIME, 'J202502010002', NULL, 10, 40, 'By Manager'),
                             ('SKU001', CURRENT_DATE, CURRENT_TIME, 'RTP202502010001', NULL, 10, 30, 'By Manager'),
                             ('SKU002', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 10, NULL, 10, 'By Manager'),
+                            ('SKU002', CURRENT_DATE, CURRENT_TIME, 'RTS202502010001', 10, NULL, 20, 'Return by Customer'),
                             ('SKU003', CURRENT_DATE, CURRENT_TIME, 'PO202502010001', 15, NULL, 15, 'By Admin');'''
 
             self.cursor.execute(sql_insert)
@@ -153,6 +199,8 @@ class SeedData:
                         ('create_logs', 'Create Logs'), ('read_logs', 'Read Logs'), ('update_logs', 'Update Logs'), ('delete_logs', 'Delete Logs'),
                         ('read_stock_card', 'Read Stock Card'),
                         ('read_stock_opname', 'Read Stock Opname'), ('create_stock_opname', 'Create Stock Opname'), ('update_stock_opname', 'Update Stock Opname'), ('delete_stock_opname', 'Delete Stock Opname'), ('export_stock_opname', 'Export Stock Opname'),
+                        ('create_purchasing_return', 'Create Purchasing Return'), ('read_purchasing_return', 'Read Purchasing Return'), ('update_purchasing_return', 'Update Purchasing Return'), ('delete_purchasing_return', 'Delete Purchasing Return'),
+                        ('create_sales_return', 'Create Sales Return'), ('read_sales_return', 'Read Sales Return'), ('update_sales_return', 'Update Sales Return'), ('delete_sales_return', 'Delete Sales Return'),
                         ('read_back_office_sales_report', 'Read Back Office Sales Report'),
                         ('read_cashier_sales_report', 'Read Cashier Sales Report'),
                         ('read_sales_per_item_report', 'Read Sales Per Item Report'),
@@ -197,6 +245,7 @@ class SeedData:
                         (1, 'backup_database'),
                         (1, 'restore_database'),
                         (1, 'create_purchase_return'), (1, 'read_purchase_return'), (1, 'update_purchase_return'), (1, 'delete_purchase_return'),
+                        (1, 'create_sales_return'), (1, 'read_sales_return'), (1, 'update_sales_return'), (1, 'delete_sales_return'),
                         (1, 'create_sales_return'), (1, 'read_sales_return'), (1, 'update_sales_return'), (1, 'delete_sales_return'),
                         (2, 'create_transactions'), (2, 'print_transactions');'''
         
@@ -504,7 +553,7 @@ class SeedData:
             sql_insert = '''INSERT INTO products (sku, product_name, barcode, category_id, supplier_id, cost_price, price, remarks, stock, unit, last_price, average_price, created_at, updated_at) 
                         VALUES 
                         ('SKU001', 'PRODUCT ONE', 'barcode', 1, 1, 1000, 1500, 'Best seller', 30, 'PCS', 1000, 1000, CURRENT_TIMESTAMP, NULL),
-                        ('SKU002', 'PRODUCT TWO', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 10, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
+                        ('SKU002', 'PRODUCT TWO', 'barcode', 2, 2, 2000, 2500, 'Limited stock', 20, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL),
                         ('SKU003', 'PRODUCT THREE', 'barcode', 3, 3, 3000, 20, 'New arrival', 15, 'PCS', 0, 0, CURRENT_TIMESTAMP, NULL); '''
             
             self.cursor.execute(sql_insert)
@@ -580,6 +629,8 @@ class SeedData:
 
 
     def drop_all_tables(self):
+        self.cursor.execute('DROP TABLE IF EXISTS detail_sales_return')
+        self.cursor.execute('DROP TABLE IF EXISTS sales_return')
         self.cursor.execute('DROP TABLE IF EXISTS detail_purchase_return')
         self.cursor.execute('DROP TABLE IF EXISTS purchase_return')
         self.cursor.execute('DROP TABLE IF EXISTS stock_opname')
@@ -604,6 +655,8 @@ class SeedData:
 
 
     def truncate_all_tables(self):
+        self.cursor.execute('DELETE FROM detail_sales_return')
+        self.cursor.execute('DELETE FROM sales_return')
         self.cursor.execute('DELETE FROM detail_purchase_return')
         self.cursor.execute('DELETE FROM purchase_return')
         self.cursor.execute('DELETE FROM stock_opname')
@@ -633,6 +686,8 @@ class SeedData:
 
         self.drop_all_tables()
 
+        self.create_detail_sales_return_table()
+        self.create_sales_return_table()
         self.create_detail_purchase_return_table()
         self.create_purchase_return_table()
         self.create_stock_opname_table()

@@ -4,8 +4,11 @@ import json
 
 from purchasing_list.models.purchasing_list_models import PurchasingListModel, DetailPurchasingModel
 
-from generals.permission_manager import PermissionManager
 from response.response_message import ResponseMessage
+from generals.constants import PERM_D_PURCHASING
+from generals.messages import ERR_PERM_D_PURCHASING
+from generals.permission_manager import PermissionManager
+
 
 class PurchasingListRepository:
     def __init__(self):
@@ -96,6 +99,9 @@ class PurchasingListRepository:
         
 
     def delete_purchasing_by_id(self, purchasing_id: str):
+        if not self.permission_manager.has_permission(PERM_D_PURCHASING):
+            return ResponseMessage.fail(message=ERR_PERM_D_PURCHASING)
+        
         try:
             self.cursor.execute('BEGIN TRANSACTION')
 

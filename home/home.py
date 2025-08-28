@@ -121,6 +121,7 @@ class HomeWindow(QtWidgets.QMainWindow):
         # Purchase Return Menu
         self.ui.purchase_return_button.clicked.connect(lambda: self.purchase_return_window.showMaximized())
         self.ui.purchase_return_list_button.clicked.connect(lambda: self.purchase_return_list_window.showMaximized())
+
         self.ui.sales_return_button.clicked.connect(lambda: self.sales_return_window.showMaximized())
         self.ui.sales_return_list_button.clicked.connect(lambda: self.sales_return_list_window.showMaximized())
 

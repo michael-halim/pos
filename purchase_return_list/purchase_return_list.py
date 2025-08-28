@@ -1,11 +1,16 @@
 from PyQt6 import QtWidgets, uic
+from datetime import datetime
+
+from purchase_return.purchase_return import PurchaseReturnWindow
+from purchase_return.models.purchase_return_models import DetailPurchaseReturnModel
 
 from purchase_return_list.services.purchase_return_list_services import PurchaseReturnListService
 from purchase_return_list.models.purchase_return_list_models import PurchaseReturnListModel
 
-from helper import format_number, add_prefix, remove_non_digit
+from helper import format_number, add_prefix
 from generals.message_box import POSMessageBox
 from generals.build import resource_path
+from generals.fonts import POSFonts
 from generals.constants import (
     SELECT_ROWS, SINGLE_SELECTION, 
     NO_EDIT_TRIGGERS, RESIZE_TO_CONTENTS,
@@ -18,12 +23,8 @@ from generals.messages import (
     PERM_DENIED
 )
 from purchase_return_list.translations import PURCHASE_RETURN_LIST_TRANSLATIONS
-from generals.permission_manager import PermissionManager
 from generals.language_manager import LanguageManager
-from purchase_return.purchase_return import PurchaseReturnWindow
-from datetime import datetime
-from purchase_return.models.purchase_return_models import DetailPurchaseReturnModel
-from generals.fonts import POSFonts
+from generals.permission_manager import PermissionManager
 
 
 class PurchaseReturnListWindow(QtWidgets.QWidget):
@@ -44,7 +45,7 @@ class PurchaseReturnListWindow(QtWidgets.QWidget):
         self.purchase_return_list_service = PurchaseReturnListService()
         
         # Init Windows
-        self.purchase_return_window = PurchaseReturnWindow()
+        self.purchase_return_window = PurchaseReturnWindow(home_window)
 
         # Init Language Manager
         self.language_manager = LanguageManager()

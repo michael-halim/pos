@@ -1,7 +1,7 @@
 from typing import List
 from datetime import datetime, timedelta
-from connect_db import DatabaseConnection
 import json
+from connect_db import DatabaseConnection
 
 from purchasing.models.purchasing_models import (
     ProductModel, 
@@ -12,9 +12,11 @@ from purchasing.models.purchasing_models import (
 )
 from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
 
+from response.response_message import ResponseMessage
+from generals.constants import PERM_C_PURCHASING, PERM_U_PURCHASING
+from generals.messages import ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING
 from generals.permission_manager import PermissionManager
 
-from response.response_message import ResponseMessage
 
 class PurchasingRepository:
     def __init__(self):
@@ -86,6 +88,9 @@ class PurchasingRepository:
     
 
     def submit_purchasing(self, purchasing: PurchasingModel, detail_purchasing: List[DetailPurchasingModel]) -> ResponseMessage:
+        if not self.permission_manager.has_permission(PERM_C_PURCHASING):
+            return ResponseMessage.fail(message=ERR_PERM_C_PURCHASING)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -197,6 +202,10 @@ class PurchasingRepository:
                           added_detail_purchasing: List[DetailPurchasingModel], 
                           updated_detail_purchasing: List[DetailPurchasingModel], 
                           deleted_detail_purchasing: List[DetailPurchasingModel]):
+        
+        if not self.permission_manager.has_permission(PERM_U_PURCHASING):
+            return ResponseMessage.fail(message=ERR_PERM_U_PURCHASING)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')

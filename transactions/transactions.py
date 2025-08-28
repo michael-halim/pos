@@ -101,6 +101,8 @@ class TransactionsWindow(QtWidgets.QWidget):
         self.ui.open_pending_transaction_button.clicked.connect(self.open_pending_transaction_dialog)
         self.ui.find_customer_transaction_button.clicked.connect(lambda: self.customers_dialog.show())
 
+        self.ui.close_transactions_button.clicked.connect(lambda: self.close())
+
         # Set date input
         self.ui.date_transaction_input.setDate(datetime.now())
         self.ui.date_transaction_input.setDisplayFormat(DATE_FORMAT_DDMMYYYY)

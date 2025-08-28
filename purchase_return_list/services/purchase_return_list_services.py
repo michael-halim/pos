@@ -1,7 +1,11 @@
-from typing import List, Optional
-from purchase_return_list.repositories.purchase_return_list_repositories import PurchaseReturnListRepository
-from generals.permission_manager import PermissionManager
 from datetime import datetime
+
+from purchase_return_list.repositories.purchase_return_list_repositories import PurchaseReturnListRepository
+
+from response.response_message import ResponseMessage
+from generals.constants import PERM_D_PURCHASE_RETURN
+from generals.messages import ERR_PERM_D_PURCHASE_RETURN
+from generals.permission_manager import PermissionManager
 
 
 class PurchaseReturnListService:
@@ -19,4 +23,7 @@ class PurchaseReturnListService:
 
 
     def delete_purchase_return_by_id(self, purchase_return_id: str):
+        if not self.permission_manager.has_permission(PERM_D_PURCHASE_RETURN):
+            return ResponseMessage.fail(message=ERR_PERM_D_PURCHASE_RETURN)
+        
         return self.repository.delete_purchase_return_by_id(purchase_return_id)

@@ -1,14 +1,18 @@
 from connect_db import DatabaseConnection
 from typing import List
 from datetime import datetime, timedelta
-from response.response_message import ResponseMessage
 import json
 
-from generals.permission_manager import PermissionManager
+from purchase_return.models.purchase_return_models import (
+    ProductModel, ProductUnitsModel, PurchaseReturnModel, 
+    DetailPurchaseReturnModel
+)
 from dialogs.suppliers_dialog.models.suppliers_dialog_models import SupplierModel
+from response.response_message import ResponseMessage
 
-from purchase_return.models.purchase_return_models import ProductModel, ProductUnitsModel
-from purchase_return.models.purchase_return_models import PurchaseReturnModel, DetailPurchaseReturnModel
+from generals.constants import PERM_C_PURCHASE_RETURN, PERM_U_PURCHASE_RETURN
+from generals.messages import ERR_PERM_C_PURCHASE_RETURN, ERR_PERM_U_PURCHASE_RETURN
+from generals.permission_manager import PermissionManager
 
 
 class PurchaseReturnRepository:
@@ -117,6 +121,9 @@ class PurchaseReturnRepository:
     
 
     def submit_purchase_return(self, purchase_return_data: PurchaseReturnModel, detail_purchase_return: list[DetailPurchaseReturnModel]):
+        if not self.permission_manager.has_permission(PERM_C_PURCHASE_RETURN):
+            return ResponseMessage.fail(message=ERR_PERM_C_PURCHASE_RETURN)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')
@@ -219,6 +226,9 @@ class PurchaseReturnRepository:
                           updated_detail_purchase_return: List[DetailPurchaseReturnModel], 
                           deleted_detail_purchase_return: List[DetailPurchaseReturnModel]):
                           
+        if not self.permission_manager.has_permission(PERM_U_PURCHASE_RETURN):
+            return ResponseMessage.fail(message=ERR_PERM_U_PURCHASE_RETURN)
+        
         try:
             # Start transaction
             self.cursor.execute('BEGIN TRANSACTION')

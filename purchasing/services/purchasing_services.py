@@ -1,7 +1,5 @@
 from typing import List
 
-from generals.permission_manager import PermissionManager
-
 from purchasing.repositories.purchasing_repositories import PurchasingRepository
 from purchasing.models.purchasing_models import (
     PurchasingModel, 
@@ -11,6 +9,8 @@ from purchasing.models.purchasing_models import (
 from response.response_message import ResponseMessage
 from generals.constants import PERM_C_PURCHASING, PERM_U_PURCHASING
 from generals.messages import ERR_PERM_C_PURCHASING, ERR_PERM_U_PURCHASING
+from generals.permission_manager import PermissionManager
+
 
 class PurchasingService:
     def __init__(self):

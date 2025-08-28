@@ -1,7 +1,9 @@
 from typing import List
 
-from transactions.models.transactions_models import ProductModel, TransactionModel, DetailTransactionModel, ProductUnitDetailModel
-from transactions.models.transactions_models import PendingTransactionModel
+from transactions.models.transactions_models import (
+    ProductModel, TransactionModel, DetailTransactionModel, 
+    ProductUnitDetailModel, PendingTransactionModel
+)
 from transactions.repositories.transaction_repository import TransactionRepository
 
 from response.response_message import ResponseMessage
@@ -14,6 +16,7 @@ from generals.messages import (
     ERR_PERM_C_PENDING_TRANSACTIONS
 )
 from generals.permission_manager import PermissionManager
+
 
 class TransactionService:
     def __init__(self):
